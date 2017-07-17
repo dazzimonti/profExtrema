@@ -16,7 +16,7 @@ Depends:
 Imports:
     microbenchmark,
     quantreg,
-    nloptr,
     lhs,
-    splines
+    splines,
+    methods
 RoxygenNote: 6.0.1

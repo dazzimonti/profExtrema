@@ -4,12 +4,12 @@
 \alias{coordinateProfiles}
 \title{Coordinate profiles starting from a kriging model}
 \usage{
-coordinateProfiles(kmModel, threshold, options_full = NULL,
+coordinateProfiles(object, threshold, options_full = NULL,
   options_approx = NULL, uq_computations = FALSE, plot_level = 0,
   plot_options = NULL, return_level = 1, ...)
 }
 \arguments{
-\item{kmModel}{a \link[DiceKriging]{km} model}
+\item{object}{either a \link[DiceKriging]{km} model or a list containing partial results. If \code{object} is a km model then all computations are carried out. If \code{object} is a list, then the function carries out all computations to complete the list results.}
 
 \item{threshold}{the threshold of interest}
 

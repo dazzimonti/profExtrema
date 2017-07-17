@@ -1,3 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 R/comp1dVol\.R
+TODO.md
+R/getProfiles\.R

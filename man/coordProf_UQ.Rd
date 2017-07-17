@@ -4,12 +4,12 @@
 \alias{coordProf_UQ}
 \title{Coordinate profiles UQ from a kriging model}
 \usage{
-coordProf_UQ(kmModel, threshold, allResMean = NULL, quantiles_uq = c(0.05,
+coordProf_UQ(object, threshold, allResMean = NULL, quantiles_uq = c(0.05,
   0.95), options_approx = NULL, options_sims = NULL, plot_level = 0,
   plot_options = NULL, return_level = 1)
 }
 \arguments{
-\item{kmModel}{a \link[DiceKriging]{km} model}
+\item{object}{either a \link[DiceKriging]{km} model or a list containing partial results. If \code{object} is a km model then all computations are carried out. If \code{object} is a list, then the function carries out all computations to complete the results list.}
 
 \item{threshold}{the threshold of interest}
 
