@@ -26,6 +26,8 @@
 #' @importFrom splines bs
 #' @importFrom graphics polygon
 #' @importFrom methods is
+#' @importFrom grDevices heat.colors terrain.colors
+#' @importFrom stats as.formula
 #' @references TODO
 #'
 #' Chevalier, C. (2013). Fast uncertainty reduction strategies relying on Gaussian process models. PhD thesis, University of Bern.

@@ -6,7 +6,7 @@
 \usage{
 coordinateProfiles(object, threshold, options_full = NULL,
   options_approx = NULL, uq_computations = FALSE, plot_level = 0,
-  plot_options = NULL, return_level = 1, ...)
+  plot_options = NULL, CI_const = NULL, return_level = 1, ...)
 }
 \arguments{
 \item{object}{either a \link[DiceKriging]{km} model or a list containing partial results. If \code{object} is a km model then all computations are carried out. If \code{object} is a list, then the function carries out all computations to complete the list results.}
@@ -25,12 +25,15 @@ coordinateProfiles(object, threshold, options_full = NULL,
 \itemize{
 \item{\code{save:}}{boolean, if TRUE saves the plots in \code{folderPlots}}
 \item{\code{folderPlots:}}{a string containing the destination folder for plots, if \code{save==TRUE} default is \code{./}}
+\item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate.}
 \item{\code{titleProf:}}{a string containing the title for the coordinate profile plots}
 \item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d)}
 \item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
 \item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC.}
 \item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}.}
 }}
+
+\item{CI_const}{an optional vector containing the constants for the CI. If not NULL, then profiles extrema for \eqn{m_n(x) \pm CI_const[i]*s_n(x,x)} are computed.}
 
 \item{return_level}{an integer to select the amount of details returned}
 

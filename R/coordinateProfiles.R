@@ -12,12 +12,14 @@
 #' \itemize{
 #' \item{\code{save:}}{boolean, if TRUE saves the plots in \code{folderPlots}}
 #' \item{\code{folderPlots:}}{a string containing the destination folder for plots, if \code{save==TRUE} default is \code{./}}
+#' \item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate.}
 #' \item{\code{titleProf:}}{a string containing the title for the coordinate profile plots}
 #' \item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d)}
 #' \item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
 #' \item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC.}
 #' \item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}.}
 #' }
+#' @param CI_const an optional vector containing the constants for the CI. If not NULL, then profiles extrema for \eqn{m_n(x) \pm CI_const[i]*s_n(x,x)} are computed.
 #' @param return_level an integer to select the amount of details returned
 #' @param ... additional parameters to be passed to \link{coordProf_UQ}.
 #' @return If return_level=1 a list containing
@@ -36,7 +38,7 @@
 #' 	}}
 #' }
 #' @export
-coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=NULL,uq_computations=FALSE,plot_level=0,plot_options=NULL,return_level=1,...){
+coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=NULL,uq_computations=FALSE,plot_level=0,plot_options=NULL,CI_const=NULL,return_level=1,...){
 
   # Check object
   if(is(object,"km")){
@@ -86,14 +88,17 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
   # save the dimension of the input
   d<-object$kmModel@d
 
+  ## posterior mean part ##
   # Let us define the posterior mean function and gradient in a 'optimizer-friendly' way
   g <-function(y){
     y<-matrix(y,ncol=d)
-    return(predict.km(object = object$kmModel,newdata = y,type="UK",light.return = TRUE,checkNames = FALSE)$mean)
+    colnames(y)<-colnames(object$kmModel@X)
+    return(predict.km(object = object$kmModel,newdata = y,type="UK",light.return = TRUE,se.compute = FALSE)$mean)
   }
   gprime <- function(y){
     y<-matrix(y,ncol=d)
-    return(gradKm_dnewdata(object = object$kmModel,newdata = y,type = "UK",light.return = TRUE)$mean)
+    colnames(y)<-colnames(object$kmModel@X)
+    return(gradKm_dnewdata(object = object$kmModel,newdata = y,type = "UK",light.return = TRUE,se.compute = FALSE)$mean)
   }
 
   # Compute profile mean full, if not already computed
@@ -164,7 +169,11 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
     mfrows<-switch(d,"1"=c(1,1),"2"=c(2,1),"3"=c(2,2),"4"=c(2,2),"5"=c(3,2),"6"=c(3,2))
     par(mfrow=mfrows, mar = c(4, 5, 3, 1) + 0.1)
     for(coord in seq(d)){
-      ylimTemp<-c(min(object$profMean_full$res$min[,coord]),max(object$profMean_full$res$max[,coord]))
+      if(is.null(plot_options$ylim)){
+        ylimTemp<-c(min(object$profMean_full$res$min[,coord]),max(object$profMean_full$res$max[,coord]))
+      }else{
+        ylimTemp<-plot_options$ylim[coord,]
+      }
       title_string<-paste("Coordinate",colnames(object$profMean_full$res$min)[coord])
       plot(plot_options$design[,coord],object$profMean_full$res$min[,coord],ylim=ylimTemp,type='l',main=title_string,
            xlab=expression(eta),ylab="f",lty=1,cex.main=3,cex.lab=2.5,cex.axis=1.8)
@@ -192,7 +201,116 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
   abs_err_max<-max(abs(object$profMean_approx$res$max-object$profMean_full$res$max)/object$profMean_full$res$max)
   abs_err<-c(abs_err_min,abs_err_max)
 
-  ## UQ part #
+  ## End posterior mean part ##
+
+  ## quantiles part ##
+  if(!is.null(CI_const)){
+    g_s2<-function(y){
+      y<-matrix(y,ncol=d)
+      colnames(y)<-colnames(object$kmModel@X)
+      return(predict.km(object = object$kmModel,newdata = y,type="UK",light.return = TRUE,se.compute = TRUE)$sd)
+    }
+    g_s2prime <- function(y){
+      y<-matrix(y,ncol=d)
+      colnames(y)<-colnames(object$kmModel@X)
+      s2<-predict.km(object = object$kmModel,newdata = y,type="UK",light.return = TRUE,se.compute = TRUE)$sd
+      s2grad<-gradKm_dnewdata(object = object$kmModel,newdata = y,type = "UK",se.compute = TRUE)$s2
+      return(0.5*s2grad/s2)
+    }
+
+    # Compute profile mean full, if not already computed
+    if(is.null(object$profSd_full)){
+      timeIn<-get_nanotime()
+      object$profSd_full<-getAllMaxMin(f = g_s2,fprime = g_s2prime,d = d,options = options_full)
+      timeVar_full<-(get_nanotime()-timeIn)*1e-9
+    }else{
+      if(return_level>1 && is.null(object$more$times$full))
+        object$more$times$full_var=NA
+    }
+
+    # Obtain the threshold points selected by profile extrema
+    prof_CI_const_full<-list()
+    temp<-list()
+    changePP_CI_full<-list()
+    for(i in seq(length(CI_const))){
+      temp_m<-list(res=list())
+      temp_m$res<-list(min= object$profMean_full$res$min - CI_const[i]*object$profSd_full$res$min,
+                       max= object$profMean_full$res$max - CI_const[i]*object$profSd_full$res$max)
+      temp_M<-list(res=list())
+      temp_M$res<-list(min= object$profMean_full$res$min + CI_const[i]*object$profSd_full$res$min,
+                       max= object$profMean_full$res$max + CI_const[i]*object$profSd_full$res$max)
+      prof_CI_const_full[[i]]<-list(lower=temp_m, upper=temp_M)
+      changePP_CI_full[[i]]<-list(lower=getChangePoints(threshold = threshold,allRes = temp_m),
+                                  upper=getChangePoints(threshold = threshold,allRes = temp_M))
+    }
+
+    # Compute profile extrema var with approximation, if not already computed
+#    if(is.null(object$profVar_approx)){
+#      timeIn<-get_nanotime()
+#      object$profVar_approx<-approxMaxMin(f = g_s2,fprime = g_s2prime,d = d,opts = options_approx)
+#      timeVar_approx<-(get_nanotime()-timeIn)*1e-9
+#    }else{
+#      if(return_level>1 && is.null(object$more$times$approx))
+#        object$more$times$approx=NA
+#    }
+
+    if(plot_level>0){
+      oldpar<-par()
+      if(plot_options$save)
+        cairo_pdf(filename = paste(plot_options$folderPlots,"profMeanCI_comparison",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
+      mfrows<-switch(d,"1"=c(1,1),"2"=c(2,1),"3"=c(2,2),"4"=c(2,2),"5"=c(3,2),"6"=c(3,2))
+      par(mfrow=mfrows, mar = c(4, 5, 3, 1) + 0.1)
+      for(coord in seq(d)){
+        if(is.null(plot_options$ylim)){
+          ylimTemp_CI<-c(object$profMean_full$res$min[,coord],object$profMean_full$res$max[,coord])
+          for(i in seq(length(CI_const))){
+            ylimTemp_CI<-c(ylimTemp_CI,prof_CI_const_full[[i]]$lower$res$min[,coord],
+                           prof_CI_const_full[[i]]$lower$res$max[,coord],
+                           prof_CI_const_full[[i]]$upper$res$min[,coord],
+                           prof_CI_const_full[[i]]$upper$res$max[,coord])
+          }
+          ylimTemp_CI<-range(ylimTemp_CI)
+        }else{
+          ylimTemp<-plot_options$ylim[coord,]
+        }
+
+        title_string<-paste("Coordinate",colnames(object$profMean_full$res$min)[coord])
+        # full mean
+        plot(plot_options$design[,coord],object$profMean_full$res$min[,coord],ylim=ylimTemp_CI,type='l',main=title_string,
+             xlab=expression(eta),ylab="f",lty=1,cex.main=3,cex.lab=2.5,cex.axis=1.8)
+        lines(plot_options$design[,coord],object$profMean_full$res$max[,coord],lty=1)
+        # approx mean
+        lines(plot_options$design[,coord],object$profMean_approx$res$max[,coord],lty=3,col=4,lwd=2)
+        points(object$profMean_approx$profPoints$design[,coord],object$profMean_approx$profPoints$res$max[,coord],col=4)
+        lines(plot_options$design[,coord],object$profMean_approx$res$min[,coord],lty=4,col=4,lwd=2)
+        points(object$profMean_approx$profPoints$design[,coord],object$profMean_approx$profPoints$res$min[,coord],col=4)
+        abline(v=changePP$neverEx[[coord]],col=3,lwd=2.5)
+        # full CI_const
+        CI_cols1<-heat.colors(n = length(CI_const)+1,alpha=0.7)
+        CI_cols2<-terrain.colors(n = length(CI_const)+1,alpha=0.7)
+        for(i in seq(length(CI_const))){
+          lines(plot_options$design[,coord],prof_CI_const_full[[i]]$upper$res$max[,coord],lty=4,col=CI_cols1[i])
+          lines(plot_options$design[,coord],prof_CI_const_full[[i]]$lower$res$max[,coord],lty=4,col=CI_cols1[i])
+          lines(plot_options$design[,coord],prof_CI_const_full[[i]]$upper$res$min[,coord],lty=4,col=CI_cols2[i])
+          lines(plot_options$design[,coord],prof_CI_const_full[[i]]$lower$res$min[,coord],lty=4,col=CI_cols2[i])
+        }
+        abline(h = threshold,col=2,lwd=2)
+        legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f," (full)"),list(coord=coord))),
+                              as.expression(substitute(paste(P[coord]^inf,f," (full)"),list(coord=coord))),
+                              as.expression(substitute(paste(P[coord]^sup,f," (1order)"),list(coord=coord))),
+                              as.expression(substitute(paste(P[coord]^inf,f," (1order)"),list(coord=coord))),
+                              "threshold"),
+               lty=c(1,1,3,4,1),col=c(1,1,4,4,2),cex=1.8,lwd=c(2,2,2,2,2))
+      }
+      if(plot_options$save)
+        dev.off()
+      #  par(oldpar)
+    }
+    object$profCI_full<-prof_CI_const_full
+  }
+
+
+  ## UQ part ##
 #  res_UQ<-NULL
   if(uq_computations){# && is.null(object$res_UQ)){
     if(is.null(object$res_UQ$kmModel))

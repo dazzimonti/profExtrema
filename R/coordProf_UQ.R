@@ -8,7 +8,17 @@
 #' @param allResMean a list resulting from \code{getAllMaxMin} or \code{approxMaxMin} for the profile extrema on the mean. If NULL the median from the observations is plotted
 #' @param quantiles_uq a vector containing the quantiles to be computed
 #' @param options_approx an optional list of options for approxMaxMin, see \link{approxMaxMin} for details.
+#' @param options_full_sims an optional list of options for getAllMaxMin, see \link{getAllMaxMin} for details. If NULL the full computations are not excuted. NOTE: this computations might be very expensive!
 #' @param options_sims an optional list of options for the posterior simulations.
+#' \itemize{
+#' \item{\code{algorithm:}} string choice of the algorithm to select the simulation points ("A" or "B");
+#' \item{\code{lower:}} \eqn{d} dimensional vector with lower bounds for simulation points;
+#' \item{\code{upper:}} \eqn{d} dimensional vector with upper bounds for simulation points;
+#' \item{\code{batchsize:}} number of simulation points;
+#' \item{\code{optimcontrol:}} list containing the options for optimization;
+#' \item{\code{integcontrol:}} list containing the options for numerical integration of the criterion;
+#' \item{\code{integration.param:}} list containing the integration design, obtained with the function \link[KrigInv]{integration_design}.
+#' }
 #' @param plot_level an integer to select the plots to return (0=no plots, 1=basic plots, 2= all plots)
 #' @param plot_options an optional list of parameters for plots. Currently available options
 #' \itemize{
@@ -35,7 +45,7 @@
 #' \item{\code{sPts:}}{the simulation points}
 #' }
 #' @export
-coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.95),options_approx=NULL,options_sims=NULL,plot_level=0,plot_options=NULL,return_level=1){
+coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.95),options_approx=NULL,options_full_sims=NULL,options_sims=NULL,plot_level=0,plot_options=NULL,return_level=1){
 
   # Check object
   if(is(object,"km")){
@@ -125,62 +135,84 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
   d<-object$kmModel@d
 
   ###
+  # Prepare the functions for UQ profiles
+  nugget.sim=1e-6
+  type="UK"
+  simu_points<-object$sPts$par
+
+  if(is.null(object$more$simuls)){
+    some.simu <- simulate_km(object=object$kmModel,nsim=options_sims$nsim,newdata=simu_points,nugget.sim=nugget.sim,
+                             cond=TRUE,checkNames = FALSE, type=type)
+  }else{
+    some.simu<-object$more$simuls
+  }
+
+  g_uq<-function(x,realization,kmModel,simupoints,F.mat=NULL,T.mat=NULL){
+    x<-matrix(x,ncol=kmModel@d)
+    colnames(x)<-colnames(kmModel@X)
+    obj <- krig_weight_GPsimu(object=kmModel,simu_points=simupoints,krig_points=x,T.mat = T.mat,F.mat = F.mat)
+    krig.mean.init <- matrix(obj$krig.mean.init,ncol=1)
+    weights <- t(obj$Lambda.end)
+
+    return(krig.mean.init + tcrossprod(weights,matrix(realization,nrow=1)))
+  }
+
+  g_uq_deriv<-function(x,realization,kmModel,simupoints,T.mat=NULL,F.mat=NULL){
+    x<-matrix(x,ncol=kmModel@d)
+    colnames(x)<-colnames(kmModel@X)
+    obj_deriv<-grad_kweights(object = kmModel,simu_points = simupoints,krig_points = matrix(x,ncol=kmModel@d),T.mat = T.mat,F.mat = F.mat)
+    krig_mean_init <- matrix(obj_deriv$krig.mean.init,ncol=kmModel@d)
+    weights <- t(obj_deriv$Lambda.end)
+
+    return(krig_mean_init + tcrossprod(matrix(realization,nrow=1),weights))
+  }
+
+  # Useful one-time computations
+  F.mat <- model.matrix(object=object$kmModel@trend.formula, data = data.frame(rbind(object$kmModel@X,simu_points)))
+  K <- covMatrix(object=object$kmModel@covariance,X=rbind(object$kmModel@X,simu_points))$C
+  T.mat <- chol(K)
+
+  ### Lets compute the profile extrema for this realization
   # if the profSups and profInfs are not already there, compute them
   if(is.null(object$profSups) || is.null(object$profInfs)){
-    nugget.sim=1e-6
-    type="UK"
-    simu_points<-object$sPts$par
-
-    if(is.null(object$more$simuls)){
-      some.simu <- simulate_km(object=object$kmModel,nsim=options_sims$nsim,newdata=simu_points,nugget.sim=nugget.sim,
-                               cond=TRUE,checkNames = FALSE, type=type)
-    }else{
-      some.simu<-object$more$simuls
-    }
-
-    g_uq<-function(x,realization,kmModel,simupoints,F.mat=NULL,T.mat=NULL){
-      x<-matrix(x,ncol=kmModel@d)
-      colnames(x)<-colnames(kmModel@X)
-      obj <- krig_weight_GPsimu(object=kmModel,simu_points=simupoints,krig_points=x,T.mat = T.mat,F.mat = F.mat)
-      krig.mean.init <- matrix(obj$krig.mean.init,ncol=1)
-      weights <- t(obj$Lambda.end)
-
-      return(krig.mean.init + tcrossprod(weights,matrix(realization,nrow=1)))
-    }
-
-    g_uq_deriv<-function(x,realization,kmModel,simupoints,T.mat=NULL,F.mat=NULL){
-      x<-matrix(x,ncol=kmModel@d)
-      colnames(x)<-colnames(kmModel@X)
-      obj_deriv<-grad_kweights(object = kmModel,simu_points = simupoints,krig_points = matrix(x,ncol=kmModel@d),T.mat = T.mat,F.mat = F.mat)
-      krig_mean_init <- matrix(obj_deriv$krig.mean.init,ncol=kmModel@d)
-      weights <- t(obj_deriv$Lambda.end)
-
-      return(krig_mean_init + tcrossprod(matrix(realization,nrow=1),weights))
-    }
-
-
-    ### Lets compute the profile extrema for this realization
     # choose size of full design
     object$profSups<-array(NA,dim = c(object$kmModel@d,options_approx$fullDesignSize,options_sims$nsim))
     object$profInfs<-array(NA,dim = c(object$kmModel@d,options_approx$fullDesignSize,options_sims$nsim))
     tApprox1ord<-rep(NA,options_sims$nsim)
+  }
+
+  if(!is.null(options_full_sims) && is.null(object$profSups_full)){
+    object$profSups_full<-array(NA,dim = c(object$kmModel@d,options_approx$fullDesignSize,options_sims$nsim))
+    object$profInfs_full<-array(NA,dim = c(object$kmModel@d,options_approx$fullDesignSize,options_sims$nsim))
+    tFull<-rep(NA,options_sims$nsim)
+  }
+
+  for(i in seq(options_sims$nsim)){
+
+    g_uq_spec<-function(x){
+      return(g_uq(x=x,realization=some.simu[i,],kmModel = object$kmModel,simupoints = simu_points,F.mat = F.mat,T.mat = T.mat))
+    }
+    g_uq_der_spec<-function(x){
+      return(g_uq_deriv(x=x,realization=some.simu[i,],kmModel = object$kmModel,simupoints = simu_points,T.mat = T.mat,F.mat = F.mat))
+    }
 
 
-    F.mat <- model.matrix(object=object$kmModel@trend.formula, data = data.frame(rbind(object$kmModel@X,simu_points)))
-    K <- covMatrix(object=object$kmModel@covariance,X=rbind(object$kmModel@X,simu_points))$C
-    T.mat <- chol(K)
-    for(i in seq(options_sims$nsim)){
-
-      g_uq_spec<-function(x){
-        return(g_uq(x=x,realization=some.simu[i,],kmModel = object$kmModel,simupoints = simu_points,F.mat = F.mat,T.mat = T.mat))
-      }
-      g_uq_der_spec<-function(x){
-        return(g_uq_deriv(x=x,realization=some.simu[i,],kmModel = object$kmModel,simupoints = simu_points,T.mat = T.mat,F.mat = F.mat))
-      }
+    if(!is.null(options_full_sims) && is.na(object$profSups_full[1,1,i])){
       if(i%%10==0){
-        cat("Realization ",i,"\n")
+        cat("Full_sims.Realization ",i,"\n")
       }
+      timeIn<-get_nanotime()
+      temp_full<-getAllMaxMin(f = g_uq_spec,fprime = g_uq_der_spec,d = object$kmModel@d,options = options_full_sims)
+      tFull[i]<-(get_nanotime()-timeIn)*1e-9
 
+      object$profSups_full[,,i]<-t(temp_full$res$max)
+      object$profInfs_full[,,i]<-t(temp_full$res$min)
+    }
+
+    if(is.null(object$profSups) || is.null(object$profInfs)){
+      if(i%%10==0){
+        cat("Approx_sims. Realization ",i,"\n")
+      }
       timeIn<-get_nanotime()
       temp_1o<-approxMaxMin(f = g_uq_spec,fprime = g_uq_der_spec,threshold = threshold,d = object$kmModel@d,opts = options_approx)
       tApprox1ord[i]<-(get_nanotime()-timeIn)*1e-9
@@ -191,18 +223,13 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
     }
   }
 
-
+  # save quantiles for approximations
   object$prof_quantiles_approx<-list()
   for(i in seq(length(quantiles_uq))){
     object$prof_quantiles_approx[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = object$kmModel@d),
                                                      max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = object$kmModel@d)))
   }
   names(object$prof_quantiles_approx)<-quantiles_uq
-
-  #qq95_sup<-matrix(NA,nrow = 100,ncol = 2)
-  #qq05_sup<-matrix(NA,nrow = 100,ncol = 2)
-  #qq95_inf<-matrix(NA,nrow = 100,ncol = 2)
-  #qq05_inf<-matrix(NA,nrow = 100,ncol = 2)
 
   ccPP<-list()
   for(j in seq(length(quantiles_uq))){
@@ -213,6 +240,27 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
     ccPP[[j]]<-getChangePoints(threshold = threshold,allRes = object$prof_quantiles_approx[[j]])
   }
   names(ccPP)<-quantiles_uq
+
+  # save quantiles for full optim
+  if(!is.null(options_full_sims)){
+    object$prof_quantiles_full<-list()
+    for(i in seq(length(quantiles_uq))){
+      object$prof_quantiles_full[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = object$kmModel@d),
+                                                     max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = object$kmModel@d)))
+    }
+    names(object$prof_quantiles_full)<-quantiles_uq
+
+    ccPP_full<-list()
+    for(j in seq(length(quantiles_uq))){
+      for(coord in seq(d)){
+        object$prof_quantiles_full[[j]]$res$max[,coord]<-apply(object$profSups_full[coord,,],1,function(x){return(quantile(x,quantiles_uq[j]))})
+        object$prof_quantiles_full[[j]]$res$min[,coord]<-apply(object$profInfs_full[coord,,],1,function(x){return(quantile(x,quantiles_uq[j]))})
+      }
+      ccPP_full[[j]]<-getChangePoints(threshold = threshold,allRes = object$prof_quantiles_full[[j]])
+    }
+    names(ccPP_full)<-quantiles_uq
+
+  }
 
   ## Plot profiles with Uncertainty
   dd<-seq(0,1,,length.out = options_approx$fullDesignSize)
@@ -247,70 +295,13 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
   }
 
   if(plot_level>=1){
-    if(plot_options$save)
-      cairo_pdf(filename = paste(plot_options$folderPlots,"prof_UQ",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
-    mfrows<-switch(d,"1"=c(1,1),"2"=c(2,1),"3"=c(2,2),"4"=c(2,2),"5"=c(3,2),"6"=c(3,2))
-    par(mfrow=mfrows, mar = c(4, 5, 3, 1) + 0.1)
-    for(coord in seq(d)){
-      title_string<-paste("Coordinate",colnames(object$kmModel@X)[coord])
-      if(!is.null(allResMean)){
-        ylimTemp<-range(c(range(object$profSups[coord,,]),range(object$profInfs[coord,,]),
-                          range(allResMean$res$min[,coord]),range(allResMean$res$max[,coord])))
-        #ylimTemp<-c(min(allResMean$res$min[,coord]),max(allResMean$res$max[,coord]))
-        plot(plot_options$design[,coord],allResMean$res$min[,coord],ylim=ylimTemp,type='l',main=title_string,
-             xlab=expression(eta),ylab="f",lty=1,cex.main=3,cex.lab=2.5,cex.axis=1.8)
-      }else{
-        ylimTemp<-range(c(range(object$profSups[coord,,]),range(object$profInfs[coord,,]),
-                          range(object$prof_quantiles_approx$`0.5`$res$min[,coord]),
-                          range(object$prof_quantiles_approx$`0.5`$res$max[,coord])))
-        plot(plot_options$design[,coord],object$prof_quantiles_approx$`0.5`$res$min[,coord],ylim=ylimTemp,type='l',main=title_string,
-             xlab=expression(eta),ylab="f",lty=1,cex.main=3,cex.lab=2.5,cex.axis=1.8)
-      }
-      for(i in seq(options_sims$nsim)){
-        dd<-seq(0,1,,length.out = length(object$profInfs[coord,,i]))
-        lines(dd, object$profSups[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.5),lwd=0.2)
-        lines(dd, object$profInfs[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.5),lwd=0.2)
-      }
-      if(plot_options$qq_fill){
-        polygon(c(plot_options$design[,coord], rev(plot_options$design[,coord])),
-                c(object$prof_quantiles_approx[[2]]$res$min[,coord],
-                  rev(object$prof_quantiles_approx[[1]]$res$min[,coord])),
-                col = adjustcolor("red",alpha.f=0.5), border = NA)
-        polygon(c(plot_options$design[,coord], rev(plot_options$design[,coord])),
-                c(object$prof_quantiles_approx[[2]]$res$max[,coord],
-                  rev(object$prof_quantiles_approx[[1]]$res$max[,coord])),
-                col = adjustcolor("red",alpha.f=0.5), border = NA,alpha=0.5)
-      }
-      #  lines(plot_options$design[,coord],allRes_approx$res$max[,coord],lty=3,col=4,lwd=2)
-      #  points(allRes_approx$profPoints$design[,coord],allRes_approx$profPoints$res$max[,coord],col=4)
-      #  lines(plot_options$design[,coord],allRes_approx$res$min[,coord],lty=4,col=4,lwd=2)
-      #  points(allRes_approx$profPoints$design[,coord],allRes_approx$profPoints$res$min[,coord],col=4)
-      abline(v=changePP$neverEx[[coord]],col=3,lwd=2.5)
-      abline(h = threshold,col=2,lwd=2)
-      for(j in seq(length(quantiles_uq))){
-        lines(plot_options$design[,coord],object$prof_quantiles_approx[[j]]$res$max[,coord],lty=j,col=1,lwd=1.5)
-        lines(plot_options$design[,coord],object$prof_quantiles_approx[[j]]$res$min[,coord],lty=j,col=1,lwd=1.5)
-        abline(v=ccPP[[j]]$neverEx[[coord]],col=4,lwd=2,lty=2)
-        abline(v=ccPP[[j]]$neverEx[[coord]],col=4,lwd=2,lty=3)
-      }
-      if(!is.null(allResMean)){
-        lines(plot_options$design[,coord],allResMean$res$max[,coord],lty=1)
-        lines(plot_options$design[,coord],allResMean$res$min[,coord],lty=1)
-      }else{
-        lines(plot_options$design[,coord],object$prof_quantiles_approx$`0.5`$res$max[,coord],lty=1)
-        lines(plot_options$design[,coord],object$prof_quantiles_approx$`0.5`$res$min[,coord],lty=1)
-      }
-      legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f,"/",P[coord]^inf,f," (full)"),list(coord=coord))),
-                            as.expression(substitute(paste(P[coord]^sup,f[95]),list(coord=coord))),
-                            as.expression(substitute(paste(P[coord]^inf,f[95]),list(coord=coord))),
-                            as.expression(substitute(paste(P[coord]^sup,f[05]),list(coord=coord))),
-                            as.expression(substitute(paste(P[coord]^inf,f[05]),list(coord=coord))),
-                            "threshold"),
-             lty=c(1,2,2,3,3,1),col=c(1,1,1,1,1,2),cex=1.2,lwd=c(2,2,2,2,2,2))
-    }
-    if(plot_options$save)
-      dev.off()
-    #  par(oldpar)
+
+    plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,
+                                threshold = threshold,nameFile ="prof_UQ_approx", profMean = allResMean,typeProf = "approx")
+
+    if(!is.null(options_full_sims))
+      plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,
+                                threshold = threshold,nameFile ="prof_UQ_full", profMean = allResMean,typeProf = "full")
   }
   #  object$profSups=profSups
   #  object$profInfs=profInfs
@@ -322,6 +313,9 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
   }else{
     if(is.null(object$more)){
       times<-list(tSpts=timeMdist,tApprox1ord=tApprox1ord)
+      if(!is.null(options_full_sims)){
+        times$tFull<-tFull
+      }
       object$more<-list(simuls=some.simu,times=times)
     }
     return(object)
