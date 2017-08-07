@@ -47,6 +47,9 @@
 #' @export
 coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.95),options_approx=NULL,options_full_sims=NULL,options_sims=NULL,plot_level=0,plot_options=NULL,return_level=1){
 
+  # number of thresholds
+  num_T<-length(threshold)
+
   # Check object
   if(is(object,"km")){
     object<-list(kmModel=object)
@@ -54,44 +57,25 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
     stop("object must be either a list or a km object")
   }
 
+  # set up dimension
+  d<-object$kmModel@d
+
   # Options setup
   if(is.null(options_approx)){
     init_des<-maximinLHS(10,2)
     options_approx<- list(multistart=8,heavyReturn=TRUE,initDesign=init_des,fullDesignSize=100)
   }
 
-  if(is.null(plot_options)){
-    if(plot_level>0){
-      plot_options<-list(save=F)
-    }
+  # Set up plot options
+  plot_options<-setPlotOptions(plot_options = plot_options,d=d,num_T=num_T)
 
-  }else{
-    if(plot_options$save==TRUE && is.null(plot_options$folderPlots))
-      plot_options$folderPlots <- './'
-
-    if(is.null(plot_options$design)){
-      plot_options$design<-matrix(NA,ncol=object$kmModel@d,nrow=100)
-      for(i in seq(object$kmModel@d)){
-        plot_options$design[,i]<-seq(0,1,,100)
-      }
-    }
-    # Useful for serial plots in HPC
-    if(is.null(plot_options$id_save)){
-      plot_options$id_save<-""
-    }
-
-    # if true it fills the region between the first 2 quantiles in quantiles_uq
-    if(is.null(plot_options$qq_fill)){
-      plot_options$qq_fill<-FALSE
-    }
-  }
-
+  # Set-up simulation options
   if(is.null(options_sims)){
-    options_sims<-list(algorithm="B", lower=rep(0,object$kmModel@d), upper=rep(1,object$kmModel@d),
+    options_sims<-list(algorithm="B", lower=rep(0,d), upper=rep(1,d),
                        batchsize=120, optimcontrol = list(method="genoud",pop.size=100,print.level=0),
                        integcontrol = list(distrib="sobol",n.points=1000),
                        nsim=300)
-    options_sims$integration.param = integration_design(options_sims$integcontrol,object$kmModel@d,options_sims$lower,options_sims$upper,object$kmModel,threshold)
+    options_sims$integration.param = integration_design(options_sims$integcontrol,d,options_sims$lower,options_sims$upper,object$kmModel,threshold)
     options_sims$integration.param$alpha <- 0.5
   }
 
@@ -106,7 +90,7 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
   # If not already in object, obtain the simulation points
   if(is.null(object$sPts)){
     timeIn<-get_nanotime()
-    object$sPts<-optim_dist_measure(model = object$kmModel,threshold = threshold,
+    object$sPts<-optim_dist_measure(model = object$kmModel,threshold = threshold[1],
                                     lower = options_sims$lower,upper = options_sims$upper,batchsize = options_sims$batchsize,
                                     algorithm = options_sims$algorithm,verb=1,optimcontrol = options_sims$optimcontrol,integration.param = options_sims$integration.param)
     timeMdist<-(get_nanotime()-timeIn)*1e-9
@@ -131,8 +115,6 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
     if(plot_options$save)
       dev.off()
   }
-
-  d<-object$kmModel@d
 
   ###
   # Prepare the functions for UQ profiles
@@ -176,14 +158,14 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
   # if the profSups and profInfs are not already there, compute them
   if(is.null(object$profSups) || is.null(object$profInfs)){
     # choose size of full design
-    object$profSups<-array(NA,dim = c(object$kmModel@d,options_approx$fullDesignSize,options_sims$nsim))
-    object$profInfs<-array(NA,dim = c(object$kmModel@d,options_approx$fullDesignSize,options_sims$nsim))
+    object$profSups<-array(NA,dim = c(d,options_approx$fullDesignSize,options_sims$nsim))
+    object$profInfs<-array(NA,dim = c(d,options_approx$fullDesignSize,options_sims$nsim))
     tApprox1ord<-rep(NA,options_sims$nsim)
   }
 
   if(!is.null(options_full_sims) && is.null(object$profSups_full)){
-    object$profSups_full<-array(NA,dim = c(object$kmModel@d,options_approx$fullDesignSize,options_sims$nsim))
-    object$profInfs_full<-array(NA,dim = c(object$kmModel@d,options_approx$fullDesignSize,options_sims$nsim))
+    object$profSups_full<-array(NA,dim = c(d,options_approx$fullDesignSize,options_sims$nsim))
+    object$profInfs_full<-array(NA,dim = c(d,options_approx$fullDesignSize,options_sims$nsim))
     tFull<-rep(NA,options_sims$nsim)
   }
 
@@ -202,19 +184,19 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
         cat("Full_sims.Realization ",i,"\n")
       }
       timeIn<-get_nanotime()
-      temp_full<-getAllMaxMin(f = g_uq_spec,fprime = g_uq_der_spec,d = object$kmModel@d,options = options_full_sims)
+      temp_full<-getAllMaxMin(f = g_uq_spec,fprime = g_uq_der_spec,d = d,options = options_full_sims)
       tFull[i]<-(get_nanotime()-timeIn)*1e-9
 
       object$profSups_full[,,i]<-t(temp_full$res$max)
       object$profInfs_full[,,i]<-t(temp_full$res$min)
     }
 
-    if(is.null(object$profSups) || is.null(object$profInfs)){
+    if(is.na(object$profSups[1,1,i]) || is.na(object$profInfs[1,1,i])){
       if(i%%10==0){
         cat("Approx_sims. Realization ",i,"\n")
       }
       timeIn<-get_nanotime()
-      temp_1o<-approxMaxMin(f = g_uq_spec,fprime = g_uq_der_spec,threshold = threshold,d = object$kmModel@d,opts = options_approx)
+      temp_1o<-approxMaxMin(f = g_uq_spec,fprime = g_uq_der_spec,threshold = threshold,d = d,opts = options_approx)
       tApprox1ord[i]<-(get_nanotime()-timeIn)*1e-9
 
       #  temp<-getAllMaxMin(f=g_uq_spec,fprime = NULL,d=2,options = list(multistart=2,heavyReturn=TRUE))
@@ -226,8 +208,8 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
   # save quantiles for approximations
   object$prof_quantiles_approx<-list()
   for(i in seq(length(quantiles_uq))){
-    object$prof_quantiles_approx[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = object$kmModel@d),
-                                                     max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = object$kmModel@d)))
+    object$prof_quantiles_approx[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d),
+                                                     max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d)))
   }
   names(object$prof_quantiles_approx)<-quantiles_uq
 
@@ -245,8 +227,8 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
   if(!is.null(options_full_sims)){
     object$prof_quantiles_full<-list()
     for(i in seq(length(quantiles_uq))){
-      object$prof_quantiles_full[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = object$kmModel@d),
-                                                     max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = object$kmModel@d)))
+      object$prof_quantiles_full[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d),
+                                                     max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d)))
     }
     names(object$prof_quantiles_full)<-quantiles_uq
 
@@ -281,14 +263,31 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
     image(matrix(pred2d$mean,nrow = 100),col=gray.colors(20), main=plot_options$title2d,xlab = colnames(object$kmModel@X)[1],ylab= colnames(object$kmModel@X)[2],
           cex.main=3,cex.axis=1.8,cex.lab=2.8)
     contour(matrix(pred2d$mean,nrow = 100),add=T,nlevels = 10,lwd=1.5,labcex=1.2)
-    contour(matrix(pred2d$mean,nrow = 100),add=T,levels = threshold,col=2,lwd=3,labcex=1.5)
-    abline(v = changePP$neverEx[[1]],col=3,lwd=2.5)
-    abline(h = changePP$neverEx[[2]],col=3,lwd=2.5)
-    for(j in seq(length(quantiles_uq))){
-      abline(v = ccPP[[j]]$neverEx[[1]],col=4,lwd=2,lty=2)
-      abline(h = ccPP[[j]]$neverEx[[2]],col=4,lwd=2,lty=2)
-      abline(v = ccPP[[j]]$alwaysEx[[1]],col=5,lwd=2,lty=2)
-      abline(h = ccPP[[j]]$alwaysEx[[2]],col=5,lwd=2,lty=2)
+    contour(matrix(pred2d$mean,nrow = 100),add=T,levels = threshold,col=plot_options$col_thresh,lwd=3,labcex=1.5)
+    for(tt in seq(num_T)){
+      abline(v = changePP$neverEx[[tt]][[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
+      abline(h = changePP$neverEx[[tt]][[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
+      abline(v = changePP$alwaysEx[[tt]][[1]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
+      abline(h = changePP$alwaysEx[[tt]][[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
+    }
+    if(!is.null(options_full_sims)){
+      for(j in seq(length(quantiles_uq))){
+        for(tt in seq(num_T)){
+          abline(v = ccPP_full[[j]]$neverEx[[tt]][[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
+          abline(h = ccPP_full[[j]]$neverEx[[tt]][[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
+          abline(v = ccPP_full[[j]]$alwaysEx[[tt]][[1]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
+          abline(h = ccPP_full[[j]]$alwaysEx[[tt]][[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
+        }
+      }
+    }else{
+      for(j in seq(length(quantiles_uq))){
+        for(tt in seq(num_T)){
+          abline(v = ccPP[[j]]$neverEx[[tt]][[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
+          abline(h = ccPP[[j]]$neverEx[[tt]][[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
+          abline(v = ccPP[[j]]$alwaysEx[[tt]][[1]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
+          abline(h = ccPP[[j]]$alwaysEx[[tt]][[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
+        }
+      }
     }
     if(plot_options$save)
       dev.off()
@@ -296,12 +295,12 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
 
   if(plot_level>=1){
 
-    plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,
+    plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,quantiles_uq=quantiles_uq,
                                 threshold = threshold,nameFile ="prof_UQ_approx", profMean = allResMean,typeProf = "approx")
 
     if(!is.null(options_full_sims))
-      plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,
-                                threshold = threshold,nameFile ="prof_UQ_full", profMean = allResMean,typeProf = "full")
+      plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,quantiles_uq=quantiles_uq,
+                                  threshold = threshold,nameFile ="prof_UQ_full", profMean = allResMean,typeProf = "full")
   }
   #  object$profSups=profSups
   #  object$profInfs=profInfs

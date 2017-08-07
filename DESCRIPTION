@@ -18,5 +18,6 @@ Imports:
     quantreg,
     lhs,
     splines,
-    methods
+    methods,
+    RColorBrewer
 RoxygenNote: 6.0.1

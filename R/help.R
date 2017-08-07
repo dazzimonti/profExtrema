@@ -28,6 +28,7 @@
 #' @importFrom methods is
 #' @importFrom grDevices heat.colors terrain.colors
 #' @importFrom stats as.formula
+#' @importFrom RColorBrewer brewer.pal
 #' @references TODO
 #'
 #' Chevalier, C. (2013). Fast uncertainty reduction strategies relying on Gaussian process models. PhD thesis, University of Bern.

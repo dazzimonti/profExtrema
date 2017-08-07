@@ -68,31 +68,41 @@ plotMaxMin<-function(allRes,Design=NULL,threshold=NULL,trueEvals=NULL,km_model=N
 #' }
 getChangePoints <- function(threshold,Design=NULL,allRes){
   d<-ncol(allRes$res$min)
-  chPointsAlwaysEx<-list()
-  chPointsNeverEx<-list()
   if(is.null(Design))
     Design<-replicate(d,seq(0,1,,nrow(allRes$res$min)))
 
-  alwaysExcursion <- allRes$res$min > threshold
-  neverExcursion <- allRes$res$max < threshold
+  # adapt the function to many thresholds
+  num_t<-length(threshold)
+  alwaysExcursion<-array(NA,dim = c(nrow(Design),d,num_t))
+  neverExcursion<-array(NA,dim = c(nrow(Design),d,num_t))
 
-  for(i in seq(d)){
-    if(!length(Design[alwaysExcursion[,i],i])){
-      chPointsAlwaysEx[[i]]<-length(Design[alwaysExcursion[,i],i])
-    }else{
-      chPointsAlwaysEx[[i]]<-getSegments(Design[alwaysExcursion[,i],i])
+  chPointsAlwaysEx<-replicate(n = num_t,list())
+  names(chPointsAlwaysEx)<-round(threshold)
+  chPointsNeverEx<-replicate(n = num_t,list())
+  names(chPointsNeverEx)<-round(threshold)
+
+  for(j in seq(num_t)){
+    alwaysExcursion[,,j] <- allRes$res$min > threshold[j]
+    neverExcursion[,,j] <- allRes$res$max < threshold[j]
+
+    for(i in seq(d)){
+      if(!length(Design[alwaysExcursion[,i,j],i])){
+        chPointsAlwaysEx[[j]][[i]]<-length(Design[alwaysExcursion[,i,j],i])
+      }else{
+        chPointsAlwaysEx[[j]][[i]]<-getSegments(Design[alwaysExcursion[,i,j],i])
+      }
+
+      if(!length(Design[neverExcursion[,i,j],i])){
+        chPointsNeverEx[[j]][[i]]<-length(Design[neverExcursion[,i,j],i])
+      }else{
+        chPointsNeverEx[[j]][[i]]<-getSegments(Design[neverExcursion[,i,j],i])
+      }
+
     }
-
-    if(!length(Design[neverExcursion[,i],i])){
-      chPointsNeverEx[[i]]<-length(Design[neverExcursion[,i],i])
-    }else{
-      chPointsNeverEx[[i]]<-getSegments(Design[neverExcursion[,i],i])
-    }
-
   }
-
   return(list(alwaysEx=chPointsAlwaysEx,neverEx=chPointsNeverEx))
 }
+
 
 
 

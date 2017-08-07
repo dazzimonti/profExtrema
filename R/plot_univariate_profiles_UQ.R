@@ -20,30 +20,10 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
 
   d<-objectUQ$kmModel@d
 
-  if(is.null(plot_options)){
-    plot_options<-list(save=F)
-  }else{
-    if(plot_options$save==TRUE && is.null(plot_options$folderPlots))
-      plot_options$folderPlots <- './'
+  num_T<-length(threshold)
 
-    if(is.null(plot_options$titleProf))
-      plot_options$titleProf<-"Coordinate profiles"
+  plot_options<-setPlotOptions(plot_options = plot_options,d=d,num_T=num_T)
 
-    if(is.null(plot_options$title2d))
-      plot_options$title2d<-"Posterior mean"
-
-    if(is.null(plot_options$design)){
-      plot_options$design<-matrix(NA,ncol=objectUQ$kmModel@d,nrow=100)
-      for(i in seq(objectUQ$kmModel@d)){
-        plot_options$design[,i]<-seq(0,1,,100)
-      }
-    }
-    # Useful for serial plots in HPC
-    if(is.null(plot_options$id_save)){
-      plot_options$id_save<-""
-    }
-
-  }
 
   if(plot_options$save)
     cairo_pdf(filename = paste(plot_options$folderPlots,nameFile,plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
@@ -122,33 +102,64 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
     #  points(allRes_approx$profPoints$design[,coord],allRes_approx$profPoints$res$min[,coord],col=4)
     ## @@@@
     ### NB changePP to be implemented!!!!!!!
+    if(!is.null(profMean)){
+      changePP<-getChangePoints(threshold = threshold,allRes = profMean)
+      for(i in seq(num_T)){
+        abline(v=changePP$neverEx[[i]][[coord]],col=plot_options$col_CCPthresh_nev[i],lwd=2.5)
+        abline(v=changePP$alwaysEx[[i]][[coord]],col=plot_options$col_CCPthresh_alw[i],lwd=2.5)
+      }
+    }
+
+    if(typeProf=="approx" || typeProf=="both"){
+    ccPP_approx<-list()
+    for(j in seq(length(quantiles_uq))){
+      ccPP_approx[[j]]<-getChangePoints(threshold = threshold,allRes = objectUQ$prof_quantiles_approx[[j]])
+    }
+    names(ccPP_approx)<-quantiles_uq
+    }
+
+    if(typeProf=="full" || typeProf=="both"){
+      ccPP_full<-list()
+      for(j in seq(length(quantiles_uq))){
+        ccPP_full[[j]]<-getChangePoints(threshold = threshold,allRes = objectUQ$prof_quantiles_full[[j]])
+      }
+      names(ccPP_full)<-quantiles_uq
+    }
+
     ## @@@
-    #  abline(v=changePP$neverEx[[coord]],col=3,lwd=2.5)
-    abline(h = threshold,col=2,lwd=2)
+    abline(h = threshold,col=plot_options$col_thresh,lwd=2)
     if(typeProf=="approx"){
       for(j in seq(length(quantiles_uq))){
-        lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx[[j]]$res$max[,coord],lty=j,col=1,lwd=1.5)
-        lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx[[j]]$res$min[,coord],lty=j,col=1,lwd=1.5)
-        #     abline(v=ccPP[[j]]$neverEx[[coord]],col=4,lwd=2,lty=2)
-        #     abline(v=ccPP[[j]]$neverEx[[coord]],col=4,lwd=2,lty=3)
+        lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx[[j]]$res$max[,coord],lty=j+1,col=1,lwd=1.5)
+        lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx[[j]]$res$min[,coord],lty=j+1,col=1,lwd=1.5)
+        for(tt in seq(num_T)){
+          abline(v=ccPP_approx[[j]]$alwaysEx[[tt]][[coord]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
+          abline(v=ccPP_approx[[j]]$neverEx[[tt]][[coord]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=3)
+        }
       }
     }else if(typeProf=="full"){
       if(!is.null(objectUQ$prof_quantiles_full)){
         for(j in seq(length(quantiles_uq))){
-          lines(plot_options$design[,coord],objectUQ$prof_quantiles_full[[j]]$res$max[,coord],lty=j,col=adjustcolor('brown3',alpha.f=0.5),lwd=1.5)
-          lines(plot_options$design[,coord],objectUQ$prof_quantiles_full[[j]]$res$min[,coord],lty=j,col=adjustcolor('brown3',alpha.f=0.5),lwd=1.5)
-          #        abline(v=ccPP_full[[j]]$neverEx[[coord]],col="green3",lwd=2,lty=2)
-          #        abline(v=ccPP_full[[j]]$neverEx[[coord]],col="green3",lwd=2,lty=3)
+          lines(plot_options$design[,coord],objectUQ$prof_quantiles_full[[j]]$res$max[,coord],lty=j+1,col=1,lwd=1.5)
+          lines(plot_options$design[,coord],objectUQ$prof_quantiles_full[[j]]$res$min[,coord],lty=j+1,col=1,lwd=1.5)
+          for(tt in seq(num_T)){
+            abline(v=ccPP_full[[j]]$alwaysEx[[tt]][[coord]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
+            abline(v=ccPP_full[[j]]$neverEx[[tt]][[coord]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=3)
+          }
         }
       }
     }else{
       for(j in seq(length(quantiles_uq))){
-        lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx[[j]]$res$max[,coord],lty=j,col=1,lwd=1.5)
-        lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx[[j]]$res$min[,coord],lty=j,col=1,lwd=1.5)
-        lines(plot_options$design[,coord],objectUQ$prof_quantiles_full[[j]]$res$max[,coord],lty=j,col=adjustcolor('brown3',alpha.f=0.5),lwd=1.5)
-        lines(plot_options$design[,coord],objectUQ$prof_quantiles_full[[j]]$res$min[,coord],lty=j,col=adjustcolor('brown3',alpha.f=0.5),lwd=1.5)
-        #     abline(v=ccPP[[j]]$neverEx[[coord]],col=4,lwd=2,lty=2)
-        #     abline(v=ccPP[[j]]$neverEx[[coord]],col=4,lwd=2,lty=3)
+        lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx[[j]]$res$max[,coord],lty=j+1,col=1,lwd=1.5)
+        lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx[[j]]$res$min[,coord],lty=j+1,col=1,lwd=1.5)
+        lines(plot_options$design[,coord],objectUQ$prof_quantiles_full[[j]]$res$max[,coord],lty=j+1,col=adjustcolor('brown3',alpha.f=0.5),lwd=1.5)
+        lines(plot_options$design[,coord],objectUQ$prof_quantiles_full[[j]]$res$min[,coord],lty=j+1,col=adjustcolor('brown3',alpha.f=0.5),lwd=1.5)
+        for(tt in seq(num_T)){
+          abline(v=ccPP_approx[[j]]$alwaysEx[[tt]][[coord]],col=4,lwd=2,lty=2)
+          abline(v=ccPP_approx[[j]]$neverEx[[tt]][[coord]],col=4,lwd=2,lty=3)
+          abline(v=ccPP_full[[j]]$alwaysEx[[tt]][[coord]],col=adjustcolor('brown4',alpha.f=0.5),lwd=2,lty=3)
+          abline(v=ccPP_full[[j]]$neverEx[[tt]][[coord]],col=adjustcolor('brown3',alpha.f=0.5),lwd=2,lty=3)
+        }
       }
     }
     if(!is.null(profMean)){
@@ -159,14 +170,85 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
       lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx$`0.5`$res$min[,coord],lty=1)
     }
     legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f,"/",P[coord]^inf,f," (full)"),list(coord=coord))),
-                          as.expression(substitute(paste(P[coord]^sup,f[95]),list(coord=coord))),
-                          as.expression(substitute(paste(P[coord]^inf,f[95]),list(coord=coord))),
-                          as.expression(substitute(paste(P[coord]^sup,f[05]),list(coord=coord))),
-                          as.expression(substitute(paste(P[coord]^inf,f[05]),list(coord=coord))),
+                          as.expression(substitute(paste(P[coord]^sup,f[qq]),list(coord=coord,qq=quantiles_uq[1]))),
+                          as.expression(substitute(paste(P[coord]^inf,f[qq]),list(coord=coord,qq=quantiles_uq[1]))),
+                          as.expression(substitute(paste(P[coord]^sup,f[qq]),list(coord=coord,qq=quantiles_uq[2]))),
+                          as.expression(substitute(paste(P[coord]^inf,f[qq]),list(coord=coord,qq=quantiles_uq[2]))),
                           "threshold"),
            lty=c(1,2,2,3,3,1),col=c(1,1,1,1,1,2),cex=1.2,lwd=c(2,2,2,2,2,2))
   }
   if(plot_options$save)
     dev.off()
 
+}
+
+
+#' @name setPlotOptions
+#' @title Set-up the plot options when NULL
+#' @description  function to set-up plot options for plot_univariate_profiles_UQ, coordProf_UQ and coordinateProfiles
+#' @author Dario Azzimonti
+#' @param plot_options the list of plot options to set-up
+#' @param d number of coordinates
+#' @param num_T number of thresholds of interest
+#' @return the properly set-up list, if all the fields are already filled then returns \code{plot_options}
+setPlotOptions<-function(plot_options=NULL,d,num_T){
+
+  # Start with saving and folder options
+  if(is.null(plot_options)){
+    # don't save to file
+    plot_options<-list(save=F)
+  }else{
+    # set save directory
+    if(plot_options$save==TRUE && is.null(plot_options$folderPlots))
+      plot_options$folderPlots <- './'
+
+    # Useful for serial plots in HPC
+    if(is.null(plot_options$id_save))
+      plot_options$id_save<-""
+  }
+
+  ## Titles of plots
+  # profile plots
+  if(is.null(plot_options$titleProf))
+    plot_options$titleProf<-"Coordinate profiles"
+  # 2d plot
+  if(is.null(plot_options$title2d))
+    plot_options$title2d<-"Posterior mean"
+
+  # Design plot
+  if(is.null(plot_options$design)){
+    plot_options$design<-matrix(NA,ncol=d,nrow=100)
+    for(i in seq(d)){
+      plot_options$design[,i]<-seq(0,1,,100)
+    }
+  }
+
+  ## Colors set-up
+
+  # AlwaysEx colors
+  if(is.null(plot_options$col_CCPthresh_alw)){
+    plot_options$col_CCPthresh_alw<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Purples'),offset = c(-0.2, -0.2, -0.2, 0))
+    plot_options$col_CCPthresh_alw<-plot_options$col_CCPthresh_alw[(2:length(plot_options$col_CCPthresh_alw))]
+    if(num_T==1)
+      plot_options$col_CCPthresh_alw[2]
+  }
+  # NeverEx colors
+  if(is.null(plot_options$col_CCPthresh_nev)){
+    plot_options$col_CCPthresh_nev<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Greens'),offset = c(-0.2, -0.2, -0.2, 0))
+    plot_options$col_CCPthresh_nev<-plot_options$col_CCPthresh_nev[(2:length(plot_options$col_CCPthresh_nev))]
+    if(num_T==1)
+      plot_options$col_CCPthresh_nev[2]
+  }
+  # threshold colors
+  if(is.null(plot_options$col_thresh)){
+    plot_options$col_thresh<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Reds'),offset = c(-0.2, -0.2, -0.2, 0))
+    plot_options$col_thresh<-plot_options$col_thresh[(2:length(plot_options$col_thresh))]
+    if(num_T==1)
+      plot_options$col_thresh[2]
+  }
+
+
+
+
+  return(plot_options)
 }

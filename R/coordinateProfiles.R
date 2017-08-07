@@ -57,36 +57,14 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
     options_approx<- list(multistart=8,heavyReturn=TRUE,initDesign=init_des,fullDesignSize=100,smoother="1order")
   }
 
-  if(is.null(plot_options)){
-    if(plot_level>0){
-      plot_options<-list(save=F)
-    }
-
-  }else{
-    if(plot_options$save==TRUE && is.null(plot_options$folderPlots))
-      plot_options$folderPlots <- './'
-
-    if(is.null(plot_options$titleProf))
-      plot_options$titleProf<-"Coordinate profiles"
-
-    if(is.null(plot_options$title2d))
-      plot_options$title2d<-"Posterior mean"
-
-    if(is.null(plot_options$design)){
-      plot_options$design<-matrix(NA,ncol=object$kmModel@d,nrow=100)
-      for(i in seq(object$kmModel@d)){
-        plot_options$design[,i]<-seq(0,1,,100)
-      }
-    }
-    # Useful for serial plots in HPC
-    if(is.null(plot_options$id_save)){
-      plot_options$id_save<-""
-    }
-
-  }
-
   # save the dimension of the input
   d<-object$kmModel@d
+
+  # save number of thresholds
+  num_T<-length(threshold)
+
+  # Set up plot options
+  plot_options<-setPlotOptions(plot_options = plot_options,d=d,num_T=num_T)
 
   ## posterior mean part ##
   # Let us define the posterior mean function and gradient in a 'optimizer-friendly' way
@@ -136,8 +114,12 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
           cex.main=3,cex.axis=1.8,cex.lab=2.8)
     contour(matrix(pred2d$mean,nrow = 100),add=T,nlevels = 10,lwd=1.5,labcex=1.2)
     contour(matrix(pred2d$mean,nrow = 100),add=T,levels = threshold,col=2,lwd=3,labcex=1.5)
-    abline(v = changePP$neverEx[[1]],col=3,lwd=2.5)
-    abline(h = changePP$neverEx[[2]],col=3,lwd=2.5)
+    for(tt in seq(num_T)){
+      abline(v = changePP$neverEx[[tt]][[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
+      abline(h = changePP$neverEx[[tt]][[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
+      abline(h = changePP$alwaysEx[[tt]][[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
+      abline(h = changePP$alwaysEx[[tt]][[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
+    }
     if(plot_options$save)
       dev.off()
   }
@@ -182,8 +164,11 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
       points(object$profMean_approx$profPoints$design[,coord],object$profMean_approx$profPoints$res$max[,coord],col=4)
       lines(plot_options$design[,coord],object$profMean_approx$res$min[,coord],lty=4,col=4,lwd=2)
       points(object$profMean_approx$profPoints$design[,coord],object$profMean_approx$profPoints$res$min[,coord],col=4)
-      abline(v=changePP$neverEx[[coord]],col=3,lwd=2.5)
-      abline(h = threshold,col=2,lwd=2)
+      for(tt in seq(num_T)){
+        abline(v=changePP$neverEx[[tt]][[coord]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
+        abline(v=changePP$alwaysEx[[tt]][[coord]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
+      }
+      abline(h = threshold,col=plot_options$col_thresh,lwd=2)
       legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f," (full)"),list(coord=coord))),
                             as.expression(substitute(paste(P[coord]^inf,f," (full)"),list(coord=coord))),
                             as.expression(substitute(paste(P[coord]^sup,f," (1order)"),list(coord=coord))),
@@ -284,7 +269,10 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
         points(object$profMean_approx$profPoints$design[,coord],object$profMean_approx$profPoints$res$max[,coord],col=4)
         lines(plot_options$design[,coord],object$profMean_approx$res$min[,coord],lty=4,col=4,lwd=2)
         points(object$profMean_approx$profPoints$design[,coord],object$profMean_approx$profPoints$res$min[,coord],col=4)
-        abline(v=changePP$neverEx[[coord]],col=3,lwd=2.5)
+        for(tt in seq(num_T)){
+          abline(v=changePP$neverEx[[tt]][[coord]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
+          abline(v=changePP$alwaysEx[[tt]][[coord]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
+        }
         # full CI_const
         CI_cols1<-heat.colors(n = length(CI_const)+1,alpha=0.7)
         CI_cols2<-terrain.colors(n = length(CI_const)+1,alpha=0.7)
@@ -294,7 +282,7 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
           lines(plot_options$design[,coord],prof_CI_const_full[[i]]$upper$res$min[,coord],lty=4,col=CI_cols2[i])
           lines(plot_options$design[,coord],prof_CI_const_full[[i]]$lower$res$min[,coord],lty=4,col=CI_cols2[i])
         }
-        abline(h = threshold,col=2,lwd=2)
+        abline(h = threshold,col=plot_options$col_thresh,lwd=2)
         legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f," (full)"),list(coord=coord))),
                               as.expression(substitute(paste(P[coord]^inf,f," (full)"),list(coord=coord))),
                               as.expression(substitute(paste(P[coord]^sup,f," (1order)"),list(coord=coord))),
