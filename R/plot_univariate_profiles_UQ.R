@@ -57,6 +57,13 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
       }
     }else{
       ylimTemp<-plot_options$ylim[coord,]
+      if(!is.null(profMean)){
+        plot(plot_options$design[,coord],profMean$res$min[,coord],ylim=ylimTemp,type='l',main=title_string,
+             xlab=expression(eta),ylab="f",lty=1,cex.main=3,cex.lab=2.5,cex.axis=1.8)
+      }else{
+        plot(plot_options$design[,coord],objectUQ$prof_quantiles_approx$`0.5`$res$min[,coord],ylim=ylimTemp,type='l',main=title_string,
+             xlab=expression(eta),ylab="f",lty=1,cex.main=3,cex.lab=2.5,cex.axis=1.8)
+      }
     }
     for(i in seq(nsims)){
       if(typeProf=="approx"){
