@@ -39,11 +39,16 @@ coordProf_UQ(object, threshold, allResMean = NULL, quantiles_uq = c(0.05,
 \itemize{
 \item{\code{save:}}{boolean, if TRUE saves the plots in \code{folderPlots}}
 \item{\code{folderPlots:}}{a string containing the destination folder for plots, if \code{save==TRUE} default is \code{./}}
+\item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate.}
 \item{\code{titleProf:}}{a string containing the title for the coordinate profile plots}
 \item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d)}
+\item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
 \item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
 \item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC.}
 \item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}.}
+\item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
+\item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
+\item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
 }}
 
 \item{return_level}{an integer to select the amount of details returned}

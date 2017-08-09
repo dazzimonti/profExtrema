@@ -22,7 +22,7 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
 
   num_T<-length(threshold)
 
-  plot_options<-setPlotOptions(plot_options = plot_options,d=d,num_T=num_T)
+  plot_options<-setPlotOptions(plot_options = plot_options,d=d,num_T=num_T,kmModel = objectUQ$kmModel)
 
 
   if(plot_options$save)
@@ -31,7 +31,7 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
   par(mfrow=mfrows, mar = c(4, 5, 3, 1) + 0.1)
   for(coord in seq(d)){
     # create the title of each plot
-    title_string<-paste("Coordinate",colnames(objectUQ$kmModel@X)[coord])
+    title_string<-paste("Coordinate",plot_options$coord_names[coord])
     # determine the plot lims
     if(is.null(plot_options$ylim)){
       if(typeProf=="approx"){
@@ -197,8 +197,23 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
 #' @param plot_options the list of plot options to set-up
 #' @param d number of coordinates
 #' @param num_T number of thresholds of interest
-#' @return the properly set-up list, if all the fields are already filled then returns \code{plot_options}
-setPlotOptions<-function(plot_options=NULL,d,num_T){
+#' @param kmModel a \link[DiceKriging]{km} model, used to obtain the coordinates names.
+#' @return the properly set-up list containing the following fields \itemize{
+#' \item{\code{save:}}{boolean, if TRUE saves the plots in \code{folderPlots}}
+#' \item{\code{folderPlots:}}{a string containing the destination folder for plots, if \code{save==TRUE} default is \code{./}}
+#' \item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate, if NULL in \code{plot_options} this is left NULL and automatically set at the plot time.}
+#' \item{\code{titleProf:}}{a string containing the title for the coordinate profile plots, default is \code{"Coordinate profiles"}}
+#' \item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d), default is \code{"Posterior mean"}}
+#' \item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
+#' \item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
+#' \item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC, left as in \code{plot_options}.}
+#' \item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}, left as in \code{plot_options}.}
+#' \item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
+#' \item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
+#' \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
+#' }
+#' if all the fields are already filled then returns \code{plot_options}
+setPlotOptions<-function(plot_options=NULL,d,num_T,kmModel=NULL){
 
   # Start with saving and folder options
   if(is.null(plot_options)){
@@ -227,6 +242,15 @@ setPlotOptions<-function(plot_options=NULL,d,num_T){
     plot_options$design<-matrix(NA,ncol=d,nrow=100)
     for(i in seq(d)){
       plot_options$design[,i]<-seq(0,1,,100)
+    }
+  }
+
+  # coordinate names
+  if(is.null(plot_options$coord_names)){
+    if(is.null(kmModel)){
+      plot_options$coord_names<-apply(matrix(1:d,ncol=1),1,function(x) paste("x_",x,sep=''))
+    }else{
+      plot_options$coord_names<-colnames(kmModel@X)
     }
   }
 

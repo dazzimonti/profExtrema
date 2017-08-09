@@ -4,7 +4,7 @@
 \alias{setPlotOptions}
 \title{Set-up the plot options when NULL}
 \usage{
-setPlotOptions(plot_options = NULL, d, num_T)
+setPlotOptions(plot_options = NULL, d, num_T, kmModel = NULL)
 }
 \arguments{
 \item{plot_options}{the list of plot options to set-up}
@@ -12,9 +12,25 @@ setPlotOptions(plot_options = NULL, d, num_T)
 \item{d}{number of coordinates}
 
 \item{num_T}{number of thresholds of interest}
+
+\item{kmModel}{a \link[DiceKriging]{km} model, used to obtain the coordinates names.}
 }
 \value{
-the properly set-up list, if all the fields are already filled then returns \code{plot_options}
+the properly set-up list containing the following fields \itemize{
+\item{\code{save:}}{boolean, if TRUE saves the plots in \code{folderPlots}}
+\item{\code{folderPlots:}}{a string containing the destination folder for plots, if \code{save==TRUE} default is \code{./}}
+\item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate, if NULL in \code{plot_options} this is left NULL and automatically set at the plot time.}
+\item{\code{titleProf:}}{a string containing the title for the coordinate profile plots, default is \code{"Coordinate profiles"}}
+\item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d), default is \code{"Posterior mean"}}
+\item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
+\item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
+\item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC, left as in \code{plot_options}.}
+\item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}, left as in \code{plot_options}.}
+\item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
+\item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
+\item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
+}
+if all the fields are already filled then returns \code{plot_options}
 }
 \description{
 function to set-up plot options for plot_univariate_profiles_UQ, coordProf_UQ and coordinateProfiles

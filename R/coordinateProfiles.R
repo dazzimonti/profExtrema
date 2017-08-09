@@ -15,9 +15,13 @@
 #' \item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate.}
 #' \item{\code{titleProf:}}{a string containing the title for the coordinate profile plots}
 #' \item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d)}
+#' \item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
 #' \item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
 #' \item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC.}
 #' \item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}.}
+#' \item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
+#' \item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
+#' \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
 #' }
 #' @param CI_const an optional vector containing the constants for the CI. If not NULL, then profiles extrema for \eqn{m_n(x) \pm CI_const[i]*s_n(x,x)} are computed.
 #' @param return_level an integer to select the amount of details returned
@@ -64,7 +68,7 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
   num_T<-length(threshold)
 
   # Set up plot options
-  plot_options<-setPlotOptions(plot_options = plot_options,d=d,num_T=num_T)
+  plot_options<-setPlotOptions(plot_options = plot_options,d=d,num_T=num_T,kmModel=object$kmModel)
 
   ## posterior mean part ##
   # Let us define the posterior mean function and gradient in a 'optimizer-friendly' way
@@ -110,10 +114,10 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
     if(plot_options$save)
       cairo_pdf(filename = paste(plot_options$folderPlots,"2dpostMean_1",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
     par(mar = c(5, 5, 4, 2) + 0.1)
-    image(matrix(pred2d$mean,nrow = 100),col=gray.colors(20), main=plot_options$title2d,xlab = colnames(object$kmModel@X)[1],ylab= colnames(object$kmModel@X)[2],
+    image(matrix(pred2d$mean,nrow = 100),col=gray.colors(20), main=plot_options$title2d,xlab = plot_options$coord_names[1],ylab= plot_options$coord_names[2],
           cex.main=3,cex.axis=1.8,cex.lab=2.8)
     contour(matrix(pred2d$mean,nrow = 100),add=T,nlevels = 10,lwd=1.5,labcex=1.2)
-    contour(matrix(pred2d$mean,nrow = 100),add=T,levels = threshold,col=2,lwd=3,labcex=1.5)
+    contour(matrix(pred2d$mean,nrow = 100),add=T,levels = threshold,col=plot_options$col_thresh,lwd=3,labcex=1.5)
     for(tt in seq(num_T)){
       abline(v = changePP$neverEx[[tt]][[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
       abline(h = changePP$neverEx[[tt]][[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
@@ -126,7 +130,7 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
 
   # Plot the profile extrema functions
   if(plot_level>0){
-    colnames(object$profMean_full$res$min)<-colnames(object$kmModel@X)
+    colnames(object$profMean_full$res$min)<-plot_options$coord_names
     if(plot_options$save)
       cairo_pdf(filename = paste(plot_options$folderPlots,"profMean_full",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
     plotMaxMin(allRes = object$profMean_full,threshold = threshold)

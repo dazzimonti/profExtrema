@@ -24,11 +24,16 @@
 #' \itemize{
 #' \item{\code{save:}}{boolean, if TRUE saves the plots in \code{folderPlots}}
 #' \item{\code{folderPlots:}}{a string containing the destination folder for plots, if \code{save==TRUE} default is \code{./}}
+#' \item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate.}
 #' \item{\code{titleProf:}}{a string containing the title for the coordinate profile plots}
 #' \item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d)}
+#' \item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
 #' \item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
 #' \item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC.}
 #' \item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}.}
+#' \item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
+#' \item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
+#' \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
 #' }
 #' @param return_level an integer to select the amount of details returned
 #' @return If return_level=1 a list containing \itemize{
@@ -67,7 +72,7 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
   }
 
   # Set up plot options
-  plot_options<-setPlotOptions(plot_options = plot_options,d=d,num_T=num_T)
+  plot_options<-setPlotOptions(plot_options = plot_options,d=d,num_T=num_T,kmModel=object$kmModel)
 
   # Set-up simulation options
   if(is.null(options_sims)){
@@ -260,7 +265,7 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
     if(plot_options$save)
       cairo_pdf(filename = paste(plot_options$folderPlots,"profMean_UQ",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
     par(mar = c(5, 5, 4, 2) + 0.1)
-    image(matrix(pred2d$mean,nrow = 100),col=gray.colors(20), main=plot_options$title2d,xlab = colnames(object$kmModel@X)[1],ylab= colnames(object$kmModel@X)[2],
+    image(matrix(pred2d$mean,nrow = 100),col=gray.colors(20), main=plot_options$title2d,xlab = plot_options$coord_names[1],ylab= plot_options$coord_names[2],
           cex.main=3,cex.axis=1.8,cex.lab=2.8)
     contour(matrix(pred2d$mean,nrow = 100),add=T,nlevels = 10,lwd=1.5,labcex=1.2)
     contour(matrix(pred2d$mean,nrow = 100),add=T,levels = threshold,col=plot_options$col_thresh,lwd=3,labcex=1.5)
