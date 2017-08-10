@@ -92,9 +92,9 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
     if(return_level>1 && is.null(object$more$times$full))
       object$more<-list(times=list(full=NA))
   }
-    #    profMean_full,profMean_approx,res_UQ
-    #    times<-list(full=timeMean_full,approx=timeMean_approx)
-    #    results$more<-list(abs_err=abs_err,times=times)
+  #    profMean_full,profMean_approx,res_UQ
+  #    times<-list(full=timeMean_full,approx=timeMean_approx)
+  #    results$more<-list(abs_err=abs_err,times=times)
   # Compute profile extrema with full optim
 
 
@@ -160,7 +160,9 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
       }else{
         ylimTemp<-plot_options$ylim[coord,]
       }
-      title_string<-paste("Coordinate",colnames(object$profMean_full$res$min)[coord])
+      # create the title of each plot
+      title_string<-paste("Coordinate",plot_options$coord_names[coord])
+
       plot(plot_options$design[,coord],object$profMean_full$res$min[,coord],ylim=ylimTemp,type='l',main=title_string,
            xlab=expression(eta),ylab="f",lty=1,cex.main=3,cex.lab=2.5,cex.axis=1.8)
       lines(plot_options$design[,coord],object$profMean_full$res$max[,coord],lty=1)
@@ -173,16 +175,18 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
         abline(v=changePP$alwaysEx[[tt]][[coord]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
       }
       abline(h = threshold,col=plot_options$col_thresh,lwd=2)
-      legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f," (full)"),list(coord=coord))),
-                            as.expression(substitute(paste(P[coord]^inf,f," (full)"),list(coord=coord))),
-                            as.expression(substitute(paste(P[coord]^sup,f," (1order)"),list(coord=coord))),
-                            as.expression(substitute(paste(P[coord]^inf,f," (1order)"),list(coord=coord))),
-                            "threshold"),
-             lty=c(1,1,3,4,1),col=c(1,1,4,4,2),cex=1.8,lwd=c(2,2,2,2,2))
+      if(!is.null(plot_options$legend)){
+        legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f," (full)"),list(coord=coord))),
+                              as.expression(substitute(paste(P[coord]^inf,f," (full)"),list(coord=coord))),
+                              as.expression(substitute(paste(P[coord]^sup,f," (1order)"),list(coord=coord))),
+                              as.expression(substitute(paste(P[coord]^inf,f," (1order)"),list(coord=coord))),
+                              "threshold"),
+               lty=c(1,1,3,4,1),col=c(1,1,4,4,2),cex=1.8,lwd=c(2,2,2,2,2))
+      }
     }
     if(plot_options$save)
       dev.off()
-  #  par(oldpar)
+    #  par(oldpar)
   }
 
   # save absolute errors with approximation
@@ -234,14 +238,14 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
     }
 
     # Compute profile extrema var with approximation, if not already computed
-#    if(is.null(object$profVar_approx)){
-#      timeIn<-get_nanotime()
-#      object$profVar_approx<-approxMaxMin(f = g_s2,fprime = g_s2prime,d = d,opts = options_approx)
-#      timeVar_approx<-(get_nanotime()-timeIn)*1e-9
-#    }else{
-#      if(return_level>1 && is.null(object$more$times$approx))
-#        object$more$times$approx=NA
-#    }
+    #    if(is.null(object$profVar_approx)){
+    #      timeIn<-get_nanotime()
+    #      object$profVar_approx<-approxMaxMin(f = g_s2,fprime = g_s2prime,d = d,opts = options_approx)
+    #      timeVar_approx<-(get_nanotime()-timeIn)*1e-9
+    #    }else{
+    #      if(return_level>1 && is.null(object$more$times$approx))
+    #        object$more$times$approx=NA
+    #    }
 
     if(plot_level>0){
       oldpar<-par()
@@ -263,7 +267,8 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
           ylimTemp<-plot_options$ylim[coord,]
         }
 
-        title_string<-paste("Coordinate",colnames(object$profMean_full$res$min)[coord])
+        # create the title of each plot
+        title_string<-paste("Coordinate",plot_options$coord_names[coord])
         # full mean
         plot(plot_options$design[,coord],object$profMean_full$res$min[,coord],ylim=ylimTemp_CI,type='l',main=title_string,
              xlab=expression(eta),ylab="f",lty=1,cex.main=3,cex.lab=2.5,cex.axis=1.8)
@@ -287,12 +292,14 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
           lines(plot_options$design[,coord],prof_CI_const_full[[i]]$lower$res$min[,coord],lty=4,col=CI_cols2[i])
         }
         abline(h = threshold,col=plot_options$col_thresh,lwd=2)
-        legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f," (full)"),list(coord=coord))),
-                              as.expression(substitute(paste(P[coord]^inf,f," (full)"),list(coord=coord))),
-                              as.expression(substitute(paste(P[coord]^sup,f," (1order)"),list(coord=coord))),
-                              as.expression(substitute(paste(P[coord]^inf,f," (1order)"),list(coord=coord))),
-                              "threshold"),
-               lty=c(1,1,3,4,1),col=c(1,1,4,4,2),cex=1.8,lwd=c(2,2,2,2,2))
+        if(!is.null(plot_options$legend)){
+          legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f," (full)"),list(coord=coord))),
+                                as.expression(substitute(paste(P[coord]^inf,f," (full)"),list(coord=coord))),
+                                as.expression(substitute(paste(P[coord]^sup,f," (1order)"),list(coord=coord))),
+                                as.expression(substitute(paste(P[coord]^inf,f," (1order)"),list(coord=coord))),
+                                "threshold"),
+                 lty=c(1,1,3,4,1),col=c(1,1,4,4,2),cex=1.8,lwd=c(2,2,2,2,2))
+        }
       }
       if(plot_options$save)
         dev.off()
@@ -303,13 +310,13 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
 
 
   ## UQ part ##
-#  res_UQ<-NULL
+  #  res_UQ<-NULL
   if(uq_computations){# && is.null(object$res_UQ)){
     if(is.null(object$res_UQ$kmModel))
       object$res_UQ$kmModel=object$kmModel
     object$res_UQ<-coordProf_UQ(object=object$res_UQ,threshold=threshold,allResMean=object$profMean_full,
-                         options_approx=options_approx,plot_level=max(0,plot_level-1),
-                         plot_options=plot_options,return_level=max(1,return_level-1),...)
+                                options_approx=options_approx,plot_level=max(0,plot_level-1),
+                                plot_options=plot_options,return_level=max(1,return_level-1),...)
 
   }else{
     object$res_UQ<-NULL

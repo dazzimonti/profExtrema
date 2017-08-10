@@ -176,13 +176,19 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
       lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx$`0.5`$res$max[,coord],lty=1)
       lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx$`0.5`$res$min[,coord],lty=1)
     }
-    legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f,"/",P[coord]^inf,f," (full)"),list(coord=coord))),
-                          as.expression(substitute(paste(P[coord]^sup,f[qq]),list(coord=coord,qq=quantiles_uq[1]))),
-                          as.expression(substitute(paste(P[coord]^inf,f[qq]),list(coord=coord,qq=quantiles_uq[1]))),
-                          as.expression(substitute(paste(P[coord]^sup,f[qq]),list(coord=coord,qq=quantiles_uq[2]))),
-                          as.expression(substitute(paste(P[coord]^inf,f[qq]),list(coord=coord,qq=quantiles_uq[2]))),
-                          "threshold"),
-           lty=c(1,2,2,3,3,1),col=c(1,1,1,1,1,2),cex=1.2,lwd=c(2,2,2,2,2,2))
+    if(plot_options$fun_evals){
+      points(objectUQ$kmModel@X[,coord],objectUQ$kmModel@y,pch=17)
+    }
+
+    if(!is.null(plot_options$legend)){
+      legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f,"/",P[coord]^inf,f," (full)"),list(coord=coord))),
+                            as.expression(substitute(paste(P[coord]^sup,f[qq]),list(coord=coord,qq=quantiles_uq[1]))),
+                            as.expression(substitute(paste(P[coord]^inf,f[qq]),list(coord=coord,qq=quantiles_uq[1]))),
+                            as.expression(substitute(paste(P[coord]^sup,f[qq]),list(coord=coord,qq=quantiles_uq[2]))),
+                            as.expression(substitute(paste(P[coord]^inf,f[qq]),list(coord=coord,qq=quantiles_uq[2]))),
+                            "threshold"),
+             lty=c(1,2,2,3,3,1),col=c(1,1,1,1,1,2),cex=1.2,lwd=c(2,2,2,2,2,2))
+    }
   }
   if(plot_options$save)
     dev.off()
@@ -213,6 +219,7 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
 #' \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
 #' }
 #' if all the fields are already filled then returns \code{plot_options}
+#' @export
 setPlotOptions<-function(plot_options=NULL,d,num_T,kmModel=NULL){
 
   # Start with saving and folder options
@@ -278,7 +285,9 @@ setPlotOptions<-function(plot_options=NULL,d,num_T,kmModel=NULL){
       plot_options$col_thresh[2]
   }
 
-
+  # plot function evaluations
+  if(is.null(plot_options$fun_evals))
+    plot_options$fun_evals <- FALSE
 
 
   return(plot_options)
