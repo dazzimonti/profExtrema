@@ -2,7 +2,7 @@
 #' @author Dario Azzimonti
 #' @name getProfileSup
 #' @title Generic profile sup function computation
-#' @description Compute profile sup function for an arbitrary matrix \code{Phi} with nloptr.
+#' @description Compute profile sup function for an arbitrary matrix \code{Phi} with \link[nloptr]{nloptr}.
 #' @param eta one dimensional point where the function is to be evaluated
 #' @param Phi projection matrix
 #' @param f function to be optimized (takes a vector y of dimension d and returns a real number)
@@ -15,7 +15,8 @@
 #' \item{\code{upper:}}{the upper bounds for the optimization domain (see optim for details)}
 #' }
 #' @return a real value corresponding to \eqn{max_{x_1,\dots, x_{coord-1},x_{coord+1}, \dots, x_d} f(x_1,\dots,x_d)}
-#' requires library(nloptr)
+#' @export
+# requires library(nloptr)
 getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
 
   # nloptr does minimizations so we need to change the sign
@@ -88,7 +89,7 @@ getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
 #' @author Dario Azzimonti
 #' @name getProfileInf
 #' @title Generic profile inf function computation
-#' @description Compute profile inf function for an arbitrary matrix \code{Phi} with nloptr.
+#' @description Compute profile inf function for an arbitrary matrix \code{Phi} with \link[nloptr]{nloptr}.
 #' @param eta one dimensional point where the function is to be evaluated
 #' @param Phi projection matrix
 #' @param f function to be optimized (takes a vector y of dimension d and returns a real number)
@@ -101,7 +102,8 @@ getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
 #' \item{\code{upper:}}{the upper bounds for the optimization domain (see optim for details)}
 #' }
 #' @return a real value corresponding to \eqn{max_{x_1,\dots, x_{coord-1},x_{coord+1}, \dots, x_d} f(x_1,\dots,x_d)}
-#' requires library(nloptr)
+#' @export
+# requires library(nloptr)
 getProfileInf = function(eta,Phi,f,fprime,d,options=NULL){
 
   lower=rep(0,d)
@@ -165,24 +167,24 @@ getProfileInf = function(eta,Phi,f,fprime,d,options=NULL){
 #' @author Dario Azzimonti
 #' @name getProfileCoord
 #' @title Coordinate profile extrema with nloptr
-#' @description Compute coordinate profile extrema with nloptr
+#' @description Compute coordinate profile extrema with \link[nloptr]{nloptr}
 #' @param f the function to be evaluated
 #' @param fprime derivative of the function
 #' @param d dimension of the input domain
-#' @param options a list containing the options for this function and the subfunctions getMax, getMin
-#' see documentation of getProfileSup, getProfileInf for details. The options only for getAllMaxMin are
+#' @param options a list containing the options for this function and the subfunctions \link{getMaxMinMC},
+#' see documentation of \link{getProfileSup}, \link{getProfileInf} for details. The options only for getProfileCoord are
 #' \itemize{
 #' \item{\code{Design:}}{an optional design matrix with the discretization of each dimension, if NULL then for each dimension Design[,coord] = seq(0,1,length.out=100)}
 #' \item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
 #' \item{\code{plts:}}{If TRUE, plots the max/min functions at each coordinate, default is FALSE.}
 #' \item{\code{verb:}}{If TRUE, outputs intermediate results, default is FALSE.}
-#' \item{\code{MonteCarlo:}}{If TRUE, use the MC optimizer otherwise use standard optim.}
+#' \item{\code{MonteCarlo:}}{If TRUE, use the MC optimizer otherwise use standard optim, default is FALSE.}
 #' }
 #' @return a list of two data frames (min, max) of the evaluations of \eqn{f_sup(x_i) = sup_{x_j \neq i} f(x_1,\dots,x_d) } and \eqn{f_inf(x_i) = inf_{x_j \neq i} f(x_1,\dots,x_d) }
-#' for each i at the design Design. By default Design is a 100 equally spaced points for each dimension. It can be changed by defining it in options$Design
-#'
-#' REUSE THE MC SAMPLES? you need to save them find a way to find the closest point to the evaluated one
-#' and then check if the values are consistent?
+#' for each i at the design \code{Design}. By default \code{Design} is a 100 equally spaced points for each dimension. It can be changed by defining it in \code{options$Design}
+#' @export
+# REUSE THE MC SAMPLES? you need to save them find a way to find the closest point to the evaluated one
+# and then check if the values are consistent?
 getProfileCoord<-function(f,fprime=NULL,d,options=NULL){
 
   if(is.null(options$lower))

@@ -21,7 +21,7 @@
 #' @importFrom grDevices cairo_pdf dev.off gray.colors adjustcolor
 #' @importFrom graphics abline contour image legend lines par plot points
 #' @importFrom stats deriv model.matrix optim predict rnorm quantile runif smooth.spline
-# @importFrom nloptr nloptr
+#' @importFrom nloptr nloptr
 #' @importFrom lhs maximinLHS
 #' @importFrom splines bs
 #' @importFrom graphics polygon

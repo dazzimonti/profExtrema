@@ -111,10 +111,6 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
     ### NB changePP to be implemented!!!!!!!
     if(!is.null(profMean)){
       changePP<-getChangePoints(threshold = threshold,allRes = profMean)
-      for(i in seq(num_T)){
-        abline(v=changePP$neverEx[[i]][[coord]],col=plot_options$col_CCPthresh_nev[i],lwd=2.5)
-        abline(v=changePP$alwaysEx[[i]][[coord]],col=plot_options$col_CCPthresh_alw[i],lwd=2.5)
-      }
     }
 
     if(typeProf=="approx" || typeProf=="both"){
@@ -144,6 +140,15 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
           abline(v=ccPP_approx[[j]]$neverEx[[tt]][[coord]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=3)
         }
       }
+      for(i in seq(num_T)){
+        if(!is.null(profMean)){
+          abline(v=changePP$neverEx[[i]][[coord]],col=plot_options$col_CCPthresh_nev[i],lwd=2.5)
+          abline(v=changePP$alwaysEx[[i]][[coord]],col=plot_options$col_CCPthresh_alw[i],lwd=2.5)
+        }else{
+          abline(v=ccPP_approx[[j]]$alwaysEx[[i]][[coord]],col=plot_options$col_CCPthresh_alw[i],lwd=2.5,lty=1)
+          abline(v=ccPP_approx[[j]]$neverEx[[i]][[coord]],col=plot_options$col_CCPthresh_nev[i],lwd=2.5,lty=1)
+        }
+      }
     }else if(typeProf=="full"){
       if(!is.null(objectUQ$prof_quantiles_full)){
         for(j in seq(length(quantiles_uq))){
@@ -152,6 +157,15 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
           for(tt in seq(num_T)){
             abline(v=ccPP_full[[j]]$alwaysEx[[tt]][[coord]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
             abline(v=ccPP_full[[j]]$neverEx[[tt]][[coord]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=3)
+          }
+        }
+        for(i in seq(num_T)){
+          if(!is.null(profMean)){
+            abline(v=changePP$neverEx[[i]][[coord]],col=plot_options$col_CCPthresh_nev[i],lwd=2.5)
+            abline(v=changePP$alwaysEx[[i]][[coord]],col=plot_options$col_CCPthresh_alw[i],lwd=2.5)
+          }else{
+            abline(v=ccPP_full[[j]]$alwaysEx[[i]][[coord]],col=plot_options$col_CCPthresh_alw[i],lwd=2.5)
+            abline(v=ccPP_full[[j]]$neverEx[[i]][[coord]],col=plot_options$col_CCPthresh_nev[i],lwd=2.5)
           }
         }
       }
@@ -166,6 +180,15 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
           abline(v=ccPP_approx[[j]]$neverEx[[tt]][[coord]],col=4,lwd=2,lty=3)
           abline(v=ccPP_full[[j]]$alwaysEx[[tt]][[coord]],col=adjustcolor('brown4',alpha.f=0.5),lwd=2,lty=3)
           abline(v=ccPP_full[[j]]$neverEx[[tt]][[coord]],col=adjustcolor('brown3',alpha.f=0.5),lwd=2,lty=3)
+        }
+      }
+      for(i in seq(num_T)){
+        if(!is.null(profMean)){
+          abline(v=changePP$neverEx[[i]][[coord]],col=plot_options$col_CCPthresh_nev[i],lwd=2.5)
+          abline(v=changePP$alwaysEx[[i]][[coord]],col=plot_options$col_CCPthresh_alw[i],lwd=2.5)
+        }else{
+          abline(v=ccPP_full[[j]]$alwaysEx[[i]][[coord]],col=plot_options$col_CCPthresh_alw[i],lwd=2.5)
+          abline(v=ccPP_full[[j]]$neverEx[[i]][[coord]],col=plot_options$col_CCPthresh_nev[i],lwd=2.5)
         }
       }
     }
