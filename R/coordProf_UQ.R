@@ -19,6 +19,7 @@
 #' \item{\code{integcontrol:}} list containing the options for numerical integration of the criterion;
 #' \item{\code{integration.param:}} list containing the integration design, obtained with the function \link[KrigInv]{integration_design}.
 #' }
+#' @param options_bound an optional list containing \code{beta} the confidence level for the approximation and \code{alpha} the confidence level for the bound. If \code{NULL}, the bound is not computed.
 #' @param plot_level an integer to select the plots to return (0=no plots, 1=basic plots, 2= all plots)
 #' @param plot_options an optional list of parameters for plots. Currently available options
 #' \itemize{
@@ -50,7 +51,7 @@
 #' \item{\code{sPts:}}{the simulation points}
 #' }
 #' @export
-coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.95),options_approx=NULL,options_full_sims=NULL,options_sims=NULL,plot_level=0,plot_options=NULL,return_level=1){
+coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.95),options_approx=NULL,options_full_sims=NULL,options_sims=NULL,options_bound=NULL,plot_level=0,plot_options=NULL,return_level=1){
 
   # number of thresholds
   num_T<-length(threshold)
@@ -312,7 +313,11 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
   #  object$prof_quantiles_approx=prof_quantiles_approx
   #  object$sPts=m_dist
 
-  # Compute mean^Delta, sigma^Delta for CI correction
+  # Compute the bound correction
+  if(!is.null(options_bound)){
+    object$bound<-bound_profiles(objectUQ = object,beta = options_bound$beta,alpha = options_bound$alpha,
+                                 options_approx = options_approx,options_full_sims = options_full_sims)
+  }
 
 
   if(return_level==1){

@@ -456,12 +456,10 @@ approxProfCoord=function(f,fprime=NULL,optimFun=getAllMaxMin,threshold=0,d,opts=
 
     if(!is.null(opts$smoother) && opts$smoother=="1order"){
       sK_max[,coord]<- kGradSmooth(newPoints=newPoints,profPoints = aa$maxima[((coord-1)*nn+1):(coord*nn),coord],
-                                   profEvals=aa$res$max[,coord], profGradient=aa$res$grad_max[,coord],
-                                   threshold= threshold)
+                                   profEvals=aa$res$max[,coord], profGradient=aa$res$grad_max[,coord])
 
       sK_min[,coord]<-kGradSmooth(newPoints=newPoints,profPoints = aa$minima[((coord-1)*nn+1):(coord*nn),coord],
-                                  profEvals=aa$res$min[,coord], profGradient=aa$res$grad_min[,coord],
-                                  threshold= threshold)
+                                  profEvals=aa$res$min[,coord], profGradient=aa$res$grad_min[,coord])
     }else if(opts$smoother=="quantSpline"){
       fit.max <- rq(aa$res$max[,coord] ~ bs(aa$maxima[((coord-1)*nn+1):(coord*nn),coord], df=15), tau=0.95)
       fit.min <- rq(aa$res$min[,coord] ~ bs(aa$minima[((coord-1)*nn+1):(coord*nn),coord], df=15), tau=0.05)

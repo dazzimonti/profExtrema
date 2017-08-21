@@ -22,9 +22,9 @@ gradKm_dnewdata(object, newdata, type, se.compute = TRUE,
 }
 \value{
 Returns a list containing \itemize{
-\item{\code{mean}}{the gradient of the posterior mean at \code{newdata}.}
-\item{\code{trend}}{the gradient of the trend at \code{newdata}.}
-\item{\code{s2}}{the gradient of the posterior variance at \code{newdata}.}
+\item{\code{mean:}}{ the gradient of the posterior mean at \code{newdata}.}
+\item{\code{trend:}}{ the gradient of the trend at \code{newdata}.}
+\item{\code{s2:}}{ the gradient of the posterior variance at \code{newdata}.}
 }
 }
 \description{

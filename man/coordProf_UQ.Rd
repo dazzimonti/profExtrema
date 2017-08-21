@@ -6,8 +6,8 @@
 \usage{
 coordProf_UQ(object, threshold, allResMean = NULL, quantiles_uq = c(0.05,
   0.95), options_approx = NULL, options_full_sims = NULL,
-  options_sims = NULL, plot_level = 0, plot_options = NULL,
-  return_level = 1)
+  options_sims = NULL, options_bound = NULL, plot_level = 0,
+  plot_options = NULL, return_level = 1)
 }
 \arguments{
 \item{object}{either a \link[DiceKriging]{km} model or a list containing partial results. If \code{object} is a km model then all computations are carried out. If \code{object} is a list, then the function carries out all computations to complete the results list.}
@@ -32,6 +32,8 @@ coordProf_UQ(object, threshold, allResMean = NULL, quantiles_uq = c(0.05,
 \item{\code{integcontrol:}} list containing the options for numerical integration of the criterion;
 \item{\code{integration.param:}} list containing the integration design, obtained with the function \link[KrigInv]{integration_design}.
 }}
+
+\item{options_bound}{an optional list containing \code{beta} the confidence level for the approximation and \code{alpha} the confidence level for the bound. If \code{NULL}, the bound is not computed.}
 
 \item{plot_level}{an integer to select the plots to return (0=no plots, 1=basic plots, 2= all plots)}
 

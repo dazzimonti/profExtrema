@@ -4,7 +4,7 @@
 \alias{kGradSmooth}
 \title{First order approximation}
 \usage{
-kGradSmooth(newPoints, profPoints, profEvals, profGradient, threshold)
+kGradSmooth(newPoints, profPoints, profEvals, profGradient)
 }
 \arguments{
 \item{newPoints}{vector of points where to approximate the function}
@@ -14,8 +14,6 @@ kGradSmooth(newPoints, profPoints, profEvals, profGradient, threshold)
 \item{profEvals}{value of the evaluation at profPoints}
 
 \item{profGradient}{value of the gradient at profPoints}
-
-\item{threshold}{threshold value}
 }
 \value{
 approximated values of the function at newPoints

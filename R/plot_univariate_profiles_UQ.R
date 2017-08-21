@@ -42,6 +42,13 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
         ylimTemp<-range(c(range(objectUQ$profSups[coord,,]),range(objectUQ$profInfs[coord,,]),
                           range(objectUQ$profSups_full[coord,,]),range(objectUQ$profInfs_full[coord,,])))
       }
+      if(!is.null(objectUQ$bound)){
+        ylimTemp<-range(c(ylimTemp,
+                          range(objectUQ$bound$bound$lower$res$min[,coord]),
+                          range(objectUQ$bound$bound$upper$res$min[,coord]),
+                          range(objectUQ$bound$bound$lower$res$max[,coord]),
+                          range(objectUQ$bound$bound$upper$res$max[,coord])))
+      }
       if(!is.null(profMean)){
         ylimTemp<-range(c(ylimTemp,
                           range(profMean$res$min[,coord]),range(profMean$res$max[,coord])))
@@ -202,7 +209,19 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
     if(plot_options$fun_evals){
       points(objectUQ$kmModel@X[,coord],objectUQ$kmModel@y,pch=17)
     }
+    # bound
+    if(!is.null(objectUQ$bound)){
+      lines(plot_options$design[,coord],objectUQ$bound$bound$lower$res$min[,coord],col=4,lty=2,lwd=1.5)
+      lines(plot_options$design[,coord],objectUQ$bound$bound$lower$res$max[,coord],col=4,lty=2,lwd=1.5)
+      lines(plot_options$design[,coord],objectUQ$bound$bound$upper$res$min[,coord],col=4,lty=3,lwd=1.5)
+      lines(plot_options$design[,coord],objectUQ$bound$bound$upper$res$max[,coord],col=4,lty=3,lwd=1.5)
 
+
+      lines(plot_options$design[,coord],objectUQ$bound$approx$lower$res$min[,coord],col=5,lty=2,lwd=1.2)
+      lines(plot_options$design[,coord],objectUQ$bound$approx$lower$res$max[,coord],col=5,lty=2,lwd=1.2)
+      lines(plot_options$design[,coord],objectUQ$bound$approx$upper$res$min[,coord],col=5,lty=3,lwd=1.2)
+      lines(plot_options$design[,coord],objectUQ$bound$approx$upper$res$max[,coord],col=5,lty=3,lwd=1.2)
+    }
     if(!is.null(plot_options$legend)){
       legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f,"/",P[coord]^inf,f," (full)"),list(coord=coord))),
                             as.expression(substitute(paste(P[coord]^sup,f[qq]),list(coord=coord,qq=quantiles_uq[1]))),
@@ -312,6 +331,9 @@ setPlotOptions<-function(plot_options=NULL,d,num_T,kmModel=NULL){
   if(is.null(plot_options$fun_evals))
     plot_options$fun_evals <- FALSE
 
+  # qq_fill
+  if(is.null(plot_options$qq_fill))
+    plot_options$qq_fill <- FALSE
 
   return(plot_options)
 }
