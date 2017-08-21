@@ -1,9 +1,9 @@
 # coordProf_UQ function
+#' @name coordProf_UQ
 #' @author Dario Azzimonti
 #' @title Coordinate profiles UQ from a kriging model
 #' @description The function coordProf_UQ computes the profile extrema functions for posterior realizations of a Gaussian process and its confidence bounds
 #' @param object either a \link[DiceKriging]{km} model or a list containing partial results. If \code{object} is a km model then all computations are carried out. If \code{object} is a list, then the function carries out all computations to complete the results list.
-# @param kmModel a \link[DiceKriging]{km} model
 #' @param threshold the threshold of interest
 #' @param allResMean a list resulting from \code{getAllMaxMin} or \code{approxMaxMin} for the profile extrema on the mean. If NULL the median from the observations is plotted
 #' @param quantiles_uq a vector containing the quantiles to be computed
@@ -201,7 +201,7 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
         cat("Approx_sims. Realization ",i,"\n")
       }
       timeIn<-get_nanotime()
-      temp_1o<-approxMaxMin(f = g_uq_spec,fprime = g_uq_der_spec,threshold = threshold,d = d,opts = options_approx)
+      temp_1o<-approxMaxMin(f = g_uq_spec,fprime = g_uq_der_spec,d = d,opts = options_approx)
       tApprox1ord[i]<-(get_nanotime()-timeIn)*1e-9
 
       #  temp<-getAllMaxMin(f=g_uq_spec,fprime = NULL,d=2,options = list(multistart=2,heavyReturn=TRUE))
@@ -311,6 +311,9 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
   #  object$profInfs=profInfs
   #  object$prof_quantiles_approx=prof_quantiles_approx
   #  object$sPts=m_dist
+
+  # Compute mean^Delta, sigma^Delta for CI correction
+
 
   if(return_level==1){
     return(object)

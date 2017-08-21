@@ -407,7 +407,6 @@ getAllMaxMin<-function(f,fprime=NULL,d,options=NULL){
 #' @description Evaluate profile extrema over other variables with approximations at few values
 #' @param f the function to be evaluated
 #' @param fprime derivative of the function
-#' @param threshold threshold of interest
 #' @param d dimension of the input domain
 #' @param opts a list containing the options for this function and the subfunctions getMax, getMin or getMaxMinMC, see documentation of getMax, getMin, getMaxMinMC for details. The options only for approxMaxMin are
 #' \itemize{
@@ -430,7 +429,7 @@ getAllMaxMin<-function(f,fprime=NULL,d,options=NULL){
 #' @return a list of two data frames (min, max) of the evaluations of \eqn{f_sup(x_i) = sup_{x_j \neq i} f(x_1,\dots,x_d) } and \eqn{f_inf(x_i) = inf_{x_j \neq i} f(x_1,\dots,x_d) }
 #' for each i at the design Design. By default Design is a 100 equally spaced points for each dimension. It can be changed by defining it in options$Design
 #' @export
-approxMaxMin=function(f,fprime=NULL,threshold=0,d,opts=NULL){
+approxMaxMin=function(f,fprime=NULL,d,opts=NULL){
   if(is.null(opts$limits)){
     limits<-list(lower=rep(0,d),upper=rep(1,d))
   }
@@ -479,12 +478,10 @@ approxMaxMin=function(f,fprime=NULL,threshold=0,d,opts=NULL){
 
     if(!is.null(opts$smoother) && opts$smoother=="1order"){
       sK_max[,coord]<- kGradSmooth(newPoints=newPoints,profPoints = aa$maxima[((coord-1)*nn+1):(coord*nn),coord],
-                                   profEvals=aa$res$max[,coord], profGradient=aa$res$grad_max[,coord],
-                                   threshold= threshold)
+                                   profEvals=aa$res$max[,coord], profGradient=aa$res$grad_max[,coord])
 
       sK_min[,coord]<-kGradSmooth(newPoints=newPoints,profPoints = aa$minima[((coord-1)*nn+1):(coord*nn),coord],
-                                  profEvals=aa$res$min[,coord], profGradient=aa$res$grad_min[,coord],
-                                  threshold= threshold)
+                                  profEvals=aa$res$min[,coord], profGradient=aa$res$grad_min[,coord])
     }else if(!is.null(opts$smoother) && opts$smoother=="quantSpline"){
       dd_fit<-data.frame(x=aa$maxima[((coord-1)*nn+1):(coord*nn),coord],y=aa$res$max[,coord])
       fit.max <- rq(y ~ bs(x, df=max(nn%/%1.5,3)),data=dd_fit,tau=0.9)
@@ -583,9 +580,8 @@ approxMaxMin=function(f,fprime=NULL,threshold=0,d,opts=NULL){
 #' @param profPoints locations where the function was evaluated
 #' @param profEvals value of the evaluation at profPoints
 #' @param profGradient value of the gradient at profPoints
-#' @param threshold threshold value
 #' @return approximated values of the function at newPoints
-kGradSmooth<-function(newPoints,profPoints,profEvals,profGradient,threshold){
+kGradSmooth<-function(newPoints,profPoints,profEvals,profGradient){
   newPoints<-matrix(newPoints,ncol=1)
   clPts<-apply(newPoints,MARGIN = 1,FUN = function(x){which.min(abs(x-profPoints))})
   ww<-rep(NA,nrow(newPoints))
