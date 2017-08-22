@@ -44,10 +44,10 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
       }
       if(!is.null(objectUQ$bound)){
         ylimTemp<-range(c(ylimTemp,
-                          range(objectUQ$bound$bound$lower$res$min[,coord]),
-                          range(objectUQ$bound$bound$upper$res$min[,coord]),
-                          range(objectUQ$bound$bound$lower$res$max[,coord]),
-                          range(objectUQ$bound$bound$upper$res$max[,coord])))
+                          range(objectUQ$bound$bound$lower$res$min[,coord],na.rm = TRUE),
+                          range(objectUQ$bound$bound$upper$res$min[,coord],na.rm = TRUE),
+                          range(objectUQ$bound$bound$lower$res$max[,coord],na.rm = TRUE),
+                          range(objectUQ$bound$bound$upper$res$max[,coord],na.rm = TRUE)))
       }
       if(!is.null(profMean)){
         ylimTemp<-range(c(ylimTemp,

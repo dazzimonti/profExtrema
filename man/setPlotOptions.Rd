@@ -25,7 +25,9 @@ the properly set-up list containing the following fields \itemize{
 \item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
 \item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
 \item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC, left as in \code{plot_options}.}
-\item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}, left as in \code{plot_options}.}
+\item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq} and between the upper and lower bound in \code{objectUQ$bound$bound}, if \code{NULL}, it is set as \code{FALSE}.}
+\item{\code{bound_cols:}}{a vector of two strings containing the names of the colors for upper and lower bound plots.}
+\item{\code{qq_fill_colors:}}{a list containing the colors for qq_fill: \code{approx} for 2 quantiles, \code{bound_min} for bounds on the profile inf, \code{bound_max} for profile sup. Initialized only if \code{qq_fill==TRUE}.}
 \item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
 \item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
 \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}

@@ -315,8 +315,18 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
 
   # Compute the bound correction
   if(!is.null(options_bound)){
-    object$bound<-bound_profiles(objectUQ = object,beta = options_bound$beta,alpha = options_bound$alpha,
+    object$bound<-bound_profiles(objectUQ = object,mean_var_delta = object$bound$mean_var_D,beta = options_bound$beta,alpha = options_bound$alpha,
                                  options_approx = options_approx,options_full_sims = options_full_sims)
+
+    if(plot_level>=1){
+
+      plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,quantiles_uq=quantiles_uq,
+                                  threshold = threshold,nameFile ="prof_UQ_bound_approx", profMean = allResMean,typeProf = "approx")
+
+      if(!is.null(options_full_sims))
+        plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,quantiles_uq=quantiles_uq,
+                                    threshold = threshold,nameFile ="prof_UQ_bound_full", profMean = allResMean,typeProf = "full")
+    }
   }
 
 

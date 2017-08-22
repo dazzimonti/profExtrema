@@ -218,7 +218,7 @@ bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.1,alpha=0.05,option
     bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+mean_var_delta$mean$res$min[,coord]+sqrt(2*mean_var_delta$var$res$min[,coord]*correction)
   }
 
-  return(list(bound=bound_quant,approx=approx_quant))
+  return(list(bound=bound_quant,approx=approx_quant,mean_var_D=mean_var_delta))
 
 
 }
