@@ -94,20 +94,20 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
         polygon(c(plot_options$design[,coord], rev(plot_options$design[,coord])),
                 c(objectUQ$prof_quantiles_approx[[2]]$res$min[,coord],
                   rev(objectUQ$prof_quantiles_approx[[1]]$res$min[,coord])),
-                col = adjustcolor("red",alpha.f=0.5), border = NA)
+                col = plot_options$qq_fill_colors$approx, border = NA)
         polygon(c(plot_options$design[,coord], rev(plot_options$design[,coord])),
                 c(objectUQ$prof_quantiles_approx[[2]]$res$max[,coord],
                   rev(objectUQ$prof_quantiles_approx[[1]]$res$max[,coord])),
-                col = adjustcolor("red",alpha.f=0.5), border = NA,alpha=0.5)
+                col = plot_options$qq_fill_colors$approx, border = NA)
       }else{
         polygon(c(plot_options$design[,coord], rev(plot_options$design[,coord])),
                 c(objectUQ$prof_quantiles_full[[2]]$res$min[,coord],
                   rev(objectUQ$prof_quantiles_full[[1]]$res$min[,coord])),
-                col = adjustcolor("red",alpha.f=0.5), border = NA)
+                col = plot_options$qq_fill_colors$approx, border = NA)
         polygon(c(plot_options$design[,coord], rev(plot_options$design[,coord])),
                 c(objectUQ$prof_quantiles_full[[2]]$res$max[,coord],
                   rev(objectUQ$prof_quantiles_full[[1]]$res$max[,coord])),
-                col = adjustcolor("red",alpha.f=0.5), border = NA,alpha=0.5)
+                col = plot_options$qq_fill_colors$approx, border = NA)
       }
     }
     #  lines(plot_options$design[,coord],allRes_approx$res$max[,coord],lty=3,col=4,lwd=2)
@@ -211,16 +211,26 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
     }
     # bound
     if(!is.null(objectUQ$bound)){
-      lines(plot_options$design[,coord],objectUQ$bound$bound$lower$res$min[,coord],col=4,lty=2,lwd=1.5)
-      lines(plot_options$design[,coord],objectUQ$bound$bound$lower$res$max[,coord],col=4,lty=2,lwd=1.5)
-      lines(plot_options$design[,coord],objectUQ$bound$bound$upper$res$min[,coord],col=4,lty=3,lwd=1.5)
-      lines(plot_options$design[,coord],objectUQ$bound$bound$upper$res$max[,coord],col=4,lty=3,lwd=1.5)
+      lines(plot_options$design[,coord],objectUQ$bound$bound$lower$res$min[,coord],col=plot_options$bound_cols[1],lty=2,lwd=1.5)
+      lines(plot_options$design[,coord],objectUQ$bound$bound$lower$res$max[,coord],col=plot_options$bound_cols[2],lty=2,lwd=1.5)
+      lines(plot_options$design[,coord],objectUQ$bound$bound$upper$res$min[,coord],col=plot_options$bound_cols[1],lty=3,lwd=1.5)
+      lines(plot_options$design[,coord],objectUQ$bound$bound$upper$res$max[,coord],col=plot_options$bound_cols[2],lty=3,lwd=1.5)
 
-
-      lines(plot_options$design[,coord],objectUQ$bound$approx$lower$res$min[,coord],col=5,lty=2,lwd=1.2)
-      lines(plot_options$design[,coord],objectUQ$bound$approx$lower$res$max[,coord],col=5,lty=2,lwd=1.2)
-      lines(plot_options$design[,coord],objectUQ$bound$approx$upper$res$min[,coord],col=5,lty=3,lwd=1.2)
-      lines(plot_options$design[,coord],objectUQ$bound$approx$upper$res$max[,coord],col=5,lty=3,lwd=1.2)
+      if(plot_options$qq_fill){
+        polygon(c(plot_options$design[,coord], rev(plot_options$design[,coord])),
+                c(objectUQ$bound$bound$upper$res$min[,coord],
+                  rev(objectUQ$bound$bound$lower$res$min[,coord])),
+                col = plot_options$qq_fill_colors$bound_min, border = NA)
+        polygon(c(plot_options$design[,coord], rev(plot_options$design[,coord])),
+                c(objectUQ$bound$bound$upper$res$max[,coord],
+                  rev(objectUQ$bound$bound$lower$res$max[,coord])),
+                col = plot_options$qq_fill_colors$bound_max, border = NA)
+      }else{
+        lines(plot_options$design[,coord],objectUQ$bound$approx$lower$res$min[,coord],col=5,lty=2,lwd=1.2)
+        lines(plot_options$design[,coord],objectUQ$bound$approx$lower$res$max[,coord],col=5,lty=2,lwd=1.2)
+        lines(plot_options$design[,coord],objectUQ$bound$approx$upper$res$min[,coord],col=5,lty=3,lwd=1.2)
+        lines(plot_options$design[,coord],objectUQ$bound$approx$upper$res$max[,coord],col=5,lty=3,lwd=1.2)
+      }
     }
     if(!is.null(plot_options$legend)){
       legend("bottomleft",c(as.expression(substitute(paste(P[coord]^sup,f,"/",P[coord]^inf,f," (full)"),list(coord=coord))),
@@ -255,7 +265,9 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
 #' \item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
 #' \item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
 #' \item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC, left as in \code{plot_options}.}
-#' \item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}, left as in \code{plot_options}.}
+#' \item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq} and between the upper and lower bound in \code{objectUQ$bound$bound}, if \code{NULL}, it is set as \code{FALSE}.}
+#' \item{\code{bound_cols:}}{a vector of two strings containing the names of the colors for upper and lower bound plots.}
+#' \item{\code{qq_fill_colors:}}{a list containing the colors for qq_fill: \code{approx} for 2 quantiles, \code{bound_min} for bounds on the profile inf, \code{bound_max} for profile sup. Initialized only if \code{qq_fill==TRUE}.}
 #' \item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
 #' \item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
 #' \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
@@ -307,33 +319,46 @@ setPlotOptions<-function(plot_options=NULL,d,num_T,kmModel=NULL){
 
   # AlwaysEx colors
   if(is.null(plot_options$col_CCPthresh_alw)){
-    plot_options$col_CCPthresh_alw<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Purples'),offset = c(-0.2, -0.2, -0.2, 0))
+    plot_options$col_CCPthresh_alw<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Purples'),offset = c(-0.25, -0.25, -0.25, 0))
     plot_options$col_CCPthresh_alw<-plot_options$col_CCPthresh_alw[(2:length(plot_options$col_CCPthresh_alw))]
     if(num_T==1)
       plot_options$col_CCPthresh_alw[2]
   }
   # NeverEx colors
   if(is.null(plot_options$col_CCPthresh_nev)){
-    plot_options$col_CCPthresh_nev<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Greens'),offset = c(-0.2, -0.2, -0.2, 0))
+    plot_options$col_CCPthresh_nev<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Greens'),offset = c(-0.25, -0.25, -0.25, 0))
     plot_options$col_CCPthresh_nev<-plot_options$col_CCPthresh_nev[(2:length(plot_options$col_CCPthresh_nev))]
     if(num_T==1)
       plot_options$col_CCPthresh_nev[2]
   }
   # threshold colors
   if(is.null(plot_options$col_thresh)){
-    plot_options$col_thresh<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Reds'),offset = c(-0.2, -0.2, -0.2, 0))
+    plot_options$col_thresh<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Reds'),offset = c(-0.3, -0.3, -0.3, 0))
     plot_options$col_thresh<-plot_options$col_thresh[(2:length(plot_options$col_thresh))]
     if(num_T==1)
       plot_options$col_thresh[2]
   }
+
+  # bound colors
+  if(is.null(plot_options$bound_cols)){
+    # first one is min, second one is max
+    plot_options$bound_cols<-c("darkseagreen4","deepskyblue4")
+  }
+
 
   # plot function evaluations
   if(is.null(plot_options$fun_evals))
     plot_options$fun_evals <- FALSE
 
   # qq_fill
-  if(is.null(plot_options$qq_fill))
+  if(is.null(plot_options$qq_fill)){
     plot_options$qq_fill <- FALSE
-
+  }else{
+    # qq_fill colors
+    plot_options$qq_fill_colors<-list(
+      approx=adjustcolor("red",alpha.f=0.5),
+      bound_max=adjustcolor(plot_options$bound_cols[2],alpha.f=0.2),
+      bound_min=adjustcolor(plot_options$bound_cols[1],alpha.f=0.2) )
+  }
   return(plot_options)
 }
