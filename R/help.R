@@ -29,8 +29,24 @@
 #' @importFrom grDevices heat.colors terrain.colors
 #' @importFrom stats as.formula
 #' @importFrom RColorBrewer brewer.pal
-#' @references TODO
+#' @references
+#'
+#' Azzimonti, D., Bect, J., Chevalier, C., and Ginsbourger, D. (2016). Quantifying uncer- tainties on excursion sets under a Gaussian random field prior. SIAM/ASA Journal on Uncertainty Quantification, 4(1):850–874.
+#'
+#' Azzimonti, D., Ginsbourger, D., Rohmer, J. and Idier, D. (2017+). Profile extrema for visualizing and quantifying uncertainties on excursion regions. Application to coastal flooding. Arxiv.
 #'
 #' Chevalier, C. (2013). Fast uncertainty reduction strategies relying on Gaussian process models. PhD thesis, University of Bern.
+#'
+#' Chevalier, C., Picheny, V., Ginsbourger, D. (2014). An efficient and user-friendly implementation of batch-sequential inversion strategies based on kriging. Computational Statistics & Data Analysis, 71: 1021-1034.
+#'
+#' Johnson, S. G.  The NLopt nonlinear-optimization package, http://ab-initio.mit.edu/nlopt
+#'
+#' Koenker, R. (2017). quantreg: Quantile Regression. R package version 5.33.
+#'
+#' Nocedal, J. and Wright, S. J. (2006). Numerical Optimization, second edition. Springer- Verlag, New York.
+#'
+#' Neuwirth, E. (2014). RColorBrewer: ColorBrewer Palettes. R package version 1.1-2.
+#'
+#' Roustant, O., Ginsbourger, D., Deville, Y. (2012). DiceKriging, DiceOptim: Two R Packages for the Analysis of Computer Experiments by Kriging-Based Metamodeling and Optimization. Journal of Statistical Software, 51(1): 1-55.
 #'
 NULL
