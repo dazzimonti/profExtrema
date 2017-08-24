@@ -57,7 +57,7 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
   }
 
   if(is.null(options_approx)){
-    init_des<-maximinLHS(10,2)
+    init_des<-maximinLHS(ceiling(sqrt(object$kmModel@d)*10),object$kmModel@d)
     options_approx<- list(multistart=8,heavyReturn=TRUE,initDesign=init_des,fullDesignSize=100,smoother="1order")
   }
 

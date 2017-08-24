@@ -437,12 +437,12 @@ approxMaxMin=function(f,fprime=NULL,d,opts=NULL){
   if(is.null(opts$initDesign)){
     opts$initDesign<-maximinLHS(ceiling(sqrt(d)*10),d)
   }
-  # for quantile smoother we need points at the border
-  if(!is.null(opts$smoother) && opts$smoother=="quantSpline"){
+  # It is better to include points on the border
+#  if(!is.null(opts$smoother) && opts$smoother=="quantSpline"){
     for(coord in seq(d)){
       opts$initDesign[,coord]<-c(limits$lower[coord],sort(opts$initDesign[,coord])[c(-1,-nrow(opts$initDesign))],limits$upper[coord])
     }
-  }
+#  }
   if(is.null(opts$fullDesignSize)){
     opts$fullDesignSize<-80*d
   }
