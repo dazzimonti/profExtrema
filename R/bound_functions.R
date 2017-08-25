@@ -117,14 +117,14 @@ prof_mean_var_Delta<-function(kmModel,simupoints,options_full_sims=NULL,options_
 
   ## Set up functions for optimization
   # mean Delta
-  g_mean_spec<-function(x){
-    return(mean_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat))
-  }
+#  g_mean_spec<-function(x){
+#    return(mean_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat))
+#  }
 
   # grad mean Delta
-  g_mean_der_spec<-function(x){
-    return(grad_mean_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat))
-  }
+#  g_mean_der_spec<-function(x){
+#    return(grad_mean_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat))
+#  }
 
   # var Delta
   g_var_spec<-function(x){
@@ -138,32 +138,35 @@ prof_mean_var_Delta<-function(kmModel,simupoints,options_full_sims=NULL,options_
   }
 
   d<-kmModel@d
+
+
   if(!is.null(options_full_sims)){
-    timeIn<-get_nanotime()
-    mean_delta<-getAllMaxMin(f = g_mean_spec,fprime = g_mean_der_spec,d = d,options = options_full_sims)
-    tFull_mean<-(get_nanotime()-timeIn)*1e-9
+  #  timeIn<-get_nanotime()
+  #  mean_delta<-getAllMaxMin(f = g_mean_spec,fprime = g_mean_der_spec,d = d,options = options_full_sims)
+  #  tFull_mean<-(get_nanotime()-timeIn)*1e-9
 
     timeIn<-get_nanotime()
     var_delta<-getAllMaxMin(f = g_var_spec,fprime = g_var_der_spec,d = d,options = options_full_sims)
-    tFull_var<-(get_nanotime()-timeIn)*1e-9
+    time_var<-(get_nanotime()-timeIn)*1e-9
 
-    times<-c(tFull_mean,tFull_var)
+#    times<-c(tFull_mean,tFull_var)
 
   }else{
-    timeIn<-get_nanotime()
-    mean_delta<-approxMaxMin(f = g_mean_spec,fprime = g_mean_der_spec,d = d,opts = options_approx)
-    tApprox_mean<-(get_nanotime()-timeIn)*1e-9
+ #   timeIn<-get_nanotime()
+ #   mean_delta<-approxMaxMin(f = g_mean_spec,fprime = g_mean_der_spec,d = d,opts = options_approx)
+ #   tApprox_mean<-(get_nanotime()-timeIn)*1e-9
 
     timeIn<-get_nanotime()
     var_delta<-approxMaxMin(f = g_var_spec,fprime = g_var_der_spec,d = d,opts = options_approx)
-    tApprox1_var<-(get_nanotime()-timeIn)*1e-9
-#    var_delta<-NULL
-    times<-c(tApprox_mean,tApprox1_var)
+    time_var<-(get_nanotime()-timeIn)*1e-9
   }
 
+  # mean_delta is zero
+  mean_delta<-list(res=list(min=matrix(0,ncol=d,nrow=nrow(var_delta$res$min)),
+                            max=matrix(0,ncol=d,nrow=nrow(var_delta$res$min))))
 
 
-  return(list(mean=mean_delta,var=var_delta,times=times))
+  return(list(mean=mean_delta,var=var_delta,times=time_var))
 }
 
 
@@ -202,7 +205,7 @@ bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.1,alpha=0.05,option
                      upper=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d),
                                          max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d))) )
 
-  correction<-log(2*beta/(beta-alpha))
+  correction<-log(2/(beta-alpha))
 
   for(coord in seq(d)){
     approx_quant$lower$res$max[,coord]<-apply(objectUQ$profSups[coord,,],1,function(x){return(quantile(x,beta))})
