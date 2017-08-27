@@ -4,19 +4,19 @@
 \alias{plotMaxMin}
 \title{Plot coordinate profiles}
 \usage{
-plotMaxMin(allRes, Design = NULL, threshold = NULL, trueEvals = NULL,
-  km_model = NULL, ...)
+plotMaxMin(allRes, Design = NULL, threshold = NULL, changes = FALSE,
+  trueEvals = NULL, ...)
 }
 \arguments{
 \item{allRes}{list containing the list \code{res} which contains the computed minima and maxima. The object returned by the function \code{getAllMaxMin}.}
 
 \item{Design}{a d dimensional design corresponding to the points}
 
-\item{threshold}{if not null plots the level}
+\item{threshold}{if not \code{NULL} plots the level}
 
-\item{trueEvals}{if not null adds to each plot the data points and the observed value}
+\item{changes}{boolean, if not \code{FALSE} plots the points where profile extrema take values near the threshold.}
 
-\item{km_model}{if not NULL plots the kriging model trend (TODO uncomment the lines).}
+\item{trueEvals}{if not \code{NULL} adds to each plot the data points and the observed value}
 
 \item{...}{additional parameters to be passed to the plot function}
 }

@@ -6,14 +6,15 @@
 #' @description Plot coordinate profiles, for dimension up to 6.
 #' @param allRes list containing the list \code{res} which contains the computed minima and maxima. The object returned by the function \code{getAllMaxMin}.
 #' @param Design a d dimensional design corresponding to the points
-#' @param threshold if not null plots the level
-#' @param trueEvals if not null adds to each plot the data points and the observed value
-#' @param km_model if not NULL plots the kriging model trend (TODO uncomment the lines).
+#' @param threshold if not \code{NULL} plots the level
+#' @param changes boolean, if not \code{FALSE} plots the points where profile extrema take values near the threshold.
+#' @param trueEvals if not \code{NULL} adds to each plot the data points and the observed value
 #' @param ... additional parameters to be passed to the plot function
 #' @return plots the sup and inf of the function for each dimension. If threshold is not NULL
+#' @export
 # you can add km_model=NULL in signature and uncomment the lines() below to plot the trend.
 # Still needs work on how to evaluate directly the formulas.
-plotMaxMin<-function(allRes,Design=NULL,threshold=NULL,trueEvals=NULL,km_model=NULL,...){
+plotMaxMin<-function(allRes,Design=NULL,threshold=NULL,changes=FALSE,trueEvals=NULL,...){
   d<-ncol(allRes$res$min)
   if(is.null(Design)){
     if(!is.null(allRes$minima)){
@@ -30,6 +31,10 @@ plotMaxMin<-function(allRes,Design=NULL,threshold=NULL,trueEvals=NULL,km_model=N
     }
   }
 
+  if(changes){
+    pp_change<-getChangePoints(threshold = threshold,Design = Design,allRes=allRes)
+  }
+
   mfrows<-switch(d,"1"=c(1,1),"2"=c(2,1),"3"=c(2,2),"4"=c(2,2),"5"=c(3,2),"6"=c(3,2))
   oldpar<-par()
   # mar= c(5, 4, 4, 2) + 0.1
@@ -40,12 +45,15 @@ plotMaxMin<-function(allRes,Design=NULL,threshold=NULL,trueEvals=NULL,km_model=N
     plot(Design[,coord],allRes$res$min[,coord],ylim=ylimTemp,type='l',main=title_string,
          xlab="x",ylab="f",...)
     lines(Design[,coord],allRes$res$max[,coord])
-#    if(coord==3)
-#      lines(Design[,coord],km_model@trend.coef[coord+1]*Design[,coord]^2,col=4)
-#    lines(Design[,coord],km_model@trend.coef[coord+1]*Design[,coord],col=3)
 
     if(!is.null(threshold))
       abline(h = threshold,col=2)
+    if(changes){
+      for(cc in seq(names(pp_change$alwaysEx))){
+        abline(v = pp_change$alwaysEx[[cc]][[coord]],col=4)
+        abline(v = pp_change$neverEx[[cc]][[coord]],col="darkgreen")
+      }
+    }
     if(!is.null(trueEvals))
       points(trueEvals[,coord],trueEvals[,(d+1)])
   }
@@ -66,6 +74,7 @@ plotMaxMin<-function(allRes,Design=NULL,threshold=NULL,trueEvals=NULL,km_model=N
 #' \item{alwaysEx:} each component is a numerical vector indicating the points \eqn{x_i} where \eqn{inf_{x^{-i}}f(x) >} \code{threshold};
 #' \item{neverEx:} each component is a numerical vector indicating the points \eqn{x_i} where \eqn{sup_{x^{-i}}f(x) <} \code{threshold}.
 #' }
+#' @export
 getChangePoints <- function(threshold,Design=NULL,allRes){
   d<-ncol(allRes$res$min)
   if(is.null(Design))
@@ -115,6 +124,7 @@ getChangePoints <- function(threshold,Design=NULL,allRes){
 # @param Design a d dimensional design corresponding to the points
 # @param threshold if not null plots the level
 #' @return plots the sup and inf of the function for each dimension. If threshold is not NULL
+#' @export
 getSegments = function(y){
   edges<-c(y[1])
   minDiffy<-min(unique(diff(y)))

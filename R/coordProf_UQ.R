@@ -50,6 +50,58 @@
 #' \item{\code{simuls:}}{ a matrix containing the value of the field simulated at the simulation points}
 #' \item{\code{sPts:}}{the simulation points}
 #' }
+#' @examples
+#' if (!requireNamespace("DiceKriging", quietly = TRUE)) {
+#' stop("DiceKriging needed for this example to work. Please install it.",
+#'      call. = FALSE)
+#' }
+#' # Compute a kriging model from 50 evaluations of the Branin function
+#' # Define the function
+#' g<-function(x){
+#'   return(-branin(x))
+#' }
+#' gp_des<-lhs::maximinLHS(20,2)
+#' reals<-apply(gp_des,1,g)
+#' kmModel<-km(design = gp_des,response = reals,covtype = "matern3_2")
+#'
+#' threshold=-10
+#' d<-2
+#'
+#' # Compute coordinate profiles UQ starting from GP model
+#' # define simulation options
+#' options_sims<-list(algorithm="B", lower=rep(0,d), upper=rep(1,d),
+#'                    batchsize=80, optimcontrol = list(method="genoud",pop.size=100,print.level=0),
+#'                    integcontrol = list(distrib="sobol",n.points=1000), nsim=150)
+#' # define 1 order approximation options
+#' init_des<-lhs::maximinLHS(15,d)
+#' options_approx<- list(multistart=4,heavyReturn=TRUE,
+#'                       initDesign=init_des,fullDesignSize=100,
+#'                       smoother="1order")
+#' # define plot options
+#' options_plots<-list(save=FALSE, titleProf = "Coordinate profiles",
+#'                     title2d = "Posterior mean",qq_fill=TRUE)
+#' \dontrun{
+#' # profile UQ on approximate coordinate profiles
+#' cProfiles_UQ<-coordProf_UQ(object = kmModel,threshold = threshold,allResMean = NULL,
+#'                             quantiles_uq = c(0.05,0.95),options_approx = options_approx,
+#'                             options_full_sims = NULL,options_sims = options_sims,
+#'                             options_bound = NULL,plot_level = 3,
+#'                             plot_options = options_plots,return_level = 3)
+#' # profile UQ on full optim coordinate profiles
+#' options_full_sims<-list(multistart=4,heavyReturn=TRUE)
+#' cProfiles_UQ_full<-coordProf_UQ(object = cProfiles_UQ,threshold = threshold,allResMean = NULL,
+#'                             quantiles_uq = c(0.05,0.95),options_approx = options_approx,
+#'                             options_full_sims = options_full_sims,options_sims = options_sims,
+#'                             options_bound = NULL,plot_level = 3,
+#'                             plot_options = options_plots,return_level = 3)
+#'
+#' # profile UQ on full optim coordinate profiles with bound
+#' cProfiles_UQ_full_bound<-coordProf_UQ(object = cProfiles_UQ_full,threshold = threshold,allResMean = NULL,
+#'                             quantiles_uq = c(0.05,0.95),options_approx = options_approx,
+#'                             options_full_sims = options_full_sims,options_sims = options_sims,
+#'                             options_bound = list(beta=0.055,alpha=0.05),plot_level = 3,
+#'                             plot_options = options_plots,return_level = 3)
+#' }
 #' @export
 coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.95),options_approx=NULL,options_full_sims=NULL,options_sims=NULL,options_bound=NULL,plot_level=0,plot_options=NULL,return_level=1){
 

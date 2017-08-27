@@ -63,6 +63,45 @@ if return_level=2 the same list as above but also including
 \description{
 The function coordinateProfiles computes the profile extrema functions for the posterior mean of a Gaussian process and its confidence bounds
 }
+\examples{
+if (!requireNamespace("DiceKriging", quietly = TRUE)) {
+stop("DiceKriging needed for this example to work. Please install it.",
+     call. = FALSE)
+}
+# Compute a kriging model from 50 evaluations of the Branin function
+# Define the function
+g=function(x){
+  return(-branin(x))
+}
+gp_des<-lhs::maximinLHS(20,2)
+reals<-apply(gp_des,1,g)
+kmModel<-km(design = gp_des,response = reals,covtype = "matern3_2")
+
+threshold=-10
+
+# Compute coordinate profiles on the posterior mean
+options_full<-list(multistart=4,heavyReturn=TRUE)
+init_des<-lhs::maximinLHS(15,2)
+options_approx<- list(multistart=4,heavyReturn=TRUE,initDesign=init_des,fullDesignSize=100)
+cProfilesMean<-coordinateProfiles(object=kmModel,threshold=threshold,options_full=options_full,
+                                  options_approx=options_approx,uq_computations=FALSE,
+                                  plot_level=3,plot_options=NULL,CI_const=NULL,return_level=2)
+\dontrun{
+# Coordinate profiles with UQ with approximate profiles
+plot_options<-list(save=FALSE, titleProf = "Coordinate profiles",
+                   title2d = "Posterior mean",qq_fill=TRUE)
+cProfilesUQ<-coordinateProfiles(object=cProfilesMean,threshold=threshold,options_full=options_full,
+                                  options_approx=options_approx,uq_computations=TRUE,
+                                  plot_level=3,plot_options=NULL,CI_const=NULL,return_level=2)
+
+# Coordinate profiles with UQ with fully optim profiles
+options_full_sims<-list(multistart=4,heavyReturn=TRUE)
+cProfilesUQ<-coordinateProfiles(object=cProfilesMean,threshold=threshold,options_full=options_full,
+                                  options_approx=options_approx,uq_computations=TRUE,
+                                  plot_level=3,plot_options=NULL,CI_const=NULL,return_level=2,
+                                  options_full_sims=options_full_sims)
+}
+}
 \author{
 Dario Azzimonti
 }
