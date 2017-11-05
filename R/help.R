@@ -29,6 +29,7 @@
 #' @importFrom grDevices heat.colors terrain.colors
 #' @importFrom stats as.formula
 #' @importFrom RColorBrewer brewer.pal
+#' @note This work was supported in part the Hasler Foundation, grant number 16065. The author wishes to thank David Ginsbourger, Jérémy Rohmer and Déborah Idier for the fruitful discussions and their suggestions.
 #' @references
 #'
 #' Azzimonti, D., Bect, J., Chevalier, C., and Ginsbourger, D. (2016). Quantifying uncer- tainties on excursion sets under a Gaussian random field prior. SIAM/ASA Journal on Uncertainty Quantification, 4(1):850–874.
