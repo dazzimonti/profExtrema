@@ -101,13 +101,14 @@ grad_var_Delta_T<-function(x,kmModel,simupoints,T.mat,F.mat){
 #' @description The function prof_mean_var_Delta computes the profile extrema functions for the mean and variance functions of the difference process \eqn{Z_x - \widetilde{Z}_x} at \code{x}.
 #' @param kmModel the \link[DiceKriging]{km} model of the Gaussian process \eqn{Z}.
 #' @param simupoints the matrix \eqn{l x d} containing the simulation points \eqn{E}.
-#' @param options_approx an optional list of options for approxMaxMin, see \link{approxMaxMin} for details.
-#' @param options_full_sims an optional list of options for getAllMaxMin, see \link{getAllMaxMin} for details. If NULL the full computations are not excuted. NOTE: this computations might be very expensive!
+#' @param allPhi optional list of matrices (dim \eqn{pxd}) for which to compute the profile extrema. If NULL coordinate profiles are computed.
+#' @param options_approx an optional list of options for \link{approxMaxMin} (or \link{approxProfileExtrema} if \code{allPhi} not NULL).
+#' @param options_full_sims an optional list of options for \link{getAllMaxMin}(or \link{approxProfileExtrema} if \code{allPhi} not NULL). If NULL the full computations are not excuted. NOTE: this computations might be very expensive!
 #' @param T.mat the upper triangular factor of the Choleski decomposition of the covariance matrix of \code{rbind(kmModel@X,simupoints)}, if \code{NULL} it is computed.
 #' @param F.mat the evaluation of the trend function at \code{rbind(kmModel@X,simupoints)}, see \link[stats]{model.matrix}, if \code{NULL} it is computed.
 #' @return the profile extrema functions at \code{options_approx$design} for the mean and variance function of the difference process \eqn{Z^\Delta = Z_x - \widetilde{Z}_x}.
 #' @export
-prof_mean_var_Delta<-function(kmModel,simupoints,options_full_sims=NULL,options_approx=NULL,F.mat=NULL,T.mat=NULL){
+prof_mean_var_Delta<-function(kmModel,simupoints,allPhi=NULL,options_full_sims=NULL,options_approx=NULL,F.mat=NULL,T.mat=NULL){
   if(is.null(F.mat))
     F.mat <- model.matrix(object=kmModel@trend.formula, data = data.frame(rbind(kmModel@X,simupoints)))
   if(is.null(T.mat)){
@@ -132,9 +133,16 @@ prof_mean_var_Delta<-function(kmModel,simupoints,options_full_sims=NULL,options_
     return(temp$vv+temp$vv_E)
   }
 
-  g_var_der_spec<-function(x){
-    temp<-grad_var_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat)
-    return(matrix(temp$ggV+temp$ggRest,ncol=kmModel@d))
+  if(is.null(allPhi)){
+    g_var_der_spec<-function(x){
+      temp<-grad_var_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat)
+      return(matrix(temp$ggV+temp$ggRest,ncol=kmModel@d))
+    }
+  }else{
+    g_var_der_spec<-function(x){
+      temp<-grad_var_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat)
+      return(t(matrix(temp$ggV+temp$ggRest,ncol=kmModel@d)))
+    }
   }
 
   d<-kmModel@d
@@ -145,9 +153,16 @@ prof_mean_var_Delta<-function(kmModel,simupoints,options_full_sims=NULL,options_
   #  mean_delta<-getAllMaxMin(f = g_mean_spec,fprime = g_mean_der_spec,d = d,options = options_full_sims)
   #  tFull_mean<-(get_nanotime()-timeIn)*1e-9
 
-    timeIn<-get_nanotime()
-    var_delta<-getAllMaxMin(f = g_var_spec,fprime = g_var_der_spec,d = d,options = options_full_sims)
-    time_var<-(get_nanotime()-timeIn)*1e-9
+
+    if(is.null(allPhi)){
+      timeIn<-get_nanotime()
+      var_delta<-getAllMaxMin(f = g_var_spec,fprime = g_var_der_spec,d = d,options = options_full_sims)
+      time_var<-(get_nanotime()-timeIn)*1e-9
+    }else{
+      timeIn<-get_nanotime()
+      var_delta<-getProfileExtrema(f = g_var_spec,fprime = g_var_der_spec,allPhi = allPhi,opts = options_full_sims,d = d)
+      time_var<-(get_nanotime()-timeIn)*1e-9
+    }
 
 #    times<-c(tFull_mean,tFull_var)
 
@@ -156,9 +171,15 @@ prof_mean_var_Delta<-function(kmModel,simupoints,options_full_sims=NULL,options_
  #   mean_delta<-approxMaxMin(f = g_mean_spec,fprime = g_mean_der_spec,d = d,opts = options_approx)
  #   tApprox_mean<-(get_nanotime()-timeIn)*1e-9
 
+    if(is.null(allPhi)){
     timeIn<-get_nanotime()
     var_delta<-approxMaxMin(f = g_var_spec,fprime = g_var_der_spec,d = d,opts = options_approx)
     time_var<-(get_nanotime()-timeIn)*1e-9
+    }else{
+      timeIn<-get_nanotime()
+      var_delta<-approxProfileExtrema(f = g_var_spec,fprime = g_var_der_spec,d = d,opts = options_approx,allPhi = allPhi)
+      time_var<-(get_nanotime()-timeIn)*1e-9
+    }
   }
 
   # mean_delta is zero
@@ -179,20 +200,23 @@ prof_mean_var_Delta<-function(kmModel,simupoints,options_full_sims=NULL,options_
 #' @param mean_var_delta  the profile extrema functions at \code{options_approx$design} for the mean and variance function of the difference process \eqn{Z^\Delta = Z_x - \widetilde{Z}_x}. Object returned by \link{prof_mean_var_Delta}.
 #' @param beta the level of confidence for the approximate simulations
 #' @param alpha the level of confidence for the bound
-#' @param options_approx an optional list of options for approxMaxMin, see \link{approxMaxMin} for details.
-#' @param options_full_sims an optional list of options for getAllMaxMin, see \link{getAllMaxMin} for details. If NULL the full computations are not excuted. NOTE: this computations might be very expensive!
+#' @param allPhi optional list of matrices (dim \eqn{pxd}) for which to compute the profile extrema. If NULL coordinate profiles are computed.
+#' @param options_approx an optional list of options for \link{approxMaxMin} (or \link{approxProfileExtrema} if \code{allPhi} not NULL).
+#' @param options_full_sims an optional list of options for \link{getAllMaxMin} (or \link{getProfileExtrema} if \code{allPhi} not NULL). If NULL the full computations are not excuted. NOTE: this computations might be very expensive!
 #' @return a list containing \itemize{
 #' \item{\code{bound: }}{a list containing the upper/lower bound for profile sup and inf}
 #' \item{\code{approx: }}{a list containing the upper/lower approximate quantiles for profile sup and inf}
 #' }
 #' @export
-bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.1,alpha=0.05,options_approx=NULL,options_full_sims=NULL){
+bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.1,alpha=0.05,allPhi=NULL,options_approx=NULL,options_full_sims=NULL){
 
   if(is.null(mean_var_delta)){
-    mean_var_delta<-prof_mean_var_Delta(kmModel=objectUQ$kmModel,simupoints = objectUQ$sPts$par,options_full_sims=options_full_sims,options_approx=options_approx,F.mat=NULL,T.mat=NULL)
+    mean_var_delta<-prof_mean_var_Delta(kmModel=objectUQ$kmModel,simupoints = objectUQ$sPts$par,allPhi=allPhi,options_full_sims=options_full_sims,options_approx=options_approx,F.mat=NULL,T.mat=NULL)
   }
 
   d<-objectUQ$kmModel@d
+  if(!is.null(allPhi))
+    d <- length(allPhi)
 
   # get (empirical) quantiles from approximations
   approx_quant<-list(lower=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d),

@@ -133,3 +133,34 @@ getSegments = function(y){
   edges<-c(edges,y[c(FALSE,allJumps)],y[length(y)])
   return(sort(edges))
 }
+
+
+
+# plotOblique function
+#' @author Dario Azzimonti
+#' @name plotOblique
+#' @title plotOblique
+#' @description Auxiliary function for 2d plotting of excluded regions
+#' @param changePoints Numerical vector with the change points (usually if \code{cp=getChangePoints(...)}, then this is cc$alwaysEx[[1]][[1]] for example)
+#' @param direction The Phi vector used for the direction
+#' @param ... parameters to be passed to abline
+#' @return adds to the current plot the lines \eqn{x} s.t. \code{direction}^T \eqn{x} = \code{changePoints[i]} for all i
+#' @export
+plotOblique<-function(changePoints,direction,...){
+
+  av<- changePoints/direction[2]
+  bv<- -direction[1]/direction[2]*(changePoints!=0)
+
+  for(i in seq(length(changePoints))){
+    if(direction[2]==0){
+      abline(v=changePoints[i]/direction[1],...)
+    }else{
+      if(av[i]==0){
+        next
+      }else{
+        abline(a=av[i],b=bv[i],...)
+      }
+    }
+
+  }
+}

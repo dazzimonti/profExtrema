@@ -74,19 +74,19 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
     }
     for(i in seq(nsims)){
       if(typeProf=="approx"){
-        dd<-seq(0,1,,length.out = length(objectUQ$profInfs[coord,,i]))
-        lines(dd, objectUQ$profSups[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.5),lwd=0.2)
-        lines(dd, objectUQ$profInfs[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.5),lwd=0.2)
+ #       dd<-seq(0,1,,length.out = length(objectUQ$profInfs[coord,,i]))
+        lines(plot_options$design[,coord], objectUQ$profSups[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.5),lwd=0.2)
+        lines(plot_options$design[,coord], objectUQ$profInfs[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.5),lwd=0.2)
       }else if (typeProf=="full"){
-        dd<-seq(0,1,,length.out = length(objectUQ$profInfs_full[coord,,i]))
-        lines(dd, objectUQ$profSups_full[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.5),lwd=0.2)
-        lines(dd, objectUQ$profInfs_full[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.5),lwd=0.2)
+ #       dd<-seq(0,1,,length.out = length(objectUQ$profInfs_full[coord,,i]))
+        lines(plot_options$design[,coord], objectUQ$profSups_full[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.5),lwd=0.2)
+        lines(plot_options$design[,coord], objectUQ$profInfs_full[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.5),lwd=0.2)
       }else{
-        dd<-seq(0,1,,length.out = length(objectUQ$profInfs[coord,,i]))
-        lines(dd, objectUQ$profSups[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.3),lwd=0.2)
-        lines(dd, objectUQ$profInfs[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.3),lwd=0.2)
-        lines(dd, objectUQ$profSups_full[coord,,i],col=adjustcolor('darkorange3',alpha.f=0.3),lwd=0.2)
-        lines(dd, objectUQ$profInfs_full[coord,,i],col=adjustcolor('darkorange3',alpha.f=0.3),lwd=0.2)
+  #      dd<-seq(0,1,,length.out = length(objectUQ$profInfs[coord,,i]))
+        lines(plot_options$design[,coord], objectUQ$profSups[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.3),lwd=0.2)
+        lines(plot_options$design[,coord], objectUQ$profInfs[coord,,i],col=adjustcolor('darkolivegreen3',alpha.f=0.3),lwd=0.2)
+        lines(plot_options$design[,coord], objectUQ$profSups_full[coord,,i],col=adjustcolor('darkorange3',alpha.f=0.3),lwd=0.2)
+        lines(plot_options$design[,coord], objectUQ$profInfs_full[coord,,i],col=adjustcolor('darkorange3',alpha.f=0.3),lwd=0.2)
       }
     }
     if(plot_options$qq_fill){
@@ -117,13 +117,13 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
     ## @@@@
     ### NB changePP to be implemented!!!!!!!
     if(!is.null(profMean)){
-      changePP<-getChangePoints(threshold = threshold,allRes = profMean)
+      changePP<-getChangePoints(threshold = threshold,allRes = profMean,Design = profMean$Design)
     }
 
     if(typeProf=="approx" || typeProf=="both"){
     ccPP_approx<-list()
     for(j in seq(length(quantiles_uq))){
-      ccPP_approx[[j]]<-getChangePoints(threshold = threshold,allRes = objectUQ$prof_quantiles_approx[[j]])
+      ccPP_approx[[j]]<-getChangePoints(threshold = threshold,allRes = objectUQ$prof_quantiles_approx[[j]],objectUQ$Design_approx)
     }
     names(ccPP_approx)<-quantiles_uq
     }
@@ -131,7 +131,7 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
     if(typeProf=="full" || typeProf=="both"){
       ccPP_full<-list()
       for(j in seq(length(quantiles_uq))){
-        ccPP_full[[j]]<-getChangePoints(threshold = threshold,allRes = objectUQ$prof_quantiles_full[[j]])
+        ccPP_full[[j]]<-getChangePoints(threshold = threshold,allRes = objectUQ$prof_quantiles_full[[j]],objectUQ$Design_full)
       }
       names(ccPP_full)<-quantiles_uq
     }

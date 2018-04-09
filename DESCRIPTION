@@ -1,10 +1,10 @@
 Package: profExtrema
 Type: Package
 Title: Compute profile extrema functions
-Version: 0.1.0
+Version: 0.2.0
 Author: Dario Azzimonti 
 Maintainer: Dario Azzimonti <dario.azzimonti@gmail.com>
-Date: 2017-07-14
+Date: 2018-04-09
 Description: Computes profile extrema functions for arbitrary functions.    It works both with posterior mean of a GP (using package DiceKriging) or with arbitrary R functions.
 License: GPL-3
 Encoding: UTF-8
@@ -20,5 +20,7 @@ Imports:
     splines,
     methods,
     RColorBrewer,
-    nloptr
+    nloptr,
+    utils,
+    MASS
 RoxygenNote: 6.0.1

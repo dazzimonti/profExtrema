@@ -16,14 +16,14 @@ Computation of profile extrema functions. The package main functions are: \itemi
 \details{
 Package: profExtrema \cr
 Type: Package \cr
-Version: 0.1.0 \cr
-Date: 2017-07-14
+Version: 0.2.0 \cr
+Date: 2018-04-09
 }
 \note{
 This work was supported in part the Hasler Foundation, grant number 16065. The author wishes to thank David Ginsbourger, Jérémy Rohmer and Déborah Idier for the fruitful discussions and their suggestions.
 }
 \references{
-Azzimonti, D., Bect, J., Chevalier, C., and Ginsbourger, D. (2016). Quantifying uncer- tainties on excursion sets under a Gaussian random field prior. SIAM/ASA Journal on Uncertainty Quantification, 4(1):850–874.
+Azzimonti, D., Bect, J., Chevalier, C., and Ginsbourger, D. (2016). Quantifying uncertainties on excursion sets under a Gaussian random field prior. SIAM/ASA Journal on Uncertainty Quantification, 4(1):850–874.
 
 Azzimonti, D., Ginsbourger, D., Rohmer, J. and Idier, D. (2017+). Profile extrema for visualizing and quantifying uncertainties on excursion regions. Application to coastal flooding. arXiv:1710.00688.
 

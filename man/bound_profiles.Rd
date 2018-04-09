@@ -5,7 +5,7 @@
 \title{Bound for profile extrema quantiles}
 \usage{
 bound_profiles(objectUQ, mean_var_delta = NULL, beta = 0.1, alpha = 0.05,
-  options_approx = NULL, options_full_sims = NULL)
+  allPhi = NULL, options_approx = NULL, options_full_sims = NULL)
 }
 \arguments{
 \item{objectUQ}{an object returned by \link{coordProf_UQ} or the object saved in \code{obj$res_UQ}, if \code{obj} is the object returned by \link{coordinateProfiles}}
@@ -16,9 +16,11 @@ bound_profiles(objectUQ, mean_var_delta = NULL, beta = 0.1, alpha = 0.05,
 
 \item{alpha}{the level of confidence for the bound}
 
-\item{options_approx}{an optional list of options for approxMaxMin, see \link{approxMaxMin} for details.}
+\item{allPhi}{optional list of matrices (dim \eqn{pxd}) for which to compute the profile extrema. If NULL coordinate profiles are computed.}
 
-\item{options_full_sims}{an optional list of options for getAllMaxMin, see \link{getAllMaxMin} for details. If NULL the full computations are not excuted. NOTE: this computations might be very expensive!}
+\item{options_approx}{an optional list of options for \link{approxMaxMin} (or \link{approxProfileExtrema} if \code{allPhi} not NULL).}
+
+\item{options_full_sims}{an optional list of options for \link{getAllMaxMin} (or \link{getProfileExtrema} if \code{allPhi} not NULL). If NULL the full computations are not excuted. NOTE: this computations might be very expensive!}
 }
 \value{
 a list containing \itemize{
