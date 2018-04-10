@@ -96,13 +96,13 @@ getChangePoints <- function(threshold,Design=NULL,allRes){
 
     for(i in seq(d)){
       if(!length(Design[alwaysExcursion[,i,j],i])){
-        chPointsAlwaysEx[[j]][[i]]<-length(Design[alwaysExcursion[,i,j],i])
+        chPointsAlwaysEx[[j]][[i]]<-min(Design[,i])
       }else{
         chPointsAlwaysEx[[j]][[i]]<-getSegments(Design[alwaysExcursion[,i,j],i])
       }
 
       if(!length(Design[neverExcursion[,i,j],i])){
-        chPointsNeverEx[[j]][[i]]<-length(Design[neverExcursion[,i,j],i])
+        chPointsNeverEx[[j]][[i]]<-min(Design[,i])
       }else{
         chPointsNeverEx[[j]][[i]]<-getSegments(Design[neverExcursion[,i,j],i])
       }
