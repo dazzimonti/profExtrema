@@ -51,8 +51,16 @@ getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
     return(Phi)
   }
 
-  opts <- list("algorithm"="NLOPT_LD_SLSQP","xtol_rel"=1e-6)
-
+  if(is.null(options$opts)){
+    local_opts <- list( "algorithm" = "NLOPT_LD_SLSQP",
+                        "xtol_rel"  = 1.0e-6 )
+    opts <- list( "algorithm" = "NLOPT_LD_AUGLAG",
+                  "xtol_rel"  = 1.0e-6,
+                  "maxeval"   = 1000,
+                  "local_opts" = local_opts )
+  }else{
+    opts <- options$opts
+  }
   if(!is.null(options$multistart)){
   #  cat("not implemented yet!")
     optRess<-NULL
@@ -134,7 +142,17 @@ getProfileInf = function(eta,Phi,f,fprime,d,options=NULL){
     return(Phi)
   }
 
-  opts <- list("algorithm"="NLOPT_LD_SLSQP","xtol_rel"=1e-6)
+  if(is.null(options$opts)){
+    local_opts <- list( "algorithm" = "NLOPT_LD_SLSQP",
+                        "xtol_rel"  = 1.0e-6 )
+    opts <- list( "algorithm" = "NLOPT_LD_AUGLAG",
+                  "xtol_rel"  = 1.0e-6,
+                  "maxeval"   = 1000,
+                  "local_opts" = local_opts )
+  }else{
+    opts <- options$opts
+  }
+
   if(!is.null(options$multistart)){
     optRess<-NULL
     optRes<-list(objective=Inf,aux=NULL)

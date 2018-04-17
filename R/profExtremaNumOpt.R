@@ -161,12 +161,14 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
     }
 
 
-    pSup<-apply(etas1,1,function(x){return(getProfileSup_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+#    pSup<-apply(etas1,1,function(x){return(getProfileSup_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+    pSup<-apply(etas1,1,function(x){return(getProfileSup(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
 
     results$max[[i]] <- sapply(pSup,function(x){x$val})
     allMaxPoints[[i]]<- sapply(pSup,function(x){x$aux$solution})
 
-    pInf<-apply(etas1,1,function(x){return(getProfileInf_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+    pInf<-apply(etas1,1,function(x){return(getProfileInf(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+#    pInf<-apply(etas1,1,function(x){return(getProfileInf_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
 
     results$min[[i]] <- sapply(pInf,function(x){x$val})
     allMinPoints[[i]]<- sapply(pSup,function(x){x$aux$solution})
