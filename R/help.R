@@ -25,6 +25,8 @@
 #' @importFrom utils combn
 #' @importFrom utils modifyList
 #' @importFrom MASS Null
+#' @importFrom rcdd makeH scdd
+#' @importFrom lpSolve lp
 #' @importFrom lhs maximinLHS
 #' @importFrom splines bs
 #' @importFrom graphics polygon
