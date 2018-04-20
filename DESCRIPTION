@@ -23,6 +23,5 @@ Imports:
     nloptr,
     utils,
     MASS,
-    lpSolve,
     rcdd
 RoxygenNote: 6.0.1

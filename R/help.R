@@ -25,8 +25,7 @@
 #' @importFrom utils combn
 #' @importFrom utils modifyList
 #' @importFrom MASS Null
-#' @importFrom rcdd makeH scdd
-#' @importFrom lpSolve lp
+#' @importFrom rcdd makeH scdd lpcdd
 #' @importFrom lhs maximinLHS
 #' @importFrom splines bs
 #' @importFrom graphics polygon
@@ -36,6 +35,7 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @note This work was supported in part the Hasler Foundation, grant number 16065. The author wishes to thank David Ginsbourger, Jérémy Rohmer and Déborah Idier for the fruitful discussions and their suggestions.
 #' @references
+# @importFrom lpSolve lp
 #'
 #' Azzimonti, D., Bect, J., Chevalier, C., and Ginsbourger, D. (2016). Quantifying uncertainties on excursion sets under a Gaussian random field prior. SIAM/ASA Journal on Uncertainty Quantification, 4(1):850–874.
 #'

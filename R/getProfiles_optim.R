@@ -5,12 +5,23 @@
 #' @description Computes an arbitrary solution \eqn{x^*} that satisfies \code{Phi x = eta}
 #' @param eta \eqn{p} dimensional point where the function is to be evaluated
 #' @param Phi \eqn{p x d} matrix describing the projection matrix
-#' @param d dimension of the input
-#' @param p dimension of the projected space
-#' @param par a vector of dimension d-p that can be selected by the user to guide the solution. When NULL (suggested) it is chosen by the function.
+#' @param low lower limits of the box constraints on the input (vector of dimension d)
+#' @param upp upper limits of the box constraints on the input (vector of dimension d)
+#' @param pars a vector of dimension d-p that can be selected by the user to guide the solution. When NULL (suggested) it is chosen by the function.
 #' @return a vector of dimensions \code{d x 1} containing the solution \eqn{x^*}.
 # requires library(MASS) and lpSolve
-solutionLinConstraint<- function(eta,Phi,d,p,par=NULL){
+solutionLinConstraint<- function(eta,Phi,low=NULL,upp=NULL,pars=NULL){
+  d<-ncol(Phi)
+  p<-nrow(Phi)
+
+  if(is.null(low)){
+    low=rep(0,d)
+  }
+
+  if(is.null(upp)){
+    upp=rep(1,d)
+  }
+
   kk<-0
   xiSol<-NULL
   allCombs<-combn(1:d,p)
@@ -18,7 +29,7 @@ solutionLinConstraint<- function(eta,Phi,d,p,par=NULL){
   while(is.null(xiSol)){
     kk<-kk+1
     for(dd in seq(choose(d,p))){
-      if(is.null(par)){
+      if(is.null(pars)){
         if(kk==1){
           arbRest<-rep(0,d-p)
         }else if(kk==2){
@@ -27,7 +38,7 @@ solutionLinConstraint<- function(eta,Phi,d,p,par=NULL){
           arbRest<-runif(d-p)
         }
       }else{
-        arbRest=par
+        arbRest=pars
       }
       solvable<-Phi[1:p,allCombs[,dd]]
       rest<-matrix(Phi[1:p,setdiff(1:d,allCombs[,dd])],ncol=d-p)
@@ -41,7 +52,7 @@ solutionLinConstraint<- function(eta,Phi,d,p,par=NULL){
         next
       }
 
-      if(all(reOrderedSol>=rep(0,d))&all(reOrderedSol<=rep(1,d))){
+      if(all(reOrderedSol>=low)&all(reOrderedSol<=upp)){
         if(is.null(xiSol))
           xiSol<-reOrderedSol
       }
@@ -81,24 +92,36 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
   if(!is.null(options$trace))
     trace=options$trace
 
-  # Find any solution of the linear system
-  xiSol<-solutionLinConstraint(eta=eta,Phi=Phi,d = d,p=p)
+  # find equations for boundary conditions on z
+  ## TODO: add option to set box-constraints
+  lower<-rep(0,d)
+  upper<-rep(1,d)
+
+  # Verify if the feasible set is not empty
+  Hlarge<-makeH(a1 = rbind(diag(-1,nrow = d,ncol=d),diag(1,nrow = d,ncol=d)),
+                b1 = rbind(matrix(lower,nrow = d),matrix(upper,nrow = d)),
+                a2 = Phi,b2=matrix(eta))
+  solLP<-lpcdd(hrep = Hlarge,objgrd = rep(0,d))
+
+  if(solLP$solution.type=="Optimal"){
+    # Find any solution of the linear system
+    xiSol<-matrix(solLP$primal.solution,nrow=d) #solutionLinConstraint(eta=eta,Phi=Phi,low = lower,upp=upper)
+  }else{
+    warning("Cannot proceed with these constraints. A simple LP optimization problem does not have an optimal solution")
+    optRes<-list(value=NA,solLP=solLP,message="The feasible set is either empty (solLP$solution.type==Inconsistent) or the problem is dual inconsistent. See solLP for the results of a LP problem with those contraints and objective function 0.")
+    return(list(val=optRes$value,aux=optRes))
+  }
+
 
   nullSpacePhi<-Null(t(Phi))
 
-  # find equations for boundary conditions on z
-  lower<-rep(0,d)
-  upper<-rep(1,d)
+
 
   Az <- rbind(-nullSpacePhi,nullSpacePhi)
   bz <- rbind(xiSol-lower,-xiSol+upper)
   #  vertices_poly<-matrix(enumerate.vertices(A=Az,b=bz),ncol=d-p)
   rcdd_Hrep<-makeH(a1 = Az,b1 = bz)
   vertices_poly<-matrix(scdd(rcdd_Hrep)$output[,-c(1,2)],ncol=d-p)
-
-  # generate point inside
-  #  library(lpSolve)
-
 
 
   ff<-function(z){
@@ -130,10 +153,15 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
     warning("Constraints check not implemented!")
   }else{
     #    startingPoint<-runif(min = lower,max = upper,d-p)
-    startingPoint<-colMeans(vertices_poly)#lp(direction = "max",objective.in = runif(d-p),const.mat = Az,const.dir = "<=",const.rhs = bz)$solution
+    startingPoint<-colMeans(vertices_poly)
     #      matrix(c(xiSol,1))
   }
 
+  if(dim(vertices_poly)[1]==1){
+    # The feasible region for the subproblem is one point, the starting point,
+    # so it doesn't make sense to try different starting points
+    options$multistart=NULL
+  }
 
   if(!is.null(options$multistart)){
     optRess<-NULL
@@ -141,9 +169,16 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
     for(i in seq(options$multistart)){
       if(i==1){
         startingPoint<-colMeans(vertices_poly)
+      }else if(i==2){
+        startingPoint<-matrix(rep(0,d-p))
+      }else if(i==3){
+  #      startingPoint <- lp(direction = "min",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
+        startingPoint<-lpcdd(rcdd_Hrep,objgrd = runif(d-p))$primal.solution
       }else{
-        startingPoint<-lp(direction = "max",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
+#        startingPoint<-lp(direction = "max",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
+        startingPoint<-lpcdd(rcdd_Hrep,objgrd = runif(d-p),minimize = FALSE)$primal.solution #lp(direction = "max",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
       }
+
       if(!is.null(options$par) && i==1)
         startingPoint<-options$par
       #      optRess<-optim(par = startingPoint,fn = ff,gr = ffprime,lower=lower,upper=upper,method="L-BFGS-B")
@@ -198,24 +233,37 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
   if(!is.null(options$trace))
     trace=options$trace
 
-  # Find any solution of the linear system
-  xiSol<-solutionLinConstraint(eta=eta,Phi=Phi,d = d,p=p)
+
+  # find equations for boundary conditions on z
+  ## TODO: add option to set box-constraints
+  lower<-rep(0,d)
+  upper<-rep(1,d)
+
+  # Verify if the feasible set is not empty
+  Hlarge<-makeH(a1 = rbind(diag(-1,nrow = d,ncol=d),diag(1,nrow = d,ncol=d)),
+                b1 = rbind(matrix(lower,nrow = d),matrix(upper,nrow = d)),
+                a2 = Phi,b2=matrix(eta))
+  solLP<-lpcdd(hrep = Hlarge,objgrd = rep(0,d))
+
+  if(solLP$solution.type=="Optimal"){
+    # Find any solution of the linear system
+    xiSol<-matrix(solLP$primal.solution,nrow=d) #solutionLinConstraint(eta=eta,Phi=Phi,low = lower,upp=upper)
+  }else{
+    warning("Cannot proceed with these constraints. A simple LP optimization problem does not have an optimal solution")
+    optRes<-list(value=NA,solLP=solLP,message="The feasible set is either empty (solLP$solution.type==Inconsistent) or the problem is dual inconsistent. See solLP for the results of a LP problem with those contraints and objective function 0.")
+    return(list(val=optRes$value,aux=optRes))
+  }
+
+
 
   nullSpacePhi<-Null(t(Phi))
 
-  # find equations for boundary conditions on z
-  lower<-rep(0,d)
-  upper<-rep(1,d)
 
   Az <- rbind(-nullSpacePhi,nullSpacePhi)
   bz <- rbind(xiSol-lower,-xiSol+upper)
   #  vertices_poly<-matrix(enumerate.vertices(A=Az,b=bz),ncol=d-p)
   rcdd_Hrep<-makeH(a1 = Az,b1 = bz)
   vertices_poly<-matrix(scdd(rcdd_Hrep)$output[,-c(1,2)],ncol=d-p)
-
-  # generate point inside
-  #  library(lpSolve)
-
 
 
   ff<-function(z){
@@ -251,6 +299,12 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
     #      matrix(c(xiSol,1))
   }
 
+  if(dim(vertices_poly)[1]==1){
+    # The feasible region for the subproblem is one point, the starting point,
+    # so it doesn't make sense to try different starting points
+    options$multistart=NULL
+  }
+
 
   if(!is.null(options$multistart)){
     #  cat("not implemented yet!")
@@ -260,8 +314,10 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
       #      startingPoint<-runif(d-p,min = lower,max=upper)
       if(i==1){
         startingPoint<-colMeans(vertices_poly)
+      }else if(i==2){
+        startingPoint<-lpcdd(rcdd_Hrep,objgrd = runif(d-p))$primal.solution #lp(direction = "max",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
       }else{
-        startingPoint<-lp(direction = "max",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
+        startingPoint<-lpcdd(rcdd_Hrep,objgrd = runif(d-p),minimize = FALSE)$primal.solution #lp(direction = "max",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
       }
 
       if(!is.null(options$par) && i==1)

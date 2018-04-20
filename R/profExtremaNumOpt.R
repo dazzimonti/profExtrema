@@ -132,7 +132,7 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
   results<-list(min=data.frame(matrix(NA,ncol=num_Phi,nrow = dd_eta^p)),max=data.frame(matrix(NA,ncol=num_Phi,nrow = dd_eta^p)))
 
   # Save the design, useful for plotting functions
-  Design<- matrix(NA,ncol=num_Phi,nrow=dd_eta)
+  Design<- matrix(NA,ncol=num_Phi,nrow=dd_eta*p)
 
   # Loop over the different Phi
   for(i in seq(num_Phi)){
@@ -150,25 +150,31 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
       p=nrow(cPhi)
     }
     # Choose limits for etas for current Phi
-    mmEtas<-min(crossprod(t(cPhi),cubeVertex))
-    MMetas<-max(crossprod(t(cPhi),cubeVertex))
+    mmEtas<-apply(crossprod(t(cPhi),cubeVertex),1,min)
+    MMetas<-apply(crossprod(t(cPhi),cubeVertex),1,max)
 
     if(p==1){
       etas1<-matrix(seq(mmEtas,MMetas,,dd_eta),ncol=1)
       Design[,i]<-etas1
-    }else{
+    }else if(p==2){
       etas1<-expand.grid(seq(mmEtas[1],MMetas[1],,dd_eta),seq(mmEtas[2],MMetas[2],,dd_eta))
+      Design[,i]<-c(seq(mmEtas[1],MMetas[1],,dd_eta),seq(mmEtas[2],MMetas[2],,dd_eta))
+    }else{
+      stop("ERROR: no implementation for p>2!")
     }
 
-
-    pSup<-apply(etas1,1,function(x){return(getProfileSup_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
-#    pSup<-apply(etas1,1,function(x){return(getProfileSup(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+    # when p==1 we can use the null space code works and it's much faster
+    # when p==2 the code shold be tested more but seems to produce better results than nloptr
+#    if(p==1){
+      pSup<-apply(etas1,1,function(x){return(getProfileSup_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+      pInf<-apply(etas1,1,function(x){return(getProfileInf_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+#    }else{
+#      pSup<-apply(etas1,1,function(x){return(getProfileSup(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+#      pInf<-apply(etas1,1,function(x){return(getProfileInf(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+#    }
 
     results$max[[i]] <- sapply(pSup,function(x){x$val})
     allMaxPoints[[i]]<- sapply(pSup,function(x){x$aux$solution})
-
-#    pInf<-apply(etas1,1,function(x){return(getProfileInf(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
-    pInf<-apply(etas1,1,function(x){return(getProfileInf_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
 
     results$min[[i]] <- sapply(pInf,function(x){x$val})
     allMinPoints[[i]]<- sapply(pSup,function(x){x$aux$solution})

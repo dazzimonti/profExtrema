@@ -19,10 +19,6 @@
 # requires library(nloptr)
 getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
 
-  # nloptr does minimizations so we need to change the sign
-  ff<-function(x){return(-f(x))}
-  ffprime<-function(x){return(-fprime(x))}
-
   lower=rep(0,d)
   upper=rep(1,d)
   trace=0
@@ -34,14 +30,37 @@ getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
   if(!is.null(options$trace))
     trace=options$trace
 
+  # Verify if the feasible set is not empty
+  Hlarge<-makeH(a1 = rbind(diag(-1,nrow = d,ncol=d),diag(1,nrow = d,ncol=d)),
+                b1 = rbind(matrix(lower-1e-8,nrow = d),matrix(upper-1e-8,nrow = d)),
+                a2 = Phi,b2=matrix(eta))
+  solLP<-lpcdd(hrep = Hlarge,objgrd = rep(0,d))
+
+  if(solLP$solution.type=="Optimal"){
+    # Find any solution of the linear system
+    startingPoint<-matrix(solLP$primal.solution,nrow=d)
+  }else{
+    warning("Cannot proceed with these constraints. A simple LP optimization problem does not have an optimal solution")
+    optRes<-list(value=NA,solLP=solLP,message="The feasible set is either empty (solLP$solution.type==Inconsistent) or the problem is dual inconsistent. See solLP for the results of a LP problem with those contraints and objective function 0.")
+    return(list(val=optRes$value,aux=optRes))
+  }
+
+
+  # nloptr does minimizations so we need to change the sign
+  ff<-function(x){return(-f(x))}
+  ffprime<-function(x){return(-fprime(x))}
+
+
+
 
   if(!is.null(options$par)){
     startingPoint<-options$par
     if(Phi%*%startingPoint< eta)
       warning("Provided starting point does not respect constraints")
-  }else{
-    startingPoint<-runif(min = lower,max = upper,d)
   }
+#  }else{
+#    startingPoint<-runif(min = lower,max = upper,d)
+#  }
 
   eval_g0 <-function(x){
     return(Phi%*%x -eta)
@@ -66,9 +85,9 @@ getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
     optRess<-NULL
     optRes<-list(objective=-Inf,aux=NA)
     for(i in seq(options$multistart)){
-      startingPoint<-runif(d,min = lower,max=upper)
-      if(!is.null(options$par) && i==1)
-        startingPoint<-options$par
+      if(i>1)
+        startingPoint<-runif(d,min = lower,max=upper)
+
       optRess<-nloptr(x0=startingPoint, eval_f=ff,
                       eval_grad_f=ffprime, eval_g_eq = eval_g0,
                       eval_jac_g_eq = eval_jac_g0,
