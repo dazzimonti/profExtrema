@@ -166,8 +166,8 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
     # when p==1 we can use the null space code works and it's much faster
     # when p==2 the code shold be tested more but seems to produce better results than nloptr
 #    if(p==1){
-      pSup<-apply(etas1,1,function(x){return(getProfileSup_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
-      pInf<-apply(etas1,1,function(x){return(getProfileInf_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+      pSup<-apply(etas1,1,function(x){a_res=getProfileSup_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts);gc();return(a_res)})
+      pInf<-apply(etas1,1,function(x){a_res=getProfileInf_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts);gc();return(a_res)})
 #    }else{
 #      pSup<-apply(etas1,1,function(x){return(getProfileSup(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
 #      pInf<-apply(etas1,1,function(x){return(getProfileInf(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
@@ -179,11 +179,27 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
     results$min[[i]] <- sapply(pInf,function(x){x$val})
     allMinPoints[[i]]<- sapply(pSup,function(x){x$aux$solution})
 
-    if(!is.null(opts$plts) & p==1)
+
+
+    if(!is.null(opts$plts)){
       if(opts$plts){
-        plot(etas1,results$min[,i],ylim=c(min(results$min[,i]),max(results$max[,i])),type='l',main=paste("Phi number",i))
-        lines(etas1,results$max[,i])
+        if(p==1){
+          plot(etas1,results$min[,i],ylim=c(min(results$min[,i]),max(results$max[,i])),type='l',main=paste("Phi number",i))
+          lines(etas1,results$max[,i])
+        }else if(p==2){
+          par(mfrow=c(1,2))
+          image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(results$max[[i]],ncol=dd_eta),col=gray.colors(20),main=sprintf("Psup, Psi number %i",i))
+          contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(results$max[[i]],ncol=dd_eta),nlevels = 10,add=T)
+
+          image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(results$min[[i]],ncol=dd_eta),col=gray.colors(20),main=sprintf("Pinf, Psi number %i",i))
+          contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(results$min[[i]],ncol=dd_eta),nlevels = 10,add=T)
+          par(mfrow=c(1,1))
+        }else{
+          stop("We should never be here!")
+        }
       }
+    }
+
 
   }
 
@@ -347,11 +363,11 @@ approxProfileExtrema=function(f,fprime=NULL,d,allPhi,opts=NULL){
   exact_results<-list(min=data.frame(matrix(NA,ncol=num_Phi,nrow = ceiling(sqrt(d*p)*10))),max=data.frame(matrix(NA,ncol=num_Phi,nrow = ceiling(sqrt(d*p)*10))))
 
   # initialize the max/min values
-  sK_max<-data.frame(matrix(NA,nrow=opts$fullDesignSize,ncol=num_Phi))
-  sK_min<-data.frame(matrix(NA,nrow=opts$fullDesignSize,ncol=num_Phi))
+  sK_max<-data.frame(matrix(NA,nrow=opts$fullDesignSize^p,ncol=num_Phi))
+  sK_min<-data.frame(matrix(NA,nrow=opts$fullDesignSize^p,ncol=num_Phi))
 
   # Save Design to return
-  Design<- matrix(NA,ncol=num_Phi,nrow=opts$fullDesignSize)
+  Design<- matrix(NA,ncol=num_Phi,nrow=opts$fullDesignSize*p)
 
   # Loop over the different Phi
   for(i in seq(num_Phi)){
@@ -369,8 +385,8 @@ approxProfileExtrema=function(f,fprime=NULL,d,allPhi,opts=NULL){
       p=nrow(cPhi)
     }
     # Choose limits for etas for current Phi
-    mmEtas<-min(crossprod(t(cPhi),cubeVertex))
-    MMetas<-max(crossprod(t(cPhi),cubeVertex))
+    mmEtas<-apply(crossprod(t(cPhi),cubeVertex),1,min)
+    MMetas<-apply(crossprod(t(cPhi),cubeVertex),1,max)
 
 
     # Get initial design
@@ -379,15 +395,16 @@ approxProfileExtrema=function(f,fprime=NULL,d,allPhi,opts=NULL){
         opts$initDesign[[i]]<-matrix(seq(from=mmEtas[1],to=MMetas[1],,ceiling(sqrt(d)*10)),ncol=1)
       }else{
         ### NEEDS TEST!
-        opts$initDesign[[i]]<-mmEtas+maximinLHS(ceiling(sqrt(d*p)*10),d)*(MMetas-mmEtas)
-        opts$initDesign[[i]]<- rbind(mmEtas,opts$initDesign[[i]][-2,],MMetas)
+        opts$initDesign[[i]]<-matrix(mmEtas,ncol=p,byrow = T,nrow=ceiling(sqrt(d*p)*10))+maximinLHS(ceiling(sqrt(d*p)*10),p)%*%diag(MMetas-mmEtas,ncol=p)
       }
 
     }
 
 
     pSup<-apply(opts$initDesign[[i]],1,function(x){return(getProfileSup_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+    gc()
     pInf<-apply(opts$initDesign[[i]],1,function(x){return(getProfileInf_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+    gc()
 
     exact_results$max[[i]] <- sapply(pSup,function(x){x$val})
     exact_allMaxPoints[[i]]<- sapply(pSup,function(x){x$aux$solution})
@@ -395,7 +412,7 @@ approxProfileExtrema=function(f,fprime=NULL,d,allPhi,opts=NULL){
     exact_allMinPoints[[i]]<- sapply(pInf,function(x){x$aux$solution})
 
     # the gradient of the sup/inf function is saved
-    if(!is.null(fprime)){
+    if(!is.null(fprime) & p==1){
       nn<-length(exact_results$max[[i]])
       exact_grad_min<-matrix(NA,ncol=1,nrow=nn)
       exact_grad_max<-matrix(NA,ncol=1,nrow=nn)
@@ -409,43 +426,68 @@ approxProfileExtrema=function(f,fprime=NULL,d,allPhi,opts=NULL){
     }
     if(p==1){
       newPoints<-matrix(seq(mmEtas,MMetas,,opts$fullDesignSize),ncol=1)
+      Design[,i]<-newPoints
     }else{
       newPoints<-expand.grid(seq(mmEtas[1],MMetas[1],,opts$fullDesignSize),seq(mmEtas[2],MMetas[2],,opts$fullDesignSize))
-    }
-
-    Design[,i]<-newPoints
-
-    if(!is.null(opts$smoother) && opts$smoother=="1order"){
-  #    sK_max[,i]<- kGradSmooth(newPoints=newPoints,profPoints = exact_allMaxPoints[[i]],
-  #                                 profEvals=exact_results$max[[i]], profGradient=exact_grad_max)
-
-#      sK_min[,i]<-kGradSmooth(newPoints=newPoints,profPoints = exact_allMaxPoints[[i]],
-#                                 profEvals=exact_results$min[[i]], profGradient=exact_grad_min)
-      warning(paste("The method ",opts$smoother," is not implemented yet!"))
-    }else if(!is.null(opts$smoother) && opts$smoother=="quantSpline"){
-      dd_fit<-data.frame(x=opts$initDesign[[i]],y=exact_results$max[[i]])
-      fit.max <- rq(y ~ bs(x, df=max(nn%/%1.5,3)),data=dd_fit,tau=0.9)
-      dd_fit<-data.frame(x=opts$initDesign[[i]],y=exact_results$min[[i]])
-      fit.min <- rq(y ~ bs(x, df=max(nn%/%1.5,3)), tau=0.1,data=dd_fit)
-      newPoints<-data.frame(x=newPoints)
-
-      sK_max[,i]<- predict.rq(object = fit.max,newdata = newPoints)
-      sK_min[,i]<- predict.rq(object = fit.min,newdata = newPoints)
-    }else {
-      sk_maxSmooth<-smooth.spline(x=opts$initDesign[[i]],y=exact_results$max[[i]])
-      sk_minSmooth<-smooth.spline(x=opts$initDesign[[i]],y=exact_results$min[[i]])
-
-      sK_max[,i]<-predict(sk_maxSmooth,newPoints)$y
-      sK_min[,i]<-predict(sk_minSmooth,newPoints)$y
+      Design[,i]<-c(seq(mmEtas[1],MMetas[1],,opts$fullDesignSize),seq(mmEtas[2],MMetas[2],,opts$fullDesignSize))
     }
 
 
+    if(p==1){
+
+      if(!is.null(opts$smoother) && opts$smoother=="1order"){
+        #    sK_max[,i]<- kGradSmooth(newPoints=newPoints,profPoints = exact_allMaxPoints[[i]],
+        #                                 profEvals=exact_results$max[[i]], profGradient=exact_grad_max)
+
+        #      sK_min[,i]<-kGradSmooth(newPoints=newPoints,profPoints = exact_allMaxPoints[[i]],
+        #                                 profEvals=exact_results$min[[i]], profGradient=exact_grad_min)
+        warning(paste("The method ",opts$smoother," is not implemented yet!"))
+      }else if(!is.null(opts$smoother) && opts$smoother=="quantSpline"){
+        dd_fit<-data.frame(x=opts$initDesign[[i]],y=exact_results$max[[i]])
+        fit.max <- rq(y ~ bs(x, df=max(nn%/%1.5,3)),data=dd_fit,tau=0.9)
+        dd_fit<-data.frame(x=opts$initDesign[[i]],y=exact_results$min[[i]])
+        fit.min <- rq(y ~ bs(x, df=max(nn%/%1.5,3)), tau=0.1,data=dd_fit)
+        newPoints<-data.frame(x=newPoints)
+
+        sK_max[,i]<- predict.rq(object = fit.max,newdata = newPoints)
+        sK_min[,i]<- predict.rq(object = fit.min,newdata = newPoints)
+      }else {
+        sk_maxSmooth<-smooth.spline(x=opts$initDesign[[i]],y=exact_results$max[[i]])
+        sk_minSmooth<-smooth.spline(x=opts$initDesign[[i]],y=exact_results$min[[i]])
+
+        sK_max[,i]<-predict(sk_maxSmooth,newPoints)$y
+        sK_min[,i]<-predict(sk_minSmooth,newPoints)$y
+      }
+
+    }else{
+      approxKm<-km(design = opts$initDesign[[i]],response = exact_results$max[[i]],covtype = "matern3_2",control = list(trace=F))
+      sK_max[,i]<-predict.km(object = approxKm,newdata = newPoints,type = "UK",checkNames = F)$mean
+
+      approxKm<-km(design = opts$initDesign[[i]],response = exact_results$min[[i]],covtype = "matern3_2",control = list(trace=F))
+      sK_min[,i]<-predict.km(object = approxKm,newdata = newPoints,type = "UK",checkNames = F)$mean
+    }
 
 
     ## Debug plots
     if(!is.null(opts$debug) && opts$debug){
 
       warning("The debug plots do not work!")
+
+      # par(mfrow=c(1,2))
+      # image(x=Design[1:opts$fullDesignSize,i],y=Design[(opts$fullDesignSize+1):(opts$fullDesignSize*2),i],
+      #       z=matrix(sK_max[[i]],ncol=opts$fullDesignSize),col=gray.colors(20),main=sprintf("Psup Psi %i",i))
+      # contour(x=Design[1:opts$fullDesignSize,i],y=Design[(opts$fullDesignSize+1):(opts$fullDesignSize*2),i],
+      #       z=matrix(sK_max[[i]],ncol=opts$fullDesignSize),nlevels = 10,add=T)
+      # contour(x=Design[1:opts$fullDesignSize,i],y=Design[(opts$fullDesignSize+1):(opts$fullDesignSize*2),i],
+      #         z=matrix(sK_max[[i]],ncol=opts$fullDesignSize),levels = threshold,add=T,col=2)
+      #
+      # image(x=Design[1:opts$fullDesignSize,i],y=Design[(opts$fullDesignSize+1):(opts$fullDesignSize*2),i],
+      #       z=matrix(sK_min[[i]],ncol=opts$fullDesignSize),col=gray.colors(20),main=sprintf("Pinf Psi %i",i))
+      # contour(x=Design[1:opts$fullDesignSize,i],y=Design[(opts$fullDesignSize+1):(opts$fullDesignSize*2),i],
+      #         z=matrix(sK_min[[i]],ncol=opts$fullDesignSize),nlevels = 10,add=T)
+      # contour(x=Design[1:opts$fullDesignSize,i],y=Design[(opts$fullDesignSize+1):(opts$fullDesignSize*2),i],
+      #         z=matrix(sK_min[[i]],ncol=opts$fullDesignSize),levels = threshold,add=T,col=2)
+      # par(mfrow=c(1,1))
       #    par(mfrow=c(1,2))
       # Plot  max/min function
       # ylimTemp<-range(c(sK_min[,coord],aa$res$min[,coord],sK_max[,coord],aa$res$max[,coord]))

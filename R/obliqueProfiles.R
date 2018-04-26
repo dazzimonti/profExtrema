@@ -129,8 +129,8 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
     for(i in seq(num_Phi)){
       p<-nrow(allPhi[[i]])
       # Choose limits for etas for current Phi
-      mmEtas<-min(crossprod(t(allPhi[[i]]),cubeVertex))
-      MMetas<-max(crossprod(t(allPhi[[i]]),cubeVertex))
+      mmEtas<-apply(crossprod(t(allPhi[[i]]),cubeVertex),1,min)
+      MMetas<-apply(crossprod(t(allPhi[[i]]),cubeVertex),1,max)
 
       # Get initial design
       if(length(options_approx$initDesign)<num_Phi){
@@ -138,8 +138,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
           init_des[[i]]<-matrix(seq(from=mmEtas[1],to=MMetas[1],,ceiling(sqrt(d)*10)),ncol=1)
         }else{
           ### NEEDS TEST!
-          init_des[[i]]<-mmEtas+maximinLHS(ceiling(sqrt(d*p)*10),d)*(MMetas-mmEtas)
-          init_des[[i]]<- rbind(mmEtas,init_des[[i]][-2,],MMetas)
+          init_des[[i]]<-matrix(mmEtas,ncol=p,byrow = T,nrow=ceiling(sqrt(d*p)*10))+maximinLHS(ceiling(sqrt(d*p)*10),p)%*%diag(MMetas-mmEtas,ncol=p)
         }
       }
   #    init_des<-maximinLHS(ceiling(sqrt(object$kmModel@d)*10),object$kmModel@d)
@@ -184,11 +183,14 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
 
 
   # Obtain the threshold points selected by profile extrema
-  changePP<-getChangePoints(threshold = threshold,allRes = object$profMean_full,Design = object$profMean_full$Design)
-
+  if(p==1){
+    changePP<-getChangePoints(threshold = threshold,allRes = object$profMean_full,Design = object$profMean_full$Design)
+  }else{
+    changePP<-NULL
+  }
 
   # Plot posterior mean, ONLY for dimension==2
-  if(plot_level>=2 & num_Phi==2){
+  if(plot_level>=2 & num_Phi==2 & d==2){
 
     # since dimension==2 we can plot the posterior mean
     newdata<-expand.grid(seq(ll_b[1],uu_b[1],,100),seq(ll_b[2],uu_b[2],,100))
@@ -215,10 +217,16 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
 
   # Plot the profile extrema functions
   if(plot_level>0){
-    colnames(object$profMean_full$res$min)<-plot_options$coord_names
-    if(plot_options$save)
-      cairo_pdf(filename = paste(plot_options$folderPlots,"profMean_full",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
-    plotMaxMin(allRes = object$profMean_full,threshold = threshold,Design = object$profMean_full$Design)
+    if(p==1){
+      if(plot_options$save)
+        cairo_pdf(filename = paste(plot_options$folderPlots,"profMean_full",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
+      colnames(object$profMean_full$res$min)<-plot_options$coord_names
+      plotMaxMin(allRes = object$profMean_full,threshold = threshold,Design = object$profMean_full$Design)
+    }else{
+      if(plot_options$save)
+        pdf(file = paste(plot_options$folderPlots,"profMean_full",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
+      plotBivProf(allRes = object$profMean_full,allPhi = allPhi,Design=object$profMean_full$Design,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+    }
     if(plot_options$save)
       dev.off()
   }
@@ -233,7 +241,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
       object$more$times$approx=NA
   }
 
-  if(plot_level>0){
+  if(plot_level>0 & p==1){
     oldpar<-par()
     if(plot_options$save)
       cairo_pdf(filename = paste(plot_options$folderPlots,"profMean_comparison",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
@@ -272,6 +280,12 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
     if(plot_options$save)
       dev.off()
     #  par(oldpar)
+  }else{
+    if(plot_options$save)
+      pdf(file = paste(plot_options$folderPlots,"profMean_approx",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
+    plotBivProf(allRes = object$profMean_approx,allPhi = allPhi,Design=object$profMean_approx$Design,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+    if(plot_options$save)
+      dev.off()
   }
 
   # save absolute errors with approximation
@@ -318,7 +332,9 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
       temp_M$res<-list(min= object$profMean_full$res$min + CI_const[i]*object$profSd_full$res$min,
                        max= object$profMean_full$res$max + CI_const[i]*object$profSd_full$res$max)
       prof_CI_const_full[[i]]<-list(lower=temp_m, upper=temp_M)
-      changePP_CI_full[[i]]<-list(lower=getChangePoints(threshold = threshold,allRes = temp_m,Design = object$profMean_full$Design),
+
+      if(p==1)
+        changePP_CI_full[[i]]<-list(lower=getChangePoints(threshold = threshold,allRes = temp_m,Design = object$profMean_full$Design),
                                   upper=getChangePoints(threshold = threshold,allRes = temp_M,Design = object$profMean_full$Design))
     }
 
@@ -332,7 +348,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
     #        object$more$times$approx=NA
     #    }
 
-    if(plot_level>0){
+    if(plot_level>0 & p==1){
       oldpar<-par()
       if(plot_options$save)
         cairo_pdf(filename = paste(plot_options$folderPlots,"profMeanCI_comparison",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
@@ -389,6 +405,21 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
       if(plot_options$save)
         dev.off()
       #  par(oldpar)
+    }else{
+
+      for(i in seq(length(CI_const))){
+        if(plot_options$save)
+          pdf(file = paste(plot_options$folderPlots,"profMeanCI",CI_const[i]*100,"_lower",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
+        plotBivProf(allRes = prof_CI_const_full[[i]]$lower,allPhi = allPhi,Design=object$profMean_full$Design,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+        if(plot_options$save)
+          dev.off()
+
+        if(plot_options$save)
+          pdf(file = paste(plot_options$folderPlots,"profMeanCI",CI_const[i]*100,"_upper",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
+        plotBivProf(allRes = prof_CI_const_full[[i]]$upper,allPhi = allPhi,Design=object$profMean_full$Design,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+        if(plot_options$save)
+          dev.off()
+      }
     }
     object$profCI_full<-prof_CI_const_full
   }

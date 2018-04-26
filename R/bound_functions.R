@@ -233,16 +233,16 @@ bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.1,alpha=0.05,allPhi
 
   for(coord in seq(d)){
     approx_quant$lower$res$max[,coord]<-apply(objectUQ$profSups[coord,,],1,function(x){return(quantile(x,beta))})
-    bound_quant$lower$res$max[,coord]<-approx_quant$lower$res$max[,coord]+mean_var_delta$mean$res$max[,coord]-sqrt(2*mean_var_delta$var$res$max[,coord]*correction)
+    bound_quant$lower$res$max[,coord]<-approx_quant$lower$res$max[,coord]+mean_var_delta$mean$res$max[,coord]-sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
 
     approx_quant$lower$res$min[,coord]<-apply(objectUQ$profInfs[coord,,],1,function(x){return(quantile(x,beta))})
-    bound_quant$lower$res$min[,coord]<-approx_quant$lower$res$min[,coord]+mean_var_delta$mean$res$min[,coord]-sqrt(2*mean_var_delta$var$res$min[,coord]*correction)
+    bound_quant$lower$res$min[,coord]<-approx_quant$lower$res$min[,coord]+mean_var_delta$mean$res$min[,coord]-sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
 
     approx_quant$upper$res$max[,coord]<-apply(objectUQ$profSups[coord,,],1,function(x){return(quantile(x,1-beta))})
-    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+mean_var_delta$mean$res$max[,coord]+sqrt(2*mean_var_delta$var$res$max[,coord]*correction)
+    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+mean_var_delta$mean$res$max[,coord]+sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
 
     approx_quant$upper$res$min[,coord]<-apply(objectUQ$profInfs[coord,,],1,function(x){return(quantile(x,1-beta))})
-    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+mean_var_delta$mean$res$min[,coord]+sqrt(2*mean_var_delta$var$res$min[,coord]*correction)
+    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+mean_var_delta$mean$res$min[,coord]+sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
   }
 
   return(list(bound=bound_quant,approx=approx_quant,mean_var_D=mean_var_delta))

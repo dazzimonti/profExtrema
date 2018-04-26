@@ -101,16 +101,20 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
   Hlarge<-makeH(a1 = rbind(diag(-1,nrow = d,ncol=d),diag(1,nrow = d,ncol=d)),
                 b1 = rbind(matrix(lower,nrow = d),matrix(upper,nrow = d)),
                 a2 = Phi,b2=matrix(eta))
-  solLP<-lpcdd(hrep = Hlarge,objgrd = rep(0,d))
+
+  Hlarge<-d2q(Hlarge)
+  solLP<-lpcdd(hrep = Hlarge,objgrd = d2q(rep(0,d)))
 
   if(solLP$solution.type=="Optimal"){
     # Find any solution of the linear system
-    xiSol<-matrix(solLP$primal.solution,nrow=d) #solutionLinConstraint(eta=eta,Phi=Phi,low = lower,upp=upper)
+    xiSol<-matrix(q2d(solLP$primal.solution),nrow=d) #solutionLinConstraint(eta=eta,Phi=Phi,low = lower,upp=upper)
   }else{
     warning("Cannot proceed with these constraints. A simple LP optimization problem does not have an optimal solution")
     optRes<-list(value=NA,solLP=solLP,message="The feasible set is either empty (solLP$solution.type==Inconsistent) or the problem is dual inconsistent. See solLP for the results of a LP problem with those contraints and objective function 0.")
     return(list(val=optRes$value,aux=optRes))
   }
+  # rm(Hlarge,solLP)
+  # gc()
 
 
   nullSpacePhi<-Null(t(Phi))
@@ -120,8 +124,11 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
   Az <- rbind(-nullSpacePhi,nullSpacePhi)
   bz <- rbind(xiSol-lower,-xiSol+upper)
   #  vertices_poly<-matrix(enumerate.vertices(A=Az,b=bz),ncol=d-p)
-  rcdd_Hrep<-makeH(a1 = Az,b1 = bz)
-  vertices_poly<-matrix(scdd(rcdd_Hrep)$output[,-c(1,2)],ncol=d-p)
+  rcdd_Hrep0<-makeH(a1 = Az,b1 = bz)
+  rcdd_Hrep<-d2q(rcdd_Hrep0)
+  # rm(rcdd_Hrep0)
+  # gc()
+  vertices_poly<-matrix(q2d(scdd(rcdd_Hrep)$output[,-c(1,2)]),ncol=d-p)
 
 
   ff<-function(z){
@@ -142,7 +149,8 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
       ww<-Az%*%z-bz
       dirs<-which(ww>0)
       ww<-matrix(ww[dirs]/sum(ww[dirs]))
-      return(-Az[dirs,]%*%ww)
+      return(crossprod(ww,-Az[dirs,]))
+      #return(-Az[dirs,]%*%ww)
     }
     return(-crossprod(fprime(xiSol+nullSpacePhi%*%z),nullSpacePhi))
   }
@@ -170,13 +178,17 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
       if(i==1){
         startingPoint<-colMeans(vertices_poly)
       }else if(i==2){
-        startingPoint<-matrix(rep(0,d-p))
+        m_lp<-lpcdd(rcdd_Hrep,objgrd = d2q(rep(0,d-p)))
+        if(m_lp$solution.type=="Optimal")
+          startingPoint<-q2d(m_lp$primal.solution)
       }else if(i==3){
-  #      startingPoint <- lp(direction = "min",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
-        startingPoint<-lpcdd(rcdd_Hrep,objgrd = runif(d-p))$primal.solution
+        m_lp<-lpcdd(rcdd_Hrep,objgrd = d2q(rep(1,d-p)),minimize = FALSE)
+        if(m_lp$solution.type=="Optimal")
+          startingPoint<-q2d(m_lp$primal.solution)
       }else{
-#        startingPoint<-lp(direction = "max",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
-        startingPoint<-lpcdd(rcdd_Hrep,objgrd = runif(d-p),minimize = FALSE)$primal.solution #lp(direction = "max",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
+        m_lp<-lpcdd(rcdd_Hrep,objgrd = d2q(runif(d-p)))
+        if(m_lp$solution.type=="Optimal")
+          startingPoint<-q2d(m_lp$primal.solution)
       }
 
       if(!is.null(options$par) && i==1)
@@ -199,6 +211,8 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
 
   optRes$solution = xiSol+Null(t(Phi))%*%optRes$par
 
+  rm(rcdd_Hrep0,Hlarge,solLP)
+#  gc()
 
   return(list(val=optRes$value,aux=optRes))
 }
@@ -243,17 +257,19 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
   Hlarge<-makeH(a1 = rbind(diag(-1,nrow = d,ncol=d),diag(1,nrow = d,ncol=d)),
                 b1 = rbind(matrix(lower,nrow = d),matrix(upper,nrow = d)),
                 a2 = Phi,b2=matrix(eta))
-  solLP<-lpcdd(hrep = Hlarge,objgrd = rep(0,d))
+  Hlarge<-d2q(Hlarge)
+  solLP<-lpcdd(hrep = Hlarge,objgrd = d2q(rep(0,d)))
 
   if(solLP$solution.type=="Optimal"){
     # Find any solution of the linear system
-    xiSol<-matrix(solLP$primal.solution,nrow=d) #solutionLinConstraint(eta=eta,Phi=Phi,low = lower,upp=upper)
+    xiSol<-matrix(q2d(solLP$primal.solution),nrow=d) #solutionLinConstraint(eta=eta,Phi=Phi,low = lower,upp=upper)
   }else{
     warning("Cannot proceed with these constraints. A simple LP optimization problem does not have an optimal solution")
     optRes<-list(value=NA,solLP=solLP,message="The feasible set is either empty (solLP$solution.type==Inconsistent) or the problem is dual inconsistent. See solLP for the results of a LP problem with those contraints and objective function 0.")
     return(list(val=optRes$value,aux=optRes))
   }
-
+  # rm(Hlarge,solLP)
+  # gc()
 
 
   nullSpacePhi<-Null(t(Phi))
@@ -262,8 +278,9 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
   Az <- rbind(-nullSpacePhi,nullSpacePhi)
   bz <- rbind(xiSol-lower,-xiSol+upper)
   #  vertices_poly<-matrix(enumerate.vertices(A=Az,b=bz),ncol=d-p)
-  rcdd_Hrep<-makeH(a1 = Az,b1 = bz)
-  vertices_poly<-matrix(scdd(rcdd_Hrep)$output[,-c(1,2)],ncol=d-p)
+  rcdd_Hrep0<-makeH(a1 = Az,b1 = bz)
+  rcdd_Hrep<-d2q(rcdd_Hrep0)
+  vertices_poly<-matrix(q2d(scdd(rcdd_Hrep)$output[,-c(1,2)]),ncol=d-p)
 
 
   ff<-function(z){
@@ -284,7 +301,8 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
       ww<-Az%*%z-bz
       dirs<-which(ww>0)
       ww<-matrix(ww[dirs]/sum(ww[dirs]))
-      return(-Az[dirs,]%*%ww)
+      return(crossprod(ww,-Az[dirs,]))
+      #return(-Az[dirs,]%*%ww)
     }
     return(crossprod(fprime(xiSol+nullSpacePhi%*%z),nullSpacePhi))
   }
@@ -311,13 +329,20 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
     optRess<-NULL
     optRes<-list(value=Inf,aux=NA)
     for(i in seq(options$multistart)){
-      #      startingPoint<-runif(d-p,min = lower,max=upper)
       if(i==1){
         startingPoint<-colMeans(vertices_poly)
       }else if(i==2){
-        startingPoint<-lpcdd(rcdd_Hrep,objgrd = runif(d-p))$primal.solution #lp(direction = "max",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
+        m_lp<-lpcdd(rcdd_Hrep,objgrd = d2q(rep(0,d-p)))
+        if(m_lp$solution.type=="Optimal")
+          startingPoint<-q2d(m_lp$primal.solution)
+      }else if(i==3){
+        m_lp<-lpcdd(rcdd_Hrep,objgrd = d2q(rep(1,d-p)),minimize = FALSE)
+        if(m_lp$solution.type=="Optimal")
+          startingPoint<-q2d(m_lp$primal.solution)
       }else{
-        startingPoint<-lpcdd(rcdd_Hrep,objgrd = runif(d-p),minimize = FALSE)$primal.solution #lp(direction = "max",objective.in = runif(d-p),const.mat = Az,const.dir = "<",const.rhs = bz)$solution
+        m_lp<-lpcdd(rcdd_Hrep,objgrd = d2q(runif(d-p)))
+        if(m_lp$solution.type=="Optimal")
+          startingPoint<-q2d(m_lp$primal.solution)
       }
 
       if(!is.null(options$par) && i==1)
@@ -338,6 +363,8 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
 
   optRes$solution = xiSol+Null(t(Phi))%*%optRes$par
 
+  rm(rcdd_Hrep0,Hlarge,solLP)
+#  gc()
 
   return(list(val=optRes$value,aux=optRes))
 

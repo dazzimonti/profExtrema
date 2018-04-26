@@ -14,18 +14,18 @@
 #' @docType package
 #' @name profExtrema
 #' @import microbenchmark
-#' @importFrom DiceKriging predict.km covMat1Mat2 covVector.dx covMatrix simulate
+#' @importFrom DiceKriging predict.km covMat1Mat2 covVector.dx covMatrix simulate km
 #' @importFrom KrigInv integration_design
 #' @importFrom GPsims krig_weight_GPsimu optim_dist_measure grad_kweights simulate_km
 #' @importFrom quantreg rq predict.rq
-#' @importFrom grDevices cairo_pdf dev.off gray.colors adjustcolor
+#' @importFrom grDevices cairo_pdf dev.off gray.colors adjustcolor pdf
 #' @importFrom graphics abline contour image legend lines par plot points
 #' @importFrom stats deriv model.matrix optim predict rnorm quantile runif smooth.spline
 #' @importFrom nloptr nloptr
 #' @importFrom utils combn
 #' @importFrom utils modifyList
 #' @importFrom MASS Null
-#' @importFrom rcdd makeH scdd lpcdd
+#' @importFrom rcdd makeH scdd lpcdd d2q q2d
 #' @importFrom lhs maximinLHS
 #' @importFrom splines bs
 #' @importFrom graphics polygon
