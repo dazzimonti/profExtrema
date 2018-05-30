@@ -132,6 +132,9 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
   # set up dimension
   d<-object$kmModel@d
 
+  # set up Psi dimension
+  p=nrow(matrix(allPhi[[1]],ncol=d))
+
   # Options setup
   # Initialize options_approx
   if(is.null(options_approx)){
@@ -194,11 +197,14 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
     options_sims<-list()
   }
   options_sims<-modifyList(options_sims_base,options_sims)
-
-  if(is.null(allResMean)){
-    quantiles_uq<-c(quantiles_uq,0.5)
+  if(p==1){
+    if(is.null(allResMean)){
+      quantiles_uq<-c(quantiles_uq,0.5)
+    }else{
+      changePP <- getChangePoints(threshold = threshold,allRes = allResMean,Design = allResMean$Design)
+    }
   }else{
-    changePP<-getChangePoints(threshold = threshold,allRes = allResMean,Design = allResMean$Design)
+      changePP <- NULL
   }
   ##### Get the simulation points
 
@@ -274,15 +280,15 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
   # if the profSups and profInfs are not already there, compute them
   if(is.null(object$profSups) || is.null(object$profInfs)){
     # choose size of full design
-    object$profSups<-array(NA,dim = c(d,options_approx$fullDesignSize,options_sims$nsim))
-    object$profInfs<-array(NA,dim = c(d,options_approx$fullDesignSize,options_sims$nsim))
+    object$profSups<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^p,options_sims$nsim))
+    object$profInfs<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^p,options_sims$nsim))
     tApprox1ord<-rep(NA,options_sims$nsim)
   }
 
   if(!is.null(options_full_sims) && is.null(object$profSups_full)){
     options_full_sims<-modifyList(list(multistart=4,heavyReturn=TRUE,discretization=options_approx$fullDesignSize),options_full_sims)
-    object$profSups_full<-array(NA,dim = c(d,options_approx$fullDesignSize,options_sims$nsim))
-    object$profInfs_full<-array(NA,dim = c(d,options_approx$fullDesignSize,options_sims$nsim))
+    object$profSups_full<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^d,options_sims$nsim))
+    object$profInfs_full<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^d,options_sims$nsim))
     tFull<-rep(NA,options_sims$nsim)
   }
 
@@ -333,50 +339,70 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
   # save quantiles for approximations
   object$prof_quantiles_approx<-list()
   for(i in seq(length(quantiles_uq))){
-    object$prof_quantiles_approx[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d),
-                                                     max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d)))
+    object$prof_quantiles_approx[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = num_Phi),
+                                                     max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = num_Phi)))
   }
   names(object$prof_quantiles_approx)<-quantiles_uq
 
   ccPP<-list()
   for(j in seq(length(quantiles_uq))){
-    for(coord in seq(d)){
+    for(coord in seq(num_Phi)){
       object$prof_quantiles_approx[[j]]$res$max[,coord]<-apply(object$profSups[coord,,],1,function(x){return(quantile(x,quantiles_uq[j]))})
       object$prof_quantiles_approx[[j]]$res$min[,coord]<-apply(object$profInfs[coord,,],1,function(x){return(quantile(x,quantiles_uq[j]))})
     }
-    ccPP[[j]]<-getChangePoints(threshold = threshold,allRes = object$prof_quantiles_approx[[j]],Design = allResMean$Design)
+    if(p==1){
+      ccPP[[j]]<-getChangePoints(threshold = threshold,allRes = object$prof_quantiles_approx[[j]],Design = allResMean$Design)
+    }else{
+      temp <- object$prof_quantiles_approx[[j]]$res$max
+      object$prof_quantiles_approx[[j]]$res$max <- list()
+      object$prof_quantiles_approx[[j]]$res$max <- lapply(seq_len(ncol(temp)), function(i) temp[,i])
+      temp <- object$prof_quantiles_approx[[j]]$res$min
+      object$prof_quantiles_approx[[j]]$res$min <- list()
+      object$prof_quantiles_approx[[j]]$res$min <- lapply(seq_len(ncol(temp)), function(i) temp[,i])
+    }
   }
-  names(ccPP)<-quantiles_uq
+  if(p==1)
+    names(ccPP)<-quantiles_uq
 
   # save quantiles for full optim
   if(!is.null(options_full_sims)){
     object$prof_quantiles_full<-list()
     for(i in seq(length(quantiles_uq))){
-      object$prof_quantiles_full[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d),
-                                                     max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d)))
+      object$prof_quantiles_full[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^d,ncol = num_Phi),
+                                                     max=matrix(NA,nrow = options_approx$fullDesignSize^d,ncol = num_Phi)))
     }
     names(object$prof_quantiles_full)<-quantiles_uq
 
     ccPP_full<-list()
     for(j in seq(length(quantiles_uq))){
-      for(coord in seq(d)){
+      for(coord in seq(num_Phi)){
         object$prof_quantiles_full[[j]]$res$max[,coord]<-apply(object$profSups_full[coord,,],1,function(x){return(quantile(x,quantiles_uq[j]))})
         object$prof_quantiles_full[[j]]$res$min[,coord]<-apply(object$profInfs_full[coord,,],1,function(x){return(quantile(x,quantiles_uq[j]))})
       }
-      ccPP_full[[j]]<-getChangePoints(threshold = threshold,allRes = object$prof_quantiles_full[[j]],Design = allResMean$Design)
+      if(p==1){
+        ccPP_full[[j]]<-getChangePoints(threshold = threshold,allRes = object$prof_quantiles_full[[j]],Design = allResMean$Design)
+      }else{
+        temp <- object$prof_quantiles_full[[j]]$res$max
+        object$prof_quantiles_full[[j]]$res$max <- list()
+        object$prof_quantiles_full[[j]]$res$max <- lapply(seq_len(ncol(temp)), function(i) temp[,i])
+        temp <- object$prof_quantiles_full[[j]]$res$min
+        object$prof_quantiles_full[[j]]$res$min <- list()
+        object$prof_quantiles_full[[j]]$res$min <- lapply(seq_len(ncol(temp)), function(i) temp[,i])
+      }
     }
-    names(ccPP_full)<-quantiles_uq
+    if(p==1)
+      names(ccPP_full)<-quantiles_uq
 
   }
 
   ## Plot profiles with Uncertainty
-  dd<-seq(0,1,,length.out = options_approx$fullDesignSize)
+#  dd<-seq(0,1,,length.out = options_approx$fullDesignSize)
 
-  if(is.null(allResMean))
+  if(is.null(allResMean) && p==1)
     changePP<-ccPP$`0.5`
 
   # Plot the posterior mean and visualize the actual excursion set and the regions of no-excursion according to the profile extrema functions.
-  if(plot_level>=2 && d==2){
+  if(plot_level>=2 && num_Phi==2 &&  d==2){
     # since dimension==2 we can plot the posterior mean
     newdata<-expand.grid(seq(0,1,,100),seq(0,1,,100))
     colnames(newdata)<-colnames(object$kmModel@X)
@@ -420,15 +446,26 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
 
   if(plot_level>=1){
 #    plot_options$design<-allResMean$Design
-    plot_options$design <- object$Design_approx
-    plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,quantiles_uq=quantiles_uq,
-                                threshold = threshold,nameFile ="prof_UQ_approx", profMean = allResMean,typeProf = "approx")
-
-    if(!is.null(options_full_sims)){
-      plot_options$design <- object$Design_full
+    if(p==1){
+      plot_options$design <- object$Design_approx
       plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,quantiles_uq=quantiles_uq,
-                                  threshold = threshold,nameFile ="prof_UQ_full", profMean = allResMean,typeProf = "full")
+                                  threshold = threshold,nameFile ="prof_UQ_approx", profMean = allResMean,typeProf = "approx")
+
+      if(!is.null(options_full_sims)){
+        plot_options$design <- object$Design_full
+        plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,quantiles_uq=quantiles_uq,
+                                    threshold = threshold,nameFile ="prof_UQ_full", profMean = allResMean,typeProf = "full")
       }
+    }else{
+      for(j in seq(length(quantiles_uq))){
+          if(plot_options$save)
+            pdf(file = paste(plot_options$folderPlots,"prof_UQ_approx_q",names(object$prof_quantiles_approx)[j],plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
+          plotBivProf(allRes = object$prof_quantiles_approx[[j]],allPhi = allPhi,Design=object$Design_approx,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+          if(plot_options$save)
+            dev.off()
+      }
+
+    }
   }
   #  object$profSups=profSups
   #  object$profInfs=profInfs
@@ -441,13 +478,27 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
                                  options_approx = options_approx,options_full_sims = options_full_sims,allPhi=allPhi)
 
     if(plot_level>=1){
-
+      if(p==1){
       plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,quantiles_uq=quantiles_uq,
                                   threshold = threshold,nameFile ="prof_UQ_bound_approx", profMean = allResMean,typeProf = "approx")
 
       if(!is.null(options_full_sims))
         plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,quantiles_uq=quantiles_uq,
                                     threshold = threshold,nameFile ="prof_UQ_bound_full", profMean = allResMean,typeProf = "full")
+      }else{
+          if(plot_options$save)
+            pdf(file = paste(plot_options$folderPlots,"prof_UQ_bound_approx_lower",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
+          plotBivProf(allRes = object$bound$bound$lower,allPhi = allPhi,Design=object$Design_approx,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+          if(plot_options$save)
+            dev.off()
+
+          if(plot_options$save)
+            pdf(file = paste(plot_options$folderPlots,"prof_UQ_bound_approx_upper",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
+          plotBivProf(allRes = object$bound$bound$upper,allPhi = allPhi,Design=object$Design_approx,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+          if(plot_options$save)
+            dev.off()
+
+      }
     }
   }
 
@@ -461,6 +512,9 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
         times$tFull<-tFull
       }
       object$more<-list(simuls=some.simu,times=times)
+    }else{
+      object$more$simuls = some.simu
+      object$more$times$tApprox1ord=tApprox1ord
     }
     return(object)
   }

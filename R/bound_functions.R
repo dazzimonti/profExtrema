@@ -215,34 +215,74 @@ bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.1,alpha=0.05,allPhi
   }
 
   d<-objectUQ$kmModel@d
-  if(!is.null(allPhi))
+  if(!is.null(allPhi)){
     d <- length(allPhi)
+    p <- nrow(allPhi[[1]])
+  }else{
+    p <- 1
+  }
 
   # get (empirical) quantiles from approximations
-  approx_quant<-list(lower=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d),
-                              max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d))),
-                     upper=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d),
-                                         max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d))) )
+  approx_quant<-list(lower=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d),
+                              max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d))),
+                     upper=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d),
+                                         max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d))) )
 
-  bound_quant<-list(lower=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d),
-                                         max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d))),
-                     upper=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d),
-                                         max=matrix(NA,nrow = options_approx$fullDesignSize,ncol = d))) )
+  bound_quant<-list(lower=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d),
+                                         max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d))),
+                     upper=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d),
+                                         max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d))) )
 
   correction<-log(2/(beta-alpha))
 
+  # In the loop below mean_var_delta$mean is removed because we always assume that the mean is zero.
   for(coord in seq(d)){
     approx_quant$lower$res$max[,coord]<-apply(objectUQ$profSups[coord,,],1,function(x){return(quantile(x,beta))})
-    bound_quant$lower$res$max[,coord]<-approx_quant$lower$res$max[,coord]+mean_var_delta$mean$res$max[,coord]-sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
+    bound_quant$lower$res$max[,coord]<-approx_quant$lower$res$max[,coord]-sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
+    #bound_quant$lower$res$max[,coord]<-approx_quant$lower$res$max[,coord]+mean_var_delta$mean$res$max[,coord]-sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
 
     approx_quant$lower$res$min[,coord]<-apply(objectUQ$profInfs[coord,,],1,function(x){return(quantile(x,beta))})
-    bound_quant$lower$res$min[,coord]<-approx_quant$lower$res$min[,coord]+mean_var_delta$mean$res$min[,coord]-sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
+    bound_quant$lower$res$min[,coord]<-approx_quant$lower$res$min[,coord]-sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
+    #bound_quant$lower$res$min[,coord]<-approx_quant$lower$res$min[,coord]+mean_var_delta$mean$res$min[,coord]-sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
 
     approx_quant$upper$res$max[,coord]<-apply(objectUQ$profSups[coord,,],1,function(x){return(quantile(x,1-beta))})
-    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+mean_var_delta$mean$res$max[,coord]+sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
+    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
+#    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+mean_var_delta$mean$res$max[,coord]+sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
 
     approx_quant$upper$res$min[,coord]<-apply(objectUQ$profInfs[coord,,],1,function(x){return(quantile(x,1-beta))})
-    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+mean_var_delta$mean$res$min[,coord]+sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
+    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
+#    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+mean_var_delta$mean$res$min[,coord]+sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
+
+  }
+
+  if(p==2){
+    temp  <- approx_quant$lower$res$max
+    temp2 <- bound_quant$lower$res$max
+    approx_quant$lower$res$max <- list()
+    approx_quant$lower$res$max <- lapply(seq_len(ncol(temp)), function(i) temp[,i])
+    bound_quant$lower$res$max <- list()
+    bound_quant$lower$res$max <- lapply(seq_len(ncol(temp2)), function(i) temp2[,i])
+
+    temp  <- approx_quant$lower$res$min
+    temp2 <- bound_quant$lower$res$min
+    approx_quant$lower$res$min <- list()
+    approx_quant$lower$res$min <- lapply(seq_len(ncol(temp)), function(i) temp[,i])
+    bound_quant$lower$res$min <- list()
+    bound_quant$lower$res$min <- lapply(seq_len(ncol(temp2)), function(i) temp2[,i])
+
+    temp  <- approx_quant$upper$res$max
+    temp2 <- bound_quant$upper$res$max
+    approx_quant$upper$res$max <- list()
+    approx_quant$upper$res$max <- lapply(seq_len(ncol(temp)), function(i) temp[,i])
+    bound_quant$upper$res$max <- list()
+    bound_quant$upper$res$max <- lapply(seq_len(ncol(temp2)), function(i) temp2[,i])
+
+    temp  <- approx_quant$upper$res$min
+    temp2 <- bound_quant$upper$res$min
+    approx_quant$upper$res$min <- list()
+    approx_quant$upper$res$min <- lapply(seq_len(ncol(temp)), function(i) temp[,i])
+    bound_quant$upper$res$min <- list()
+    bound_quant$upper$res$min <- lapply(seq_len(ncol(temp2)), function(i) temp2[,i])
   }
 
   return(list(bound=bound_quant,approx=approx_quant,mean_var_D=mean_var_delta))

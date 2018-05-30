@@ -145,7 +145,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
     }
     options_approx$initDesign<-init_des
   }
-
+  p<-nrow(allPhi[[1]])
 
   # save number of thresholds
   num_T<-length(threshold)
@@ -180,7 +180,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
   #    results$more<-list(abs_err=abs_err,times=times)
   # Compute profile extrema with full optim
 
-
+  gc()
 
   # Obtain the threshold points selected by profile extrema
   if(p==1){
