@@ -206,8 +206,12 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
   }else{
       changePP <- NULL
   }
-  ##### Get the simulation points
 
+  if(is.null(object$more)){
+    object$more <-list()
+  }
+
+  ##### Get the simulation points
 
   # If not already in object, obtain the simulation points
   if(is.null(object$sPts)){
@@ -216,15 +220,7 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
                                     lower = options_sims$lower,upper = options_sims$upper,batchsize = options_sims$batchsize,
                                     algorithm = options_sims$algorithm,verb=1,optimcontrol = options_sims$optimcontrol,integration.param = options_sims$integration.param)
     timeMdist<-(get_nanotime()-timeIn)*1e-9
-  }else{
-    if(is.null(object$more$times$tSpts)){
-      times<-list(tSpts=NA)
-      if(is.null(object$more)){
-        object$more<-list(times=times)
-      }else{
-        object$more$times=times
-      }
-    }
+    object$more <- modifyList(object$more,list(times=list(tSpts=timeMdist)))
   }
 
 
@@ -282,14 +278,14 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
     # choose size of full design
     object$profSups<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^p,options_sims$nsim))
     object$profInfs<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^p,options_sims$nsim))
-    tApprox1ord<-rep(NA,options_sims$nsim)
+    object$more$times$tApprox1ord<-rep(NA,options_sims$nsim)
   }
 
   if(!is.null(options_full_sims) && is.null(object$profSups_full)){
     options_full_sims<-modifyList(list(multistart=4,heavyReturn=TRUE,discretization=options_approx$fullDesignSize),options_full_sims)
     object$profSups_full<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^d,options_sims$nsim))
     object$profInfs_full<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^d,options_sims$nsim))
-    tFull<-rep(NA,options_sims$nsim)
+    object$more$times$tFull<-rep(NA,options_sims$nsim)
   }
 
   for(i in seq(options_sims$nsim)){
@@ -308,7 +304,7 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
       }
       timeIn<-get_nanotime()
       temp_full<-getProfileExtrema(f = g_uq_spec,fprime = g_uq_der_spec,allPhi = allPhi,d = d,opts = options_full_sims)
-      tFull[i]<-(get_nanotime()-timeIn)*1e-9
+      object$more$times$tFull[i]<-(get_nanotime()-timeIn)*1e-9
 
       object$profSups_full[,,i]<-t(temp_full$res$max)
       object$profInfs_full[,,i]<-t(temp_full$res$min)
@@ -323,7 +319,7 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
       }
       timeIn<-get_nanotime()
       temp_1o<-approxProfileExtrema(f = g_uq_spec,fprime = g_uq_der_spec,allPhi = allPhi,d = d,opts = options_approx)
-      tApprox1ord[i]<-(get_nanotime()-timeIn)*1e-9
+      object$more$times$tApprox1ord[i]<-(get_nanotime()-timeIn)*1e-9
 
       #  temp<-getProfileExtrema(f=g_uq_spec,fprime = NULL,d=2,options = list(multistart=2,heavyReturn=TRUE))
       object$profSups[,,i]<-t(temp_1o$res$max)
@@ -504,18 +500,9 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
 
 
   if(return_level==1){
+    object$more <- NULL
     return(object)
   }else{
-    if(is.null(object$more)){
-      times<-list(tSpts=timeMdist,tApprox1ord=tApprox1ord)
-      if(!is.null(options_full_sims)){
-        times$tFull<-tFull
-      }
-      object$more<-list(simuls=some.simu,times=times)
-    }else{
-      object$more$simuls = some.simu
-      object$more$times$tApprox1ord=tApprox1ord
-    }
     return(object)
   }
 
