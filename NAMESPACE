@@ -3,6 +3,7 @@
 export(approxMaxMin)
 export(approxProfileExtrema)
 export(bound_profiles)
+export(cleanProfileResults)
 export(coordProf_UQ)
 export(coordinateProfiles)
 export(getAllMaxMin)

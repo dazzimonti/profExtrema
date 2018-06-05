@@ -42,7 +42,7 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
         ylimTemp<-range(c(range(objectUQ$profSups[coord,,]),range(objectUQ$profInfs[coord,,]),
                           range(objectUQ$profSups_full[coord,,]),range(objectUQ$profInfs_full[coord,,])))
       }
-      if(!is.null(objectUQ$bound)){
+      if(!is.null(objectUQ$bound$bound)){
         ylimTemp<-range(c(ylimTemp,
                           range(objectUQ$bound$bound$lower$res$min[,coord],na.rm = TRUE),
                           range(objectUQ$bound$bound$upper$res$min[,coord],na.rm = TRUE),
