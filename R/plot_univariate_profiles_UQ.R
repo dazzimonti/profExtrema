@@ -206,7 +206,7 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
       lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx$`0.5`$res$max[,coord],lty=1)
       lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx$`0.5`$res$min[,coord],lty=1)
     }
-    if(plot_options$fun_evals){
+    if(plot_options$fun_evals>0){
       points(objectUQ$kmModel@X[,coord],objectUQ$kmModel@y,pch=17)
     }
     # bound
@@ -271,94 +271,77 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
 #' \item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
 #' \item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
 #' \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
+#' \item{\code{fun_evals:}{integer denoting the level of plot for the true evaluations. \itemize{
+#' \item{0: }{default, no plots for true evaluations;}
+#' \item{1: }{plot the true evaluations as points};
+#' \item{2: }{plot true evaluations, with different color for values above threshold;}
+#' \item{3: }{plot true evaluations, in color, with background of the image colored as proportion of points inside excursion;} }}}
 #' }
 #' if all the fields are already filled then returns \code{plot_options}
 #' @export
 setPlotOptions<-function(plot_options=NULL,d,num_T,kmModel=NULL){
 
-  # Start with saving and folder options
-  if(is.null(plot_options)){
-    # don't save to file
-    plot_options<-list(save=F)
-  }else{
-    # set save directory
-    if(plot_options$save==TRUE && is.null(plot_options$folderPlots))
-      plot_options$folderPlots <- './'
+  # Start with saving, folder options, titles
+  full_plot_options <-list(save=F, folderPlots = './', id_save="",
+                           titleProf="Profile extrema", title2d="Posterior mean")
 
-    # Useful for serial plots in HPC
-    if(is.null(plot_options$id_save))
-      plot_options$id_save<-""
-  }
 
-  ## Titles of plots
-  # profile plots
-  if(is.null(plot_options$titleProf))
-    plot_options$titleProf<-"Coordinate profiles"
-  # 2d plot
-  if(is.null(plot_options$title2d))
-    plot_options$title2d<-"Posterior mean"
 
   # Design plot
-  if(is.null(plot_options$design)){
-    plot_options$design<-matrix(NA,ncol=d,nrow=100)
-    for(i in seq(d)){
-      plot_options$design[,i]<-seq(0,1,,100)
-    }
+  full_plot_options$design<-matrix(NA,ncol=d,nrow=100)
+  for(i in seq(d)){
+    full_plot_options$design[,i]<-seq(0,1,,100)
   }
 
+
   # coordinate names
-  if(is.null(plot_options$coord_names)){
-    if(is.null(kmModel)){
-      plot_options$coord_names<-apply(matrix(1:d,ncol=1),1,function(x) paste("x_",x,sep=''))
-    }else{
-      plot_options$coord_names<-colnames(kmModel@X)
-    }
+  if(is.null(kmModel)){
+    full_plot_options$coord_names<-apply(matrix(1:d,ncol=1),1,function(x) paste("x_",x,sep=''))
+  }else{
+    full_plot_options$coord_names<-colnames(kmModel@X)
   }
 
   ## Colors set-up
 
   # AlwaysEx colors
-  if(is.null(plot_options$col_CCPthresh_alw)){
-    plot_options$col_CCPthresh_alw<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Purples'),offset = c(-0.25, -0.25, -0.25, 0))
-    plot_options$col_CCPthresh_alw<-plot_options$col_CCPthresh_alw[(2:length(plot_options$col_CCPthresh_alw))]
-    if(num_T==1)
-      plot_options$col_CCPthresh_alw[2]
-  }
+  full_plot_options$col_CCPthresh_alw<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Purples'),offset = c(-0.25, -0.25, -0.25, 0))
+  full_plot_options$col_CCPthresh_alw<-full_plot_options$col_CCPthresh_alw[(2:length(full_plot_options$col_CCPthresh_alw))]
+  if(num_T==1)
+    full_plot_options$col_CCPthresh_alw[2]
+
   # NeverEx colors
-  if(is.null(plot_options$col_CCPthresh_nev)){
-    plot_options$col_CCPthresh_nev<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Greens'),offset = c(-0.25, -0.25, -0.25, 0))
-    plot_options$col_CCPthresh_nev<-plot_options$col_CCPthresh_nev[(2:length(plot_options$col_CCPthresh_nev))]
-    if(num_T==1)
-      plot_options$col_CCPthresh_nev[2]
-  }
+  full_plot_options$col_CCPthresh_nev<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Greens'),offset = c(-0.25, -0.25, -0.25, 0))
+  full_plot_options$col_CCPthresh_nev<-full_plot_options$col_CCPthresh_nev[(2:length(full_plot_options$col_CCPthresh_nev))]
+  if(num_T==1)
+    full_plot_options$col_CCPthresh_nev[2]
+
   # threshold colors
-  if(is.null(plot_options$col_thresh)){
-    plot_options$col_thresh<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Reds'),offset = c(-0.3, -0.3, -0.3, 0))
-    plot_options$col_thresh<-plot_options$col_thresh[(2:length(plot_options$col_thresh))]
-    if(num_T==1)
-      plot_options$col_thresh[2]
-  }
+  full_plot_options$col_thresh<-adjustcolor(RColorBrewer::brewer.pal(n=max(num_T+1,3),name='Reds'),offset = c(-0.3, -0.3, -0.3, 0))
+  full_plot_options$col_thresh<-full_plot_options$col_thresh[(2:length(full_plot_options$col_thresh))]
+  if(num_T==1)
+    full_plot_options$col_thresh[2]
 
   # bound colors
-  if(is.null(plot_options$bound_cols)){
-    # first one is min, second one is max
-    plot_options$bound_cols<-c("darkseagreen4","deepskyblue4")
-  }
+  # first one is min, second one is max
+  full_plot_options$bound_cols<-c("darkseagreen4","deepskyblue4")
+
 
 
   # plot function evaluations
-  if(is.null(plot_options$fun_evals))
-    plot_options$fun_evals <- FALSE
+  full_plot_options$fun_evals <- 0
 
   # qq_fill
-  if(is.null(plot_options$qq_fill)){
-    plot_options$qq_fill <- FALSE
+  full_plot_options$qq_fill <- FALSE
+  # qq_fill colors
+  full_plot_options$qq_fill_colors<-list(
+    approx=adjustcolor("red",alpha.f=0.5),
+    bound_max=adjustcolor(full_plot_options$bound_cols[2],alpha.f=0.2),
+    bound_min=adjustcolor(full_plot_options$bound_cols[1],alpha.f=0.2) )
+
+  if(is.null(plot_options)){
+    plot_options<-full_plot_options
   }else{
-    # qq_fill colors
-    plot_options$qq_fill_colors<-list(
-      approx=adjustcolor("red",alpha.f=0.5),
-      bound_max=adjustcolor(plot_options$bound_cols[2],alpha.f=0.2),
-      bound_min=adjustcolor(plot_options$bound_cols[1],alpha.f=0.2) )
+    plot_options <- modifyList(full_plot_options,plot_options)
   }
   return(plot_options)
 }

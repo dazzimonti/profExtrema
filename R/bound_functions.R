@@ -238,19 +238,19 @@ bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.1,alpha=0.05,allPhi
   # In the loop below mean_var_delta$mean is removed because we always assume that the mean is zero.
   for(coord in seq(d)){
     approx_quant$lower$res$max[,coord]<-apply(objectUQ$profSups[coord,,],1,function(x){return(quantile(x,beta))})
-    bound_quant$lower$res$max[,coord]<-approx_quant$lower$res$max[,coord]-sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
+    bound_quant$lower$res$max[,coord]<-approx_quant$lower$res$max[,coord]-sqrt(2*pmax(mean_var_delta$var$res$max[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction)
     #bound_quant$lower$res$max[,coord]<-approx_quant$lower$res$max[,coord]+mean_var_delta$mean$res$max[,coord]-sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
 
     approx_quant$lower$res$min[,coord]<-apply(objectUQ$profInfs[coord,,],1,function(x){return(quantile(x,beta))})
-    bound_quant$lower$res$min[,coord]<-approx_quant$lower$res$min[,coord]-sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
+    bound_quant$lower$res$min[,coord]<-approx_quant$lower$res$min[,coord]-sqrt(2*pmax(mean_var_delta$var$res$min[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction)
     #bound_quant$lower$res$min[,coord]<-approx_quant$lower$res$min[,coord]+mean_var_delta$mean$res$min[,coord]-sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
 
     approx_quant$upper$res$max[,coord]<-apply(objectUQ$profSups[coord,,],1,function(x){return(quantile(x,1-beta))})
-    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
+    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+sqrt(2*pmax(mean_var_delta$var$res$max[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction)
 #    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+mean_var_delta$mean$res$max[,coord]+sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
 
     approx_quant$upper$res$min[,coord]<-apply(objectUQ$profInfs[coord,,],1,function(x){return(quantile(x,1-beta))})
-    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
+    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+sqrt(2*pmax(mean_var_delta$var$res$min[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction)
 #    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+mean_var_delta$mean$res$min[,coord]+sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
 
   }
