@@ -16,7 +16,7 @@ mean_Delta_T<-function(x,kmModel,simupoints,T.mat,F.mat){
   mu_n<-predict.km(object = kmModel,newdata = x,type = "UK",se.compute = FALSE,light.return = TRUE)$mean
   mu_E<-predict.km(object = kmModel,newdata = simupoints,type = "UK",se.compute = FALSE,light.return = TRUE)$mean
   return(mu_n-obj$krig.mean.init-crossprod(obj$Lambda.end,mu_E))
-#  return(-tcrossprod(weights,predict.km(object = kmModel,newdata = simupoints,type = "UK",se.compute = FALSE,cov.compute = FALSE,light.return = FALSE)$mean))
+  #  return(-tcrossprod(weights,predict.km(object = kmModel,newdata = simupoints,type = "UK",se.compute = FALSE,cov.compute = FALSE,light.return = FALSE)$mean))
 }
 
 # grad_mean_Delta_T function
@@ -36,10 +36,10 @@ grad_mean_Delta_T<-function(x,kmModel,simupoints,T.mat,F.mat){
   obj_deriv<-grad_kweights(object = kmModel,simu_points = simupoints,krig_points = matrix(x,ncol=kmModel@d),T.mat = T.mat,F.mat = F.mat)
   krig_mean_init <- matrix(obj_deriv$krig.mean.init,ncol=kmModel@d)
   weights <- t(obj_deriv$Lambda.end)
-
+  
   krig_mean_init <- matrix(obj_deriv$krig.mean.init,ncol=kmModel@d)
   weights <- t(obj_deriv$Lambda.end)
-
+  
   rr<-gradKm_dnewdata(object = kmModel,newdata=x,type = "UK",se.compute = F)$mean-krig_mean_init - tcrossprod(predict.km(object = kmModel,newdata = simupoints,type = "UK",se.compute = FALSE,cov.compute = FALSE,light.return = FALSE)$mean,weights)
   return(rr) # return(- tcrossprod(predict.km(object = kmModel,newdata = simupoints,type = "UK",se.compute = FALSE,cov.compute = FALSE,light.return = FALSE)$mean,weights))
 }
@@ -60,7 +60,7 @@ var_Delta_T<-function(x,kmModel,simupoints,T.mat,F.mat){
   x<-matrix(x,ncol=kmModel@d)
   colnames(x)<-colnames(kmModel@X)
   obj <- krig_weight_GPsimu(object=kmModel,simu_points=simupoints,krig_points=x,T.mat = T.mat,F.mat = F.mat)
-#  krig.mean.init <- matrix(obj$krig.mean.init,nrow=1)
+  #  krig.mean.init <- matrix(obj$krig.mean.init,nrow=1)
   weights <- t(obj$Lambda.end)
   var_post<-predict.km(object = kmModel,newdata = x,type = "UK",se.compute =TRUE)$sd^2
   kEE<-predict.km(object = kmModel,newdata = simupoints,type = "UK",cov.compute = TRUE,light.return = TRUE)$cov #covMatrix(object = kmModel@covariance,X = rbind(kmModel@X,simupoints))$C
@@ -84,13 +84,13 @@ grad_var_Delta_T<-function(x,kmModel,simupoints,T.mat,F.mat){
   colnames(x)<-colnames(kmModel@X)
   obj<-krig_weight_GPsimu(object=kmModel,simu_points=simupoints,krig_points=x,T.mat = T.mat,F.mat = F.mat)
   obj_deriv<-grad_kweights(object = kmModel,simu_points = simupoints,krig_points = matrix(x,ncol=kmModel@d),T.mat = T.mat,F.mat = F.mat)
-#  krig_mean_init <- matrix(obj_deriv$krig.mean.init,ncol=kmModel@d)
+  #  krig_mean_init <- matrix(obj_deriv$krig.mean.init,ncol=kmModel@d)
   d_weights <- t(obj_deriv$Lambda.end)
   weights<-t(obj$Lambda.end)
   ggVar<-gradKm_dnewdata(object = kmModel,newdata = x,type = "UK",se.compute = TRUE)$s2
-
+  
   kEE<-predict.km(object = kmModel,newdata = simupoints,type = "UK",cov.compute = TRUE,light.return = TRUE)$cov
-
+  
   return(list(ggV=t(ggVar), ggRest= - 2*d_weights%*%tcrossprod(kEE,weights)))
 }
 
@@ -115,24 +115,24 @@ prof_mean_var_Delta<-function(kmModel,simupoints,allPhi=NULL,options_full_sims=N
     K <- covMatrix(object=kmModel@covariance,X=rbind(kmModel@X,simupoints))$C
     T.mat <- chol(K)
   }
-
+  
   ## Set up functions for optimization
   # mean Delta
-#  g_mean_spec<-function(x){
-#    return(mean_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat))
-#  }
-
+  #  g_mean_spec<-function(x){
+  #    return(mean_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat))
+  #  }
+  
   # grad mean Delta
-#  g_mean_der_spec<-function(x){
-#    return(grad_mean_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat))
-#  }
-
+  #  g_mean_der_spec<-function(x){
+  #    return(grad_mean_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat))
+  #  }
+  
   # var Delta
   g_var_spec<-function(x){
     temp<-var_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat)
     return(temp$vv+temp$vv_E)
   }
-
+  
   if(is.null(allPhi)){
     g_var_der_spec<-function(x){
       temp<-grad_var_Delta_T(x=x,kmModel=kmModel,simupoints=simupoints,T.mat = T.mat,F.mat = F.mat)
@@ -144,16 +144,16 @@ prof_mean_var_Delta<-function(kmModel,simupoints,allPhi=NULL,options_full_sims=N
       return(t(matrix(temp$ggV+temp$ggRest,ncol=kmModel@d)))
     }
   }
-
+  
   d<-kmModel@d
-
-
+  
+  
   if(!is.null(options_full_sims)){
-  #  timeIn<-get_nanotime()
-  #  mean_delta<-getAllMaxMin(f = g_mean_spec,fprime = g_mean_der_spec,d = d,options = options_full_sims)
-  #  tFull_mean<-(get_nanotime()-timeIn)*1e-9
-
-
+    #  timeIn<-get_nanotime()
+    #  mean_delta<-getAllMaxMin(f = g_mean_spec,fprime = g_mean_der_spec,d = d,options = options_full_sims)
+    #  tFull_mean<-(get_nanotime()-timeIn)*1e-9
+    
+    
     if(is.null(allPhi)){
       timeIn<-get_nanotime()
       var_delta<-getAllMaxMin(f = g_var_spec,fprime = g_var_der_spec,d = d,options = options_full_sims)
@@ -163,30 +163,30 @@ prof_mean_var_Delta<-function(kmModel,simupoints,allPhi=NULL,options_full_sims=N
       var_delta<-getProfileExtrema(f = g_var_spec,fprime = g_var_der_spec,allPhi = allPhi,opts = options_full_sims,d = d)
       time_var<-(get_nanotime()-timeIn)*1e-9
     }
-
-#    times<-c(tFull_mean,tFull_var)
-
+    
+    #    times<-c(tFull_mean,tFull_var)
+    
   }else{
- #   timeIn<-get_nanotime()
- #   mean_delta<-approxMaxMin(f = g_mean_spec,fprime = g_mean_der_spec,d = d,opts = options_approx)
- #   tApprox_mean<-(get_nanotime()-timeIn)*1e-9
-
+    #   timeIn<-get_nanotime()
+    #   mean_delta<-approxMaxMin(f = g_mean_spec,fprime = g_mean_der_spec,d = d,opts = options_approx)
+    #   tApprox_mean<-(get_nanotime()-timeIn)*1e-9
+    
     if(is.null(allPhi)){
-    timeIn<-get_nanotime()
-    var_delta<-approxMaxMin(f = g_var_spec,fprime = g_var_der_spec,d = d,opts = options_approx)
-    time_var<-(get_nanotime()-timeIn)*1e-9
+      timeIn<-get_nanotime()
+      var_delta<-approxMaxMin(f = g_var_spec,fprime = g_var_der_spec,d = d,opts = options_approx)
+      time_var<-(get_nanotime()-timeIn)*1e-9
     }else{
       timeIn<-get_nanotime()
       var_delta<-approxProfileExtrema(f = g_var_spec,fprime = g_var_der_spec,d = d,opts = options_approx,allPhi = allPhi)
       time_var<-(get_nanotime()-timeIn)*1e-9
     }
   }
-
+  
   # mean_delta is zero
   mean_delta<-list(res=list(min=matrix(0,ncol=d,nrow=nrow(var_delta$res$min)),
                             max=matrix(0,ncol=d,nrow=nrow(var_delta$res$min))))
-
-
+  
+  
   return(list(mean=mean_delta,var=var_delta,times=time_var))
 }
 
@@ -208,12 +208,12 @@ prof_mean_var_Delta<-function(kmModel,simupoints,allPhi=NULL,options_full_sims=N
 #' \item{\code{approx: }}{a list containing the upper/lower approximate quantiles for profile sup and inf}
 #' }
 #' @export
-bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.1,alpha=0.05,allPhi=NULL,options_approx=NULL,options_full_sims=NULL){
-
+bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.0124,alpha=0.025,allPhi=NULL,options_approx=NULL,options_full_sims=NULL){
+  
   if(is.null(mean_var_delta)){
     mean_var_delta<-prof_mean_var_Delta(kmModel=objectUQ$kmModel,simupoints = objectUQ$sPts$par,allPhi=allPhi,options_full_sims=options_full_sims,options_approx=options_approx,F.mat=NULL,T.mat=NULL)
   }
-
+  
   d<-objectUQ$kmModel@d
   if(!is.null(allPhi)){
     d <- length(allPhi)
@@ -221,40 +221,41 @@ bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.1,alpha=0.05,allPhi
   }else{
     p <- 1
   }
-
+  
   # get (empirical) quantiles from approximations
   approx_quant<-list(lower=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d),
-                              max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d))),
-                     upper=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d),
-                                         max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d))) )
-
-  bound_quant<-list(lower=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d),
                                          max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d))),
                      upper=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d),
                                          max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d))) )
-
-  correction<-log(2/(beta-alpha))
-
+  
+  bound_quant<-list(lower=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d),
+                                        max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d))),
+                    upper=list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d),
+                                        max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = d))) )
+  
+  correction_u<-log(2/(alpha-beta))
+  correction_l<-log(2/(alpha-2*beta))
+  
   # In the loop below mean_var_delta$mean is removed because we always assume that the mean is zero.
   for(coord in seq(d)){
     approx_quant$lower$res$max[,coord]<-apply(objectUQ$profSups[coord,,],1,function(x){return(quantile(x,beta))})
-    bound_quant$lower$res$max[,coord]<-approx_quant$lower$res$max[,coord]-sqrt(2*pmax(mean_var_delta$var$res$max[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction)
+    bound_quant$lower$res$max[,coord]<-approx_quant$lower$res$max[,coord]-sqrt(2*pmax(mean_var_delta$var$res$max[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction_l)
     #bound_quant$lower$res$max[,coord]<-approx_quant$lower$res$max[,coord]+mean_var_delta$mean$res$max[,coord]-sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
-
+    
     approx_quant$lower$res$min[,coord]<-apply(objectUQ$profInfs[coord,,],1,function(x){return(quantile(x,beta))})
-    bound_quant$lower$res$min[,coord]<-approx_quant$lower$res$min[,coord]-sqrt(2*pmax(mean_var_delta$var$res$min[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction)
+    bound_quant$lower$res$min[,coord]<-approx_quant$lower$res$min[,coord]-sqrt(2*pmax(mean_var_delta$var$res$min[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction_l)
     #bound_quant$lower$res$min[,coord]<-approx_quant$lower$res$min[,coord]+mean_var_delta$mean$res$min[,coord]-sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
-
+    
     approx_quant$upper$res$max[,coord]<-apply(objectUQ$profSups[coord,,],1,function(x){return(quantile(x,1-beta))})
-    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+sqrt(2*pmax(mean_var_delta$var$res$max[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction)
-#    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+mean_var_delta$mean$res$max[,coord]+sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
-
+    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+sqrt(2*pmax(mean_var_delta$var$res$max[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction_u)
+    #    bound_quant$upper$res$max[,coord]<-approx_quant$upper$res$max[,coord]+mean_var_delta$mean$res$max[,coord]+sqrt(2*max(mean_var_delta$var$res$max[,coord],0)*correction)
+    
     approx_quant$upper$res$min[,coord]<-apply(objectUQ$profInfs[coord,,],1,function(x){return(quantile(x,1-beta))})
-    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+sqrt(2*pmax(mean_var_delta$var$res$min[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction)
-#    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+mean_var_delta$mean$res$min[,coord]+sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
-
+    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+sqrt(2*pmax(mean_var_delta$var$res$min[,coord],rep(0,nrow(mean_var_delta$var$res$min)))*correction_u)
+    #    bound_quant$upper$res$min[,coord]<-approx_quant$upper$res$min[,coord]+mean_var_delta$mean$res$min[,coord]+sqrt(2*max(mean_var_delta$var$res$min[,coord],0)*correction)
+    
   }
-
+  
   if(p==2){
     temp  <- approx_quant$lower$res$max
     temp2 <- bound_quant$lower$res$max
@@ -262,21 +263,21 @@ bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.1,alpha=0.05,allPhi
     approx_quant$lower$res$max <- lapply(seq_len(ncol(temp)), function(i) temp[,i])
     bound_quant$lower$res$max <- list()
     bound_quant$lower$res$max <- lapply(seq_len(ncol(temp2)), function(i) temp2[,i])
-
+    
     temp  <- approx_quant$lower$res$min
     temp2 <- bound_quant$lower$res$min
     approx_quant$lower$res$min <- list()
     approx_quant$lower$res$min <- lapply(seq_len(ncol(temp)), function(i) temp[,i])
     bound_quant$lower$res$min <- list()
     bound_quant$lower$res$min <- lapply(seq_len(ncol(temp2)), function(i) temp2[,i])
-
+    
     temp  <- approx_quant$upper$res$max
     temp2 <- bound_quant$upper$res$max
     approx_quant$upper$res$max <- list()
     approx_quant$upper$res$max <- lapply(seq_len(ncol(temp)), function(i) temp[,i])
     bound_quant$upper$res$max <- list()
     bound_quant$upper$res$max <- lapply(seq_len(ncol(temp2)), function(i) temp2[,i])
-
+    
     temp  <- approx_quant$upper$res$min
     temp2 <- bound_quant$upper$res$min
     approx_quant$upper$res$min <- list()
@@ -284,9 +285,9 @@ bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.1,alpha=0.05,allPhi
     bound_quant$upper$res$min <- list()
     bound_quant$upper$res$min <- lapply(seq_len(ncol(temp2)), function(i) temp2[,i])
   }
-
+  
   return(list(bound=bound_quant,approx=approx_quant,mean_var_D=mean_var_delta))
-
-
+  
+  
 }
 
