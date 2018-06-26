@@ -211,6 +211,9 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
       plotOblique(changePoints = changePP$neverEx[[tt]][[1]],direction = allPhi[[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
       plotOblique(changePoints = changePP$neverEx[[tt]][[2]],direction = allPhi[[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
     }
+    if(plot_options$fun_evals>0){
+      points(object$kmModel@X,pch=17,cex=1.6)
+    }
     if(plot_options$save)
       dev.off()
   }
@@ -277,6 +280,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
                lty=c(1,1,3,4,1),col=c(1,1,4,4,2),cex=1.8,lwd=c(2,2,2,2,2))
       }
     }
+    par(mfrow=c(1,1))
     if(plot_options$save)
       dev.off()
     #  par(oldpar)
@@ -402,6 +406,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
                  lty=c(1,1,3,4,1),col=c(1,1,4,4,2),cex=1.8,lwd=c(2,2,2,2,2))
         }
       }
+      par(mfrow=c(1,1))
       if(plot_options$save)
         dev.off()
       #  par(oldpar)

@@ -206,11 +206,11 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
       lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx$`0.5`$res$max[,coord],lty=1)
       lines(plot_options$design[,coord],objectUQ$prof_quantiles_approx$`0.5`$res$min[,coord],lty=1)
     }
-    if(plot_options$fun_evals>0){
+    if(plot_options$fun_evals>1){
       points(objectUQ$kmModel@X[,coord],objectUQ$kmModel@y,pch=17)
     }
     # bound
-    if(!is.null(objectUQ$bound)){
+    if(!is.null(objectUQ$bound$bound)){
       lines(plot_options$design[,coord],objectUQ$bound$bound$lower$res$min[,coord],col=plot_options$bound_cols[1],lty=2,lwd=1.5)
       lines(plot_options$design[,coord],objectUQ$bound$bound$lower$res$max[,coord],col=plot_options$bound_cols[2],lty=2,lwd=1.5)
       lines(plot_options$design[,coord],objectUQ$bound$bound$upper$res$min[,coord],col=plot_options$bound_cols[1],lty=3,lwd=1.5)
@@ -242,6 +242,7 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
              lty=c(1,2,2,3,3,1),col=c(1,1,1,1,1,2),cex=1.2,lwd=c(2,2,2,2,2,2))
     }
   }
+  par(mfrow=c(1,1))
   if(plot_options$save)
     dev.off()
 
@@ -273,9 +274,9 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
 #' \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
 #' \item{\code{fun_evals:}{integer denoting the level of plot for the true evaluations. \itemize{
 #' \item{0: }{default, no plots for true evaluations;}
-#' \item{1: }{plot the true evaluations as points};
-#' \item{2: }{plot true evaluations, with different color for values above threshold;}
-#' \item{3: }{plot true evaluations, in color, with background of the image colored as proportion of points inside excursion;} }}}
+#' \item{1: }{plot the true evaluations as points in 2d plots, no true evaluation plots in 1d};
+#' \item{2: }{plot true evaluations, in 2d with different color for values above threshold;}
+#' \item{3: }{plot true evaluations, in 2d plots in color, with background of the image colored as proportion of points inside excursion;} }}}
 #' }
 #' if all the fields are already filled then returns \code{plot_options}
 #' @export

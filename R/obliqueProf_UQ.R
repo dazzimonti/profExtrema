@@ -436,6 +436,9 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
         }
       }
     }
+    if(plot_options$fun_evals>0){
+      points(object$kmModel@X,pch=17,cex=1.6)
+    }
     if(plot_options$save)
       dev.off()
   }
@@ -443,6 +446,7 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
   if(plot_level>=1){
 #    plot_options$design<-allResMean$Design
     if(p==1){
+      object$bound$bound=NULL
       plot_options$design <- object$Design_approx
       plot_univariate_profiles_UQ(objectUQ = object, plot_options = plot_options,nsims = options_sims$nsim,quantiles_uq=quantiles_uq,
                                   threshold = threshold,nameFile ="prof_UQ_approx", profMean = allResMean,typeProf = "approx")
