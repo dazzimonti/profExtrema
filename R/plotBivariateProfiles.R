@@ -49,16 +49,18 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
     if(trueEvals<3){
       zzBackgroud_max<-matrix(allRes$res$max[[i]],ncol=dd_eta)
       zzBackgroud_min<-matrix(allRes$res$min[[i]],ncol=dd_eta)
+      bck_name <- "mean"
     }else{
       propPoints<-getPointProportion(pp=pp,xBins = Design[1:(dd_eta),i],
                                      yBins = Design[(dd_eta+1):(2*dd_eta),i],whichAbove = whichAbove,plt = FALSE)
 
       zzBackgroud_max<-propPoints$freq
       zzBackgroud_min<-propPoints$freq
+      bck_name <- "frequency"
     }
     layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
     image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
-          main=sprintf("Psup mean, \n Psi number %i",i),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+          main=bquote(P[Psi[.(i)]]^sup ~" mean, "~  .(bck_name) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
     switch (as.character(trueEvals),
@@ -68,7 +70,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
 
 
     image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
-          main=sprintf("Pinf mean, \n Psi number %i",i),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+          main=bquote(P[Psi[.(i)]]^inf ~" mean, "~  .(bck_name) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
     switch (as.character(trueEvals),
@@ -98,16 +100,18 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
         if(trueEvals<3){
           zzBackgroud_max<-matrix(allRes$res$max[[i]],ncol=dd_eta)
           zzBackgroud_min<-matrix(allRes$res$min[[i]],ncol=dd_eta)
+          bck_name <- "mean"
         }else{
           propPoints<-getPointProportion(pp=pp,xBins = Design[1:(dd_eta),i],
                                          yBins = Design[(dd_eta+1):(2*dd_eta),i],whichAbove = whichAbove,plt = FALSE)
 
           zzBackgroud_max<-propPoints$freq
           zzBackgroud_min<-propPoints$freq
+          bck_name <- "frequency"
         }
         layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
         image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
-              main=sprintf("Psup %s, \n Psi number %i",names(bivProf$res_UQ$prof_quantiles_approx)[j],i),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+              main=bquote(P[Psi[.(i)]]^sup ~" Z (" ~ .(names(bivProf$res_UQ$prof_quantiles_approx)[j]) ~ "), "~  .(bck_name) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
         switch (as.character(trueEvals),
@@ -117,7 +121,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
 
 
         image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
-              main=sprintf("Pinf %s, \n Psi number %i",names(bivProf$res_UQ$prof_quantiles_approx)[j],i),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+              main=bquote(P[Psi[.(i)]]^inf ~" Z (" ~ .(names(bivProf$res_UQ$prof_quantiles_approx)[j]) ~ "), " ~ .(bck_name) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
         switch (as.character(trueEvals),
@@ -134,7 +138,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
       whichIQR <- c(1,length(bivProf$res_UQ$prof_quantiles_approx))
     }
 
-    actualQQ <- as.numeric(names(bivProf$res_UQ$prof_quantiles_approx))[whichIQR]
+    actualQQ <- round(as.numeric(names(bivProf$res_UQ$prof_quantiles_approx))[whichIQR],3)
 
     # Compute weighted interquantile range
     if(!is.null(bivProf$res_UQ$prof_quantiles_approx$`0.50`$res)){
@@ -171,7 +175,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
 
       layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
       image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
-            main=sprintf("Psup mean, wIQR %.3f-%.3f, \n Psi number %i",actualQQ[1],actualQQ[2],i),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+            main=bquote(P[Psi[.(i)]]^sup ~" mean, wIQR " ~ .(actualQQ[1]) ~ "-" ~ .(actualQQ[2]) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
       switch (as.character(trueEvals),
@@ -181,7 +185,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
 
 
       image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
-            main=sprintf("Pinf mean, wIQR %.3f-%.3f, \n Psi number %i",actualQQ[1],actualQQ[2],i),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+            main=bquote(P[Psi[.(i)]]^inf ~" mean, wIQR " ~ .(actualQQ[1]) ~ "-" ~ .(actualQQ[2]) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
       switch (as.character(trueEvals),
@@ -211,19 +215,22 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
         whichVars<-as.logical(apply(allPhi[[i]]==1,2,sum))
         pp <- bivProf$kmModel@X[,whichVars]
 
+        bck_name <- "mean"
         if(trueEvals<3){
           zzBackgroud_max<-matrix(allRes$res$max[[i]],ncol=dd_eta)
           zzBackgroud_min<-matrix(allRes$res$min[[i]],ncol=dd_eta)
+          bck_name <- "mean"
         }else{
           propPoints<-getPointProportion(pp=pp,xBins = Design[1:(dd_eta),i],
                                          yBins = Design[(dd_eta+1):(2*dd_eta),i],whichAbove = whichAbove,plt = FALSE)
 
           zzBackgroud_max<-propPoints$freq
           zzBackgroud_min<-propPoints$freq
+          bck_name <- "frequency"
         }
         layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
         image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
-              main=sprintf("Psup %s bound, \n Psi number %i",names(bivProf$res_UQ$bound$bound)[j],i),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+              main=bquote(P[Psi[.(i)]]^sup ~ .(names(bivProf$res_UQ$bound$bound)[j]) ~ " bound," ~ " "~ .(bck_name)),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
         switch (as.character(trueEvals),
@@ -233,7 +240,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
 
 
         image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
-              main=sprintf("Pinf %s bound, \n Psi number %i",names(bivProf$res_UQ$bound$bound)[j],i),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+              main=bquote(P[Psi[.(i)]]^inf ~ .(names(bivProf$res_UQ$bound$bound)[j]) ~ " bound," ~ " "~ .(bck_name)),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
         switch (as.character(trueEvals),
@@ -282,7 +289,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
 
       layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
       image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
-            main=sprintf("Psup mean, wBound range, \n Psi number %i",i),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2])#,...)
+            main=bquote(P[Psi[.(i)]]^sup ~ "mean, bound range"),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
       switch (as.character(trueEvals),
@@ -292,7 +299,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
 
 
       image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
-            main=sprintf("Pinf mean, wBound range, \n Psi number %i",i),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2])#,...)
+            main=bquote(P[Psi[.(i)]]^inf ~ "mean, bound range"),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
       switch (as.character(trueEvals),
@@ -303,6 +310,48 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
 
     if(plot_options$save)
       dev.off()
+
+
+    ### Plot the bivariate profile mean as contour and sigma_T^Delta as background
+    if(plot_options$save)
+      pdf(file = paste(plot_options$folderPlots,"profUQ_sigmaD",plot_options$id_save,".pdf",sep=""),width = 18,height = 9,pointsize = 15)
+
+    for(i in seq(num_Phi)){
+
+      whichVars<-as.logical(apply(allPhi[[i]]==1,2,sum))
+      pp <- bivProf$kmModel@X[,whichVars]
+
+      zzBackgroud_max<-matrix(sqrt(pmax(bivProf$res_UQ$bound$mean_var_D$var$res$max[,i],0)),ncol=dd_eta)
+      zzBackgroud_min<-matrix(sqrt(pmax(bivProf$res_UQ$bound$mean_var_D$var$res$min[,i],0)),ncol=dd_eta)
+
+
+#      zzBackgroud_max<-matrix(ddRange$max[,i],ncol=dd_eta)
+#      zzBackgroud_min<-matrix(ddRange$min[,i],ncol=dd_eta)
+
+      layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
+      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
+            main=bquote(P[Psi[.(i)]]^sup ~ "mean, " ~(sigma[T]^tilde(Delta))^2 ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+      contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
+      contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
+      switch (as.character(trueEvals),
+              "0" = {},
+              "1" = {points(pp,pch=3)},
+              {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+
+
+      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
+            main=bquote(P[Psi[.(i)]]^inf ~ "mean, " ~(sigma[T]^tilde(Delta))^2 ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+      contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
+      contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
+      switch (as.character(trueEvals),
+              "0" = {},
+              "1" = {points(pp,pch=3)},
+              {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+    }
+
+    if(plot_options$save)
+      dev.off()
+
   }
 
 
