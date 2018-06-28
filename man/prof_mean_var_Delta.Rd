@@ -4,7 +4,7 @@
 \alias{prof_mean_var_Delta}
 \title{Profile extrema for the mean and variance functions of difference process}
 \usage{
-prof_mean_var_Delta(kmModel, simupoints, allPhi = NULL,
+prof_mean_var_Delta(kmModel, simupoints, allPsi = NULL,
   options_full_sims = NULL, options_approx = NULL, F.mat = NULL,
   T.mat = NULL)
 }
@@ -13,11 +13,11 @@ prof_mean_var_Delta(kmModel, simupoints, allPhi = NULL,
 
 \item{simupoints}{the matrix \eqn{l x d} containing the simulation points \eqn{E}.}
 
-\item{allPhi}{optional list of matrices (dim \eqn{pxd}) for which to compute the profile extrema. If NULL coordinate profiles are computed.}
+\item{allPsi}{optional list of matrices (dim \eqn{pxd}) for which to compute the profile extrema. If NULL coordinate profiles are computed.}
 
-\item{options_full_sims}{an optional list of options for \link{getAllMaxMin}(or \link{approxProfileExtrema} if \code{allPhi} not NULL). If NULL the full computations are not excuted. NOTE: this computations might be very expensive!}
+\item{options_full_sims}{an optional list of options for \link{getAllMaxMin}(or \link{approxProfileExtrema} if \code{allPsi} not NULL). If NULL the full computations are not excuted. NOTE: this computations might be very expensive!}
 
-\item{options_approx}{an optional list of options for \link{approxMaxMin} (or \link{approxProfileExtrema} if \code{allPhi} not NULL).}
+\item{options_approx}{an optional list of options for \link{approxMaxMin} (or \link{approxProfileExtrema} if \code{allPsi} not NULL).}
 
 \item{F.mat}{the evaluation of the trend function at \code{rbind(kmModel@X,simupoints)}, see \link[stats]{model.matrix}, if \code{NULL} it is computed.}
 

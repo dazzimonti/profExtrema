@@ -2,9 +2,9 @@
 #' @author Dario Azzimonti
 #' @name getProfileSup
 #' @title Generic profile sup function computation
-#' @description Compute profile sup function for an arbitrary matrix \code{Phi} with \link[nloptr]{nloptr}.
+#' @description Compute profile sup function for an arbitrary matrix \code{Psi} with \link[nloptr]{nloptr}.
 #' @param eta one dimensional point where the function is to be evaluated
-#' @param Phi projection matrix
+#' @param Psi projection matrix
 #' @param f function to be optimized (takes a vector y of dimension d and returns a real number)
 #' @param fprime derivative of f (same format)
 #' @param d dimension of the input for f
@@ -17,7 +17,7 @@
 #' @return a real value corresponding to \eqn{max_{x_1,\dots, x_{coord-1},x_{coord+1}, \dots, x_d} f(x_1,\dots,x_d)}
 #' @export
 # requires library(nloptr)
-getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
+getProfileSup = function(eta,Psi,f,fprime,d,options=NULL){
 
   lower=rep(0,d)
   upper=rep(1,d)
@@ -33,7 +33,7 @@ getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
   # Verify if the feasible set is not empty
   Hlarge<-makeH(a1 = rbind(diag(-1,nrow = d,ncol=d),diag(1,nrow = d,ncol=d)),
                 b1 = rbind(matrix(lower-1e-8,nrow = d),matrix(upper-1e-8,nrow = d)),
-                a2 = Phi,b2=matrix(eta))
+                a2 = Psi,b2=matrix(eta))
   solLP<-lpcdd(hrep = Hlarge,objgrd = rep(0,d))
 
   if(solLP$solution.type=="Optimal"){
@@ -55,7 +55,7 @@ getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
 
   if(!is.null(options$par)){
     startingPoint<-options$par
-    if(Phi%*%startingPoint< eta)
+    if(Psi%*%startingPoint< eta)
       warning("Provided starting point does not respect constraints")
   }
 #  }else{
@@ -63,11 +63,11 @@ getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
 #  }
 
   eval_g0 <-function(x){
-    return(Phi%*%x -eta)
+    return(Psi%*%x -eta)
   }
 
   eval_jac_g0 <- function(x){
-    return(Phi)
+    return(Psi)
   }
 
   if(is.null(options$opts)){
@@ -116,9 +116,9 @@ getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
 #' @author Dario Azzimonti
 #' @name getProfileInf
 #' @title Generic profile inf function computation
-#' @description Compute profile inf function for an arbitrary matrix \code{Phi} with \link[nloptr]{nloptr}.
+#' @description Compute profile inf function for an arbitrary matrix \code{Psi} with \link[nloptr]{nloptr}.
 #' @param eta one dimensional point where the function is to be evaluated
-#' @param Phi projection matrix
+#' @param Psi projection matrix
 #' @param f function to be optimized (takes a vector y of dimension d and returns a real number)
 #' @param fprime derivative of f (same format)
 #' @param d dimension of the input for f
@@ -131,7 +131,7 @@ getProfileSup = function(eta,Phi,f,fprime,d,options=NULL){
 #' @return a real value corresponding to \eqn{max_{x_1,\dots, x_{coord-1},x_{coord+1}, \dots, x_d} f(x_1,\dots,x_d)}
 #' @export
 # requires library(nloptr)
-getProfileInf = function(eta,Phi,f,fprime,d,options=NULL){
+getProfileInf = function(eta,Psi,f,fprime,d,options=NULL){
 
   lower=rep(0,d)
   upper=rep(1,d)
@@ -147,18 +147,18 @@ getProfileInf = function(eta,Phi,f,fprime,d,options=NULL){
 
   if(!is.null(options$par)){
     startingPoint<-options$par
-    if(Phi%*%startingPoint< eta)
+    if(Psi%*%startingPoint< eta)
       warning("Provided starting point does not respect constraints")
   }else{
     startingPoint<-runif(min = lower,max = upper,d)
   }
 
   eval_g0 <-function(x){
-    return(Phi%*%x -eta)
+    return(Psi%*%x -eta)
   }
 
   eval_jac_g0 <- function(x){
-    return(Phi)
+    return(Psi)
   }
 
   if(is.null(options$opts)){
@@ -250,8 +250,8 @@ getProfileCoord<-function(f,fprime=NULL,d,options=NULL){
         cat("Coordinate ",coord," of ",d,"\n")
     #    tempMCvals[[coord]]<-matrix(NA,ncol=nPtsPerDim,nrow=options$numMCsamples)
     #    tempMCpoints[[coord]]<-array(NA,dim = c(nPtsPerDim,options$numMCsamples,d))
-    Phi<-matrix(rep(0,d),ncol=d)
-    Phi[,coord]<-1
+    Psi<-matrix(rep(0,d),ncol=d)
+    Psi[,coord]<-1
     for(i in seq(nPtsPerDim)){
       if(!is.null(options$verb))
         if(options$verb)
@@ -281,7 +281,7 @@ getProfileCoord<-function(f,fprime=NULL,d,options=NULL){
         }else{
           options$par[coord]<-Design[i,coord]
         }
-        tempMax<-getProfileSup(eta = Design[i,coord],Phi = Phi,f = f,fprime = fprime,d = d,options=options)
+        tempMax<-getProfileSup(eta = Design[i,coord],Psi = Psi,f = f,fprime = fprime,d = d,options=options)
         results$max[i,coord]<-tempMax$val
         allMaxPoints[(coord-1)*nPtsPerDim+i,]<-tempMax$aux$solution
 #        allMaxPoints[(coord-1)*nPtsPerDim+i,coord]<-Design[i,coord]
@@ -294,7 +294,7 @@ getProfileCoord<-function(f,fprime=NULL,d,options=NULL){
         }else{
           options$par[coord]<-Design[i,coord]
         }
-        tempMin<-getProfileInf(eta=Design[i,coord],Phi=Phi,f = f,fprime = fprime,d = d,options=options)
+        tempMin<-getProfileInf(eta=Design[i,coord],Psi=Psi,f = f,fprime = fprime,d = d,options=options)
         results$min[i,coord]<-tempMin$val
         allMinPoints[(coord-1)*nPtsPerDim+i,]<-tempMin$aux$solution
   #      allMinPoints[(coord-1)*nPtsPerDim+i,coord]<-Design[i,coord]

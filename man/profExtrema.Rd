@@ -6,21 +6,34 @@
 \alias{profExtrema-package}
 \title{profExtrema package}
 \description{
-Computation of profile extrema functions. The package main functions are: \itemize{
-    \item \code{\link{coordinateProfiles}}: Given a \link[DiceKriging]{km} objects computes the profile extrema function for the posterior mean an its quantiles.
+Computation and plots of profile extrema functions. The package main functions are: \describe{
+   \item{\strong{Computation:}}{ \itemize{
+    \item \code{\link{coordinateProfiles}}: Given a \link[DiceKriging]{km} objects computes the coordinate profile extrema function for the posterior mean and its quantiles.
     \item \code{\link{coordProf_UQ}}: UQ part of \code{coordinateProfiles}.
-    \item \code{\link{getAllMaxMin}}: central function to compute the coordinate profile extrema with full optimization.
-    \item \code{\link{approxMaxMin}}: central function to compute the coordinate profile extrema with approximations.
+    \item \code{\link{obliqueProfiles}}: Given a \link[DiceKriging]{km} objects computes the profile extrema functions for a generic list of matrices Psi for the posterior mean and its quantiles.
+    \item \code{\link{obliqueProf_UQ}}: The UQ part of \code{obliqueProfiles}.
+    \item \code{\link{getAllMaxMin}}: computes coordinate profile extrema with full optimization for a deterministic function.
+    \item \code{\link{approxMaxMin}}: approximates coordinate profile extrema for a deterministic function.
+    \item \code{\link{getProfileExtrema}}: computes profile extrema given a list of matrices Psi for a deterministic function.
+    \item \code{\link{approxProfileExtrema}}: approximates profile extrema given a list of matrices Psi for a deterministic function.
+   } }
+   \item{\strong{Plotting:}}{ \itemize{
+    \item \code{\link{plot_univariate_profiles_UQ}}: plots for the results of \code{coordProf_UQ} or \code{obliqueProf_UQ}. Note that this function only works for univariate profiles.
+    \item \code{\link{plotBivariateProfiles}}: plots the bivariate maps results of a call to \code{obliqueProfiles} with a two dimensional projection matrix Psi.
+    \item \code{\link{plotMaxMin}}: simple plotting function for univariate profile extrema.
+    \item \code{\link{plotBivProf}}: simple plotting function for bivariate profile extrema.
+   }  }
+
 }
 }
 \details{
 Package: profExtrema \cr
 Type: Package \cr
 Version: 0.2.0 \cr
-Date: 2018-04-09
+Date: 2018-06-08
 }
 \note{
-This work was supported in part the Hasler Foundation, grant number 16065. The author wishes to thank David Ginsbourger, Jérémy Rohmer and Déborah Idier for the fruitful discussions and their suggestions.
+This work was supported in part the Hasler Foundation, grant number 16065 and by the Swiss National Science Foundation, grant number 167199. The author warmly thanks David Ginsbourger, Jérémy Rohmer and Déborah Idier for fruitful discussions and accurate, thought provoking suggestions.
 }
 \references{
 Azzimonti, D., Bect, J., Chevalier, C., and Ginsbourger, D. (2016). Quantifying uncertainties on excursion sets under a Gaussian random field prior. SIAM/ASA Journal on Uncertainty Quantification, 4(1):850–874.

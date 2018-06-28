@@ -4,12 +4,12 @@
 \alias{getProfileInf}
 \title{Generic profile inf function computation}
 \usage{
-getProfileInf(eta, Phi, f, fprime, d, options = NULL)
+getProfileInf(eta, Psi, f, fprime, d, options = NULL)
 }
 \arguments{
 \item{eta}{one dimensional point where the function is to be evaluated}
 
-\item{Phi}{projection matrix}
+\item{Psi}{projection matrix}
 
 \item{f}{function to be optimized (takes a vector y of dimension d and returns a real number)}
 
@@ -28,7 +28,7 @@ getProfileInf(eta, Phi, f, fprime, d, options = NULL)
 a real value corresponding to \eqn{max_{x_1,\dots, x_{coord-1},x_{coord+1}, \dots, x_d} f(x_1,\dots,x_d)}
 }
 \description{
-Compute profile inf function for an arbitrary matrix \code{Phi} with \link[nloptr]{nloptr}.
+Compute profile inf function for an arbitrary matrix \code{Psi} with \link[nloptr]{nloptr}.
 }
 \author{
 Dario Azzimonti

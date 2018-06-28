@@ -4,12 +4,12 @@
 \alias{getProfileSup_optim}
 \title{Generic profile sup function computation with optim}
 \usage{
-getProfileSup_optim(eta, Phi, f, fprime, d, options = NULL)
+getProfileSup_optim(eta, Psi, f, fprime, d, options = NULL)
 }
 \arguments{
 \item{eta}{\eqn{p} dimensional point where the function is to be evaluated}
 
-\item{Phi}{projection matrix of dimensions \code{p x d}}
+\item{Psi}{projection matrix of dimensions \code{p x d}}
 
 \item{f}{function to be optimized (takes a vector y of dimension d and returns a real number)}
 
@@ -28,7 +28,7 @@ getProfileSup_optim(eta, Phi, f, fprime, d, options = NULL)
 a real value corresponding to \eqn{max_{x \in D_Psi} f(x)}
 }
 \description{
-Compute profile sup function for an arbitrary matrix \code{Phi} with the L-BFGS-B algorithm of \link[stats]{optim}.
+Compute profile sup function for an arbitrary matrix \code{Psi} with the L-BFGS-B algorithm of \link[stats]{optim}.
 }
 \seealso{
 \link{getProfileInf_optim}, \link{getProfileSup}, \link{plotMaxMin}

@@ -4,7 +4,7 @@
 \alias{getProfileExtrema}
 \title{Profile extrema with BFGS optimization}
 \usage{
-getProfileExtrema(f, fprime = NULL, d, allPhi, opts = NULL)
+getProfileExtrema(f, fprime = NULL, d, allPsi, opts = NULL)
 }
 \arguments{
 \item{f}{the function to be evaluated}
@@ -13,23 +13,23 @@ getProfileExtrema(f, fprime = NULL, d, allPhi, opts = NULL)
 
 \item{d}{dimension of the input domain}
 
-\item{allPhi}{a list containing the matrices Phi (dim \eqn{pxd}) for which to compute the profile extrema}
+\item{allPsi}{a list containing the matrices Psi (dim \eqn{pxd}) for which to compute the profile extrema}
 
 \item{opts}{a list containing the options for this function and the subfunctions \link{getProfileSup_optim}, \link{getProfileInf_optim}. The options only for getProfileExtrema are
 \itemize{
 \item{\code{limits:}}{an optional list containing \code{lower} and \code{upper}, two vectors with the limits of the input space. If NULL then \code{limits=list(upper=rep(1,d),lower=rep(0,d))}}
 \item{\code{discretization:}}{an optional integer representing the discretization size for the profile computation for each dimension of eta. Pay attention that this leads to a grid of size \code{discretization^p}.}
 \item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
-\item{\code{plts:}}{If TRUE and p==1 for all Phi in allPhi, plots the profile functions at each Phi, default is FALSE.}
+\item{\code{plts:}}{If TRUE and p==1 for all Psi in allPsi, plots the profile functions at each Psi, default is FALSE.}
 \item{\code{verb:}}{If TRUE, outputs intermediate results, default is FALSE.}
 }}
 }
 \value{
 a list of two data frames (min, max) of the evaluations of \eqn{P^sup_Psi f(eta) = sup_{Psi x = \eta} f(x) } and \eqn{P^inf_Psi f(eta) = inf_{Psi x = \eta} f(x) }
-discretized over 50 equally spaced points for each dimension for each Phi in \code{allPhi}. This number can be changed by defining it in options$discretization.
+discretized over 50 equally spaced points for each dimension for each Psi in \code{allPsi}. This number can be changed by defining it in options$discretization.
 }
 \description{
-Evaluate profile extrema for a set of matrices allPhi with full optimization.
+Evaluate profile extrema for a set of matrices allPsi with full optimization.
 }
 \examples{
 # Compute the oblique profile extrema with full optimization on 2d example
@@ -62,10 +62,10 @@ fprime <- function(x){
 }
 
 # Define list of directions where to evaluate the profile extrema
-all_Phi <- list(Phi1=vv1,Phi2=vv2)
+all_Psi <- list(Psi1=vv1,Psi2=vv2)
 
-# Evaluate profile extrema along directions of all_Phi
-allOblique<-getProfileExtrema(f=f,fprime = fprime,d = 2,allPhi = all_Phi,
+# Evaluate profile extrema along directions of all_Psi
+allOblique<-getProfileExtrema(f=f,fprime = fprime,d = 2,allPsi = all_Psi,
                               opts = list(plts=FALSE,discretization=100,multistart=8))
 
 \dontrun{
@@ -101,10 +101,10 @@ plotOblique<-function(cc,vv,col){
 image(inDes,inDes,matrix(outs,ncol=100),col=grey.colors(20),main="Example and oblique profiles")
 contour(inDes,inDes,matrix(outs,ncol=100),add=T,nlevels = 20)
 contour(inDes,inDes,matrix(outs,ncol=100),add=T,levels = c(threshold),col=4,lwd=1.5)
-plotOblique(cccObl$alwaysEx$`0`[[1]],all_Phi[[1]],3)
-plotOblique(cccObl$alwaysEx$`0`[[2]],all_Phi[[2]],3)
-plotOblique(cccObl$neverEx$`0`[[1]],all_Phi[[1]],2)
-plotOblique(cccObl$neverEx$`0`[[2]],all_Phi[[2]],2)
+plotOblique(cccObl$alwaysEx$`0`[[1]],all_Psi[[1]],3)
+plotOblique(cccObl$alwaysEx$`0`[[2]],all_Psi[[2]],3)
+plotOblique(cccObl$neverEx$`0`[[1]],all_Psi[[1]],2)
+plotOblique(cccObl$neverEx$`0`[[2]],all_Psi[[2]],2)
 
 }
 }

@@ -142,7 +142,7 @@ getSegments = function(y){
 #' @title plotOblique
 #' @description Auxiliary function for 2d plotting of excluded regions
 #' @param changePoints Numerical vector with the change points (usually if \code{cp=getChangePoints(...)}, then this is cc$alwaysEx[[1]][[1]] for example)
-#' @param direction The Phi vector used for the direction
+#' @param direction The Psi vector used for the direction
 #' @param ... parameters to be passed to abline
 #' @return adds to the current plot the lines \eqn{x} s.t. \code{direction}^T \eqn{x} = \code{changePoints[i]} for all i
 #' @export
@@ -172,17 +172,18 @@ plotOblique<-function(changePoints,direction,...){
 #' @name plotBivProf
 #' @description Plot bivariate profiles, for dimension up to 6.
 #' @param allRes list containing the list \code{res} which contains the computed minima and maxima. The object returned by the function \code{getProfileExtrema}.
-#' @param allPhi a list containing the matrices Phi (dim \eqn{2xd}) for which to compute the profile extrema
-#' @param Design a matrix of dimension \eqn{(2d)x numPhi} encoding the first (\code{Design[1:d,]}) and the second ((\code{Design[(d+1):(2*d),]})) axis values.
+#' @param allPsi a list containing the matrices Psi (dim \eqn{2xd}) for which to compute the profile extrema
+#' @param Design a matrix of dimension \eqn{(2d)x numPsi} encoding the first (\code{Design[1:d,]}) and the second ((\code{Design[(d+1):(2*d),]})) axis values.
 #' @param threshold if not \code{NULL} plots the level as a contour.
 #' @param trueEvals if not \code{NULL} adds to each plot the data points and the observed value
+#' @param main_addendum additional string to add to image title. Default is empty string.
 #' @param ... additional parameters to be passed to the plot function
-#' @return plots the 2d maps of the profile sup and inf of the function for each Phi in allPhi. If threshold is not NULL also contours the threshold level.
+#' @return plots the 2d maps of the profile sup and inf of the function for each Psi in allPsi. If threshold is not NULL also contours the threshold level.
 #' @export
-plotBivProf<-function(allRes,allPhi,Design=NULL,threshold=NULL,trueEvals=NULL,...){
+plotBivProf<-function(allRes,allPsi,Design=NULL,threshold=NULL,trueEvals=NULL,main_addendum="",...){
 
 
-  num_Phi<-length(allPhi)
+  num_Psi<-length(allPsi)
 
 
 
@@ -193,13 +194,14 @@ plotBivProf<-function(allRes,allPhi,Design=NULL,threshold=NULL,trueEvals=NULL,..
 
   dd_eta<-length(Design[,1])/2
 
-  for(i in seq(num_Phi)){
+  for(i in seq(num_Psi)){
     par(mfrow=c(1,2))
-    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),col=gray.colors(20),main=sprintf("Psup, Psi number %i",i),...)
+    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),col=gray.colors(20),
+          main=bquote(P[Psi[.(i)]]^sup ~ "f " ~ .(main_addendum)),...)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
 
-    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),col=gray.colors(20),main=sprintf("Pinf, Psi number %i",i),...)
+    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),col=gray.colors(20),main=bquote(P[Psi[.(i)]]^inf ~ "f" ~ .(main_addendum)),...)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
   }

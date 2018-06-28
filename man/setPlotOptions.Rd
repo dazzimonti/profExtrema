@@ -31,11 +31,16 @@ the properly set-up list containing the following fields \itemize{
 \item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
 \item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
 \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
+\item{\code{fun_evals:}{integer denoting the level of plot for the true evaluations. \itemize{
+\item{0: }{default, no plots for true evaluations;}
+\item{1: }{plot the true evaluations as points in 2d plots, no true evaluation plots in 1d};
+\item{2: }{plot true evaluations, in 2d with different color for values above threshold;}
+\item{3: }{plot true evaluations, in 2d plots in color, with background of the image colored as proportion of points inside excursion;} }}}
 }
 if all the fields are already filled then returns \code{plot_options}
 }
 \description{
-function to set-up plot options for plot_univariate_profiles_UQ, coordProf_UQ and coordinateProfiles
+Function to set-up plot options for \link{plot_univariate_profiles_UQ}, \link{plotBivariateProfiles}, \link{coordinateProfiles}, \link{coordProf_UQ}, \link{obliqueProfiles} and \link{obliqueProf_UQ}.
 }
 \author{
 Dario Azzimonti

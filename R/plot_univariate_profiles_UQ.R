@@ -251,7 +251,7 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
 
 #' @name setPlotOptions
 #' @title Set-up the plot options when NULL
-#' @description  function to set-up plot options for plot_univariate_profiles_UQ, coordProf_UQ and coordinateProfiles
+#' @description  Function to set-up plot options for \link{plot_univariate_profiles_UQ}, \link{plotBivariateProfiles}, \link{coordinateProfiles}, \link{coordProf_UQ}, \link{obliqueProfiles} and \link{obliqueProf_UQ}.
 #' @author Dario Azzimonti
 #' @param plot_options the list of plot options to set-up
 #' @param d number of coordinates

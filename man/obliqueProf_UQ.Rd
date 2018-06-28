@@ -4,7 +4,7 @@
 \alias{obliqueProf_UQ}
 \title{Oblique profiles UQ from a kriging model}
 \usage{
-obliqueProf_UQ(object, allPhi, threshold, allResMean = NULL,
+obliqueProf_UQ(object, allPsi, threshold, allResMean = NULL,
   quantiles_uq = c(0.05, 0.95), options_approx = NULL,
   options_full_sims = NULL, options_sims = NULL, options_bound = NULL,
   plot_level = 0, plot_options = NULL, return_level = 1)
@@ -12,7 +12,7 @@ obliqueProf_UQ(object, allPhi, threshold, allResMean = NULL,
 \arguments{
 \item{object}{either a \link[DiceKriging]{km} model or a list containing partial results. If \code{object} is a km model then all computations are carried out. If \code{object} is a list, then the function carries out all computations to complete the results list.}
 
-\item{allPhi}{a list containing the matrices Phi (dim \eqn{pxd}) for which to compute the profile extrema}
+\item{allPsi}{a list containing the matrices Psi (dim \eqn{pxd}) for which to compute the profile extrema}
 
 \item{threshold}{the threshold of interest}
 
@@ -35,25 +35,11 @@ obliqueProf_UQ(object, allPhi, threshold, allResMean = NULL,
 \item{\code{integration.param:}} list containing the integration design, obtained with the function \link[KrigInv]{integration_design}.
 }}
 
-\item{options_bound}{an optional list containing \code{beta} the confidence level for the approximation and \code{alpha} the confidence level for the bound. If \code{NULL}, the bound is not computed.}
+\item{options_bound}{an optional list containing \code{beta} the confidence level for the approximation and \code{alpha} the confidence level for the bound. Note that \code{alpha > 2*beta}. If \code{NULL}, the bound is not computed.}
 
 \item{plot_level}{an integer to select the plots to return (0=no plots, 1=basic plots, 2= all plots)}
 
-\item{plot_options}{an optional list of parameters for plots. Currently available options
-\itemize{
-\item{\code{save:}}{boolean, if TRUE saves the plots in \code{folderPlots}}
-\item{\code{folderPlots:}}{a string containing the destination folder for plots, if \code{save==TRUE} default is \code{./}}
-\item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate.}
-\item{\code{titleProf:}}{a string containing the title for the coordinate profile plots}
-\item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d)}
-\item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
-\item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
-\item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC.}
-\item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}.}
-\item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
-\item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
-\item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
-}}
+\item{plot_options}{an optional list of parameters for plots. See \link{setPlotOptions} for currently available options.}
 
 \item{return_level}{an integer to select the amount of details returned}
 }
@@ -108,11 +94,11 @@ options_plots<-list(save=FALSE, titleProf = "Coordinate profiles",
 # Define the oblique directions
 # (for theta=0 it is equal to coordinateProfiles)
 theta=pi/4
-allPhi = list(Phi1=matrix(c(cos(theta),sin(theta)),ncol=2),
-              Phi2=matrix(c(cos(theta+pi/2),sin(theta+pi/2)),ncol=2))
+allPsi = list(Psi1=matrix(c(cos(theta),sin(theta)),ncol=2),
+              Psi2=matrix(c(cos(theta+pi/2),sin(theta+pi/2)),ncol=2))
 \dontrun{
 # profile UQ on approximate oblique profiles
-oProfiles_UQ<-obliqueProf_UQ(object = kmModel,threshold = threshold,allPhi=allPhi,
+oProfiles_UQ<-obliqueProf_UQ(object = kmModel,threshold = threshold,allPsi=allPsi,
                              allResMean = NULL,quantiles_uq = c(0.05,0.95),
                              options_approx = options_approx, options_full_sims = NULL,
                              options_sims = options_sims,options_bound = NULL,
@@ -121,7 +107,7 @@ oProfiles_UQ<-obliqueProf_UQ(object = kmModel,threshold = threshold,allPhi=allPh
 
 options_full_sims<-list(multistart=4,heavyReturn=TRUE)
 options_sims$nsim <- 50
-oProfiles_UQ_full<- obliqueProf_UQ(object = oProfiles_UQ,threshold = threshold,allPhi=allPhi,
+oProfiles_UQ_full<- obliqueProf_UQ(object = oProfiles_UQ,threshold = threshold,allPsi=allPsi,
                              allResMean = NULL,quantiles_uq = c(0.05,0.95),
                              options_approx = options_approx, options_full_sims = options_full_sims,
                              options_sims = options_sims,options_bound = NULL,
@@ -131,12 +117,12 @@ oProfiles_UQ_full<- obliqueProf_UQ(object = oProfiles_UQ,threshold = threshold,a
 
 # profile UQ on full optim oblique profiles with bound
 oProfiles_UQ_full_bound<-obliqueProf_UQ(object = oProfiles_UQ_full,threshold = threshold,
-                                        allPhi=allPhi, allResMean = NULL,
+                                        allPsi=allPsi, allResMean = NULL,
                                         quantiles_uq = c(0.05,0.95),
                                         options_approx = options_approx,
                                         options_full_sims = options_full_sims,
                                       options_sims = options_sims,
-                                      options_bound = list(beta=0.055,alpha=0.05),
+                                      options_bound = list(beta=0.024,alpha=0.05),
                                       plot_level = 3, plot_options = options_plots,
                                       return_level = 3)
 }

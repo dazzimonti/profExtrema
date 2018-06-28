@@ -4,14 +4,14 @@
 \alias{obliqueProfiles}
 \title{Oblique coordinate profiles starting from a kriging model}
 \usage{
-obliqueProfiles(object, allPhi, threshold, options_full = NULL,
+obliqueProfiles(object, allPsi, threshold, options_full = NULL,
   options_approx = NULL, uq_computations = FALSE, plot_level = 0,
   plot_options = NULL, CI_const = NULL, return_level = 1, ...)
 }
 \arguments{
 \item{object}{either a \link[DiceKriging]{km} model or a list containing partial results. If \code{object} is a km model then all computations are carried out. If \code{object} is a list, then the function carries out all computations to complete the list results.}
 
-\item{allPhi}{a list containing the matrices Phi (dim \eqn{pxd}) for which to compute the profile extrema}
+\item{allPsi}{a list containing the matrices Psi (dim \eqn{pxd}) for which to compute the profile extrema}
 
 \item{threshold}{the threshold of interest}
 
@@ -23,21 +23,7 @@ obliqueProfiles(object, allPhi, threshold, options_full = NULL,
 
 \item{plot_level}{an integer to select the plots to return (0=no plots, 1=basic plots, 2= all plots)}
 
-\item{plot_options}{an optional list of parameters for plots. Currently available options
-\itemize{
-\item{\code{save:}}{boolean, if TRUE saves the plots in \code{folderPlots}}
-\item{\code{folderPlots:}}{a string containing the destination folder for plots, if \code{save==TRUE} default is \code{./}}
-\item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate.}
-\item{\code{titleProf:}}{a string containing the title for the coordinate profile plots}
-\item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d)}
-\item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
-\item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
-\item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC.}
-\item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}.}
-\item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
-\item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
-\item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
-}}
+\item{plot_options}{an optional list of parameters for plots. See \link{setPlotOptions} for currently available options.}
 
 \item{CI_const}{an optional vector containing the constants for the CI. If not NULL, then profiles extrema for \eqn{m_n(x) \pm CI_const[i]*s_n(x,x)} are computed.}
 
@@ -86,10 +72,10 @@ threshold=-10
 options_full<-list(multistart=4,heavyReturn=TRUE,discretization=100)
 options_approx<- list(multistart=4,heavyReturn=TRUE,initDesign=NULL,fullDesignSize=100)
 theta=pi/4
-allPhi = list(Phi1=matrix(c(cos(theta),sin(theta)),ncol=2),
-Phi2=matrix(c(cos(theta+pi/2),sin(theta+pi/2)),ncol=2))
+allPsi = list(Psi1=matrix(c(cos(theta),sin(theta)),ncol=2),
+Psi2=matrix(c(cos(theta+pi/2),sin(theta+pi/2)),ncol=2))
 
-profMeans<-obliqueProfiles(object = kmModel,allPhi = allPhi,threshold = threshold,
+profMeans<-obliqueProfiles(object = kmModel,allPsi = allPsi,threshold = threshold,
                            options_full = options_full,options_approx = options_approx,
                            uq_computations = FALSE,plot_level = 3,plot_options = NULL,
                            CI_const = NULL,return_level = 2)
@@ -99,7 +85,7 @@ profMeans<-obliqueProfiles(object = kmModel,allPhi = allPhi,threshold = threshol
 plot_options<-list(save=FALSE, titleProf = "Coordinate profiles",
                    title2d = "Posterior mean",qq_fill=TRUE)
 options_sims<-list(nsim=150)
-obProfUQ<-obliqueProfiles(object=profMeans,threshold=threshold,allPhi = allPhi,
+obProfUQ<-obliqueProfiles(object=profMeans,threshold=threshold,allPsi = allPsi,
                            options_full=options_full, options_approx=options_approx,
                            uq_computations=TRUE, plot_level=3,plot_options=NULL,
                            CI_const=NULL,return_level=2,options_sims=options_sims)

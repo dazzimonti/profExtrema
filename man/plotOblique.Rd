@@ -9,7 +9,7 @@ plotOblique(changePoints, direction, ...)
 \arguments{
 \item{changePoints}{Numerical vector with the change points (usually if \code{cp=getChangePoints(...)}, then this is cc$alwaysEx[[1]][[1]] for example)}
 
-\item{direction}{The Phi vector used for the direction}
+\item{direction}{The Psi vector used for the direction}
 
 \item{...}{parameters to be passed to abline}
 }

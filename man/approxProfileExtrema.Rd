@@ -4,7 +4,7 @@
 \alias{approxProfileExtrema}
 \title{Approximate profile extrema functions}
 \usage{
-approxProfileExtrema(f, fprime = NULL, d, allPhi, opts = NULL)
+approxProfileExtrema(f, fprime = NULL, d, allPsi, opts = NULL)
 }
 \arguments{
 \item{f}{the function to be evaluated}
@@ -13,7 +13,7 @@ approxProfileExtrema(f, fprime = NULL, d, allPhi, opts = NULL)
 
 \item{d}{dimension of the input domain}
 
-\item{allPhi}{a list containing the matrices Phi (dim \eqn{pxd}) for which to compute the profile extrema}
+\item{allPsi}{a list containing the matrices Psi (dim \eqn{pxd}) for which to compute the profile extrema}
 
 \item{opts}{a list containing the options for this function and the subfunctions \link{getProfileSup_optim}, \link{getProfileInf_optim} or \link{getProfileExtrema}. The options only for approxProfileExtrema are
 \itemize{
@@ -24,7 +24,7 @@ approxProfileExtrema(f, fprime = NULL, d, allPhi, opts = NULL)
       \item{\code{"quantSpline"}}: profile inf and profile sup approximated with quantile spline regression at levels 0.1 and 0.9 respectively
 }}
 \item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
-\item{\code{initDesign:}}{A list of the same length as allPhi containing the designs of few points where the expensive sup is evaluated. If Null it is automatically initialized}
+\item{\code{initDesign:}}{A list of the same length as allPsi containing the designs of few points where the expensive sup is evaluated. If Null it is automatically initialized}
 \item{\code{fullDesignSize:}}{The full design where the function is approximated.}
 \item{\code{multistart:}}{number of multistarts for optim procedure.}
 \item{\code{numMCsamples:}}{number of MC samples for the sup.}
@@ -37,7 +37,7 @@ a list of two data frames (min, max) of the evaluations of \eqn{f_sup(x_i) = sup
 for each i at the design Design. By default Design is a 100 equally spaced points for each dimension. It can be changed by defining it in options$Design
 }
 \description{
-Evaluate profile extrema for a set of Phi with approximations at few values
+Evaluate profile extrema for a set of Psi with approximations at few values
 }
 \examples{
 # Compute the oblique profile extrema with approximate optimization on 2d example
@@ -70,10 +70,10 @@ fprime <- function(x){
 }
 
 # Define list of directions where to evaluate the profile extrema
-all_Phi <- list(Phi1=vv1,Phi2=vv2)
+all_Psi <- list(Psi1=vv1,Psi2=vv2)
 
-# Evaluate profile extrema along directions of all_Phi
-allOblique<-approxProfileExtrema(f=f,fprime = fprime,d = 2,allPhi = all_Phi,
+# Evaluate profile extrema along directions of all_Psi
+allOblique<-approxProfileExtrema(f=f,fprime = fprime,d = 2,allPsi = all_Psi,
                                  opts = list(plts=FALSE,heavyReturn=TRUE))
 
 \dontrun{
@@ -109,10 +109,10 @@ plotOblique<-function(cc,vv,col){
 image(inDes,inDes,matrix(outs,ncol=100),col=grey.colors(20),main="Example and oblique profiles")
 contour(inDes,inDes,matrix(outs,ncol=100),add=T,nlevels = 20)
 contour(inDes,inDes,matrix(outs,ncol=100),add=T,levels = c(threshold),col=4,lwd=1.5)
-plotOblique(cccObl$alwaysEx$`0`[[1]],all_Phi[[1]],3)
-plotOblique(cccObl$alwaysEx$`0`[[2]],all_Phi[[2]],3)
-plotOblique(cccObl$neverEx$`0`[[1]],all_Phi[[1]],2)
-plotOblique(cccObl$neverEx$`0`[[2]],all_Phi[[2]],2)
+plotOblique(cccObl$alwaysEx$`0`[[1]],all_Psi[[1]],3)
+plotOblique(cccObl$alwaysEx$`0`[[2]],all_Psi[[2]],3)
+plotOblique(cccObl$neverEx$`0`[[1]],all_Psi[[1]],2)
+plotOblique(cccObl$neverEx$`0`[[2]],all_Psi[[2]],2)
 
 }
 }

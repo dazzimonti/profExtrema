@@ -2,17 +2,17 @@
 #' @author Dario Azzimonti
 #' @name solutionLinConstraint
 #' @title Obtain generic solution to linear constraints
-#' @description Computes an arbitrary solution \eqn{x^*} that satisfies \code{Phi x = eta}
+#' @description Computes an arbitrary solution \eqn{x^*} that satisfies \code{Psi x = eta}
 #' @param eta \eqn{p} dimensional point where the function is to be evaluated
-#' @param Phi \eqn{p x d} matrix describing the projection matrix
+#' @param Psi \eqn{p x d} matrix describing the projection matrix
 #' @param low lower limits of the box constraints on the input (vector of dimension d)
 #' @param upp upper limits of the box constraints on the input (vector of dimension d)
 #' @param pars a vector of dimension d-p that can be selected by the user to guide the solution. When NULL (suggested) it is chosen by the function.
 #' @return a vector of dimensions \code{d x 1} containing the solution \eqn{x^*}.
 # requires library(MASS) and lpSolve
-solutionLinConstraint<- function(eta,Phi,low=NULL,upp=NULL,pars=NULL){
-  d<-ncol(Phi)
-  p<-nrow(Phi)
+solutionLinConstraint<- function(eta,Psi,low=NULL,upp=NULL,pars=NULL){
+  d<-ncol(Psi)
+  p<-nrow(Psi)
 
   if(is.null(low)){
     low=rep(0,d)
@@ -40,8 +40,8 @@ solutionLinConstraint<- function(eta,Phi,low=NULL,upp=NULL,pars=NULL){
       }else{
         arbRest=pars
       }
-      solvable<-Phi[1:p,allCombs[,dd]]
-      rest<-matrix(Phi[1:p,setdiff(1:d,allCombs[,dd])],ncol=d-p)
+      solvable<-Psi[1:p,allCombs[,dd]]
+      rest<-matrix(Psi[1:p,setdiff(1:d,allCombs[,dd])],ncol=d-p)
       if(kappa(solvable)<1e16){
         tempSol<-matrix(c(solve(solvable,eta-rest%*%arbRest),arbRest))
         reOrderedSol<- tempSol
@@ -66,9 +66,9 @@ solutionLinConstraint<- function(eta,Phi,low=NULL,upp=NULL,pars=NULL){
 #' @author Dario Azzimonti
 #' @name getProfileSup_optim
 #' @title Generic profile sup function computation with optim
-#' @description Compute profile sup function for an arbitrary matrix \code{Phi} with the L-BFGS-B algorithm of \link[stats]{optim}.
+#' @description Compute profile sup function for an arbitrary matrix \code{Psi} with the L-BFGS-B algorithm of \link[stats]{optim}.
 #' @param eta \eqn{p} dimensional point where the function is to be evaluated
-#' @param Phi projection matrix of dimensions \code{p x d}
+#' @param Psi projection matrix of dimensions \code{p x d}
 #' @param f function to be optimized (takes a vector y of dimension d and returns a real number)
 #' @param fprime derivative of f (same format, returning a \eqn{d} dimensional vector)
 #' @param d dimension of the input for f
@@ -82,12 +82,12 @@ solutionLinConstraint<- function(eta,Phi,low=NULL,upp=NULL,pars=NULL){
 #' @seealso \link{getProfileInf_optim}, \link{getProfileSup}, \link{plotMaxMin}
 #' @export
 # requires library(MASS) and lpSolve
-getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
+getProfileSup_optim = function(eta,Psi,f,fprime,d,options=NULL){
 
-  p = dim(Phi)[1]
+  p = dim(Psi)[1]
 
   # put to zero small values
-  Phi[which(abs(Phi)<.Machine$double.neg.eps)]<-0
+  Psi[which(abs(Psi)<.Machine$double.neg.eps)]<-0
 
   if(!is.null(options$trace))
     trace=options$trace
@@ -100,14 +100,14 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
   # Verify if the feasible set is not empty
   Hlarge<-makeH(a1 = rbind(diag(-1,nrow = d,ncol=d),diag(1,nrow = d,ncol=d)),
                 b1 = rbind(matrix(lower,nrow = d),matrix(upper,nrow = d)),
-                a2 = Phi,b2=matrix(eta))
+                a2 = Psi,b2=matrix(eta))
 
   Hlarge<-d2q(Hlarge)
   solLP<-lpcdd(hrep = Hlarge,objgrd = d2q(rep(0,d)))
 
   if(solLP$solution.type=="Optimal"){
     # Find any solution of the linear system
-    xiSol<-matrix(q2d(solLP$primal.solution),nrow=d) #solutionLinConstraint(eta=eta,Phi=Phi,low = lower,upp=upper)
+    xiSol<-matrix(q2d(solLP$primal.solution),nrow=d) #solutionLinConstraint(eta=eta,Psi=Psi,low = lower,upp=upper)
   }else{
     warning("Cannot proceed with these constraints. A simple LP optimization problem does not have an optimal solution")
     optRes<-list(value=NA,solLP=solLP,message="The feasible set is either empty (solLP$solution.type==Inconsistent) or the problem is dual inconsistent. See solLP for the results of a LP problem with those contraints and objective function 0.")
@@ -117,11 +117,11 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
   # gc()
 
 
-  nullSpacePhi<-Null(t(Phi))
+  nullSpacePsi<-Null(t(Psi))
 
 
 
-  Az <- rbind(-nullSpacePhi,nullSpacePhi)
+  Az <- rbind(-nullSpacePsi,nullSpacePsi)
   bz <- rbind(xiSol-lower,-xiSol+upper)
   #  vertices_poly<-matrix(enumerate.vertices(A=Az,b=bz),ncol=d-p)
   rcdd_Hrep0<-makeH(a1 = Az,b1 = bz)
@@ -132,7 +132,7 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
 
 
   ff<-function(z){
-    x_cand<-xiSol+nullSpacePhi%*%z
+    x_cand<-xiSol+nullSpacePsi%*%z
     g_cand<- sqrt(.Machine$double.xmax)
     if(all(x_cand>=rep(0,d))&all(x_cand<=rep(1,d))){
       return(-f(x_cand))
@@ -142,9 +142,9 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
   }
 
   ffprime<-function(z){
-    x_cand<-xiSol+nullSpacePhi%*%z
+    x_cand<-xiSol+nullSpacePsi%*%z
     if(all(Az%*%z-bz<=0)){
-      return(-crossprod(fprime(xiSol+nullSpacePhi%*%z),nullSpacePhi))
+      return(-crossprod(fprime(xiSol+nullSpacePsi%*%z),nullSpacePsi))
     }else{
       ww<-Az%*%z-bz
       dirs<-which(ww>0)
@@ -152,12 +152,12 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
       return(crossprod(ww,-Az[dirs,]))
       #return(-Az[dirs,]%*%ww)
     }
-    return(-crossprod(fprime(xiSol+nullSpacePhi%*%z),nullSpacePhi))
+    return(-crossprod(fprime(xiSol+nullSpacePsi%*%z),nullSpacePsi))
   }
 
   if(!is.null(options$par)){
     #    startingPoint<-options$par
-    #   if(Phi%*%startingPoint< eta)
+    #   if(Psi%*%startingPoint< eta)
     warning("Constraints check not implemented!")
   }else{
     #    startingPoint<-runif(min = lower,max = upper,d-p)
@@ -209,7 +209,7 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
     optRes$value = -optRes$value
   }
 
-  optRes$solution = xiSol+Null(t(Phi))%*%optRes$par
+  optRes$solution = xiSol+Null(t(Psi))%*%optRes$par
 
   rm(rcdd_Hrep0,Hlarge,solLP)
 #  gc()
@@ -222,9 +222,9 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
 #' @author Dario Azzimonti
 #' @name getProfileInf_optim
 #' @title Generic profile inf function computation with optim
-#' @description Compute profile inf function for an arbitrary matrix \code{Phi} with with the L-BFGS-B algorithm of \link[stats]{optim}. Here the linear equality constraint is eliminated by using the Null space of \code{Phi}.
+#' @description Compute profile inf function for an arbitrary matrix \code{Psi} with with the L-BFGS-B algorithm of \link[stats]{optim}. Here the linear equality constraint is eliminated by using the Null space of \code{Psi}.
 #' @param eta \eqn{p} dimensional point where the function is to be evaluated
-#' @param Phi projection matrix of dimension \code{pxd}
+#' @param Psi projection matrix of dimension \code{pxd}
 #' @param f function to be optimized (takes a vector y of dimension d and returns a real number)
 #' @param fprime derivative of f (same format, returning a \eqn{d} dimensional vector)
 #' @param d dimension of the input for f
@@ -237,12 +237,12 @@ getProfileSup_optim = function(eta,Phi,f,fprime,d,options=NULL){
 #' @return a real value corresponding to \eqn{min_{x \in D_Psi} f(x)}
 #' @seealso \link{getProfileSup_optim}, \link{getProfileInf}, \link{plotMaxMin}
 #' @export
-getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
+getProfileInf_optim = function(eta,Psi,f,fprime,d,options=NULL){
 
-  p = dim(Phi)[1]
+  p = dim(Psi)[1]
 
   # put to zero small values
-  Phi[which(abs(Phi)<.Machine$double.neg.eps)]<-0
+  Psi[which(abs(Psi)<.Machine$double.neg.eps)]<-0
 
   if(!is.null(options$trace))
     trace=options$trace
@@ -256,13 +256,13 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
   # Verify if the feasible set is not empty
   Hlarge<-makeH(a1 = rbind(diag(-1,nrow = d,ncol=d),diag(1,nrow = d,ncol=d)),
                 b1 = rbind(matrix(lower,nrow = d),matrix(upper,nrow = d)),
-                a2 = Phi,b2=matrix(eta))
+                a2 = Psi,b2=matrix(eta))
   Hlarge<-d2q(Hlarge)
   solLP<-lpcdd(hrep = Hlarge,objgrd = d2q(rep(0,d)))
 
   if(solLP$solution.type=="Optimal"){
     # Find any solution of the linear system
-    xiSol<-matrix(q2d(solLP$primal.solution),nrow=d) #solutionLinConstraint(eta=eta,Phi=Phi,low = lower,upp=upper)
+    xiSol<-matrix(q2d(solLP$primal.solution),nrow=d) #solutionLinConstraint(eta=eta,Psi=Psi,low = lower,upp=upper)
   }else{
     warning("Cannot proceed with these constraints. A simple LP optimization problem does not have an optimal solution")
     optRes<-list(value=NA,solLP=solLP,message="The feasible set is either empty (solLP$solution.type==Inconsistent) or the problem is dual inconsistent. See solLP for the results of a LP problem with those contraints and objective function 0.")
@@ -272,10 +272,10 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
   # gc()
 
 
-  nullSpacePhi<-Null(t(Phi))
+  nullSpacePsi<-Null(t(Psi))
 
 
-  Az <- rbind(-nullSpacePhi,nullSpacePhi)
+  Az <- rbind(-nullSpacePsi,nullSpacePsi)
   bz <- rbind(xiSol-lower,-xiSol+upper)
   #  vertices_poly<-matrix(enumerate.vertices(A=Az,b=bz),ncol=d-p)
   rcdd_Hrep0<-makeH(a1 = Az,b1 = bz)
@@ -284,7 +284,7 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
 
 
   ff<-function(z){
-    x_cand<-xiSol+nullSpacePhi%*%z
+    x_cand<-xiSol+nullSpacePsi%*%z
     g_cand<- sqrt(.Machine$double.xmax)
     if(all(x_cand>=rep(0,d))&all(x_cand<=rep(1,d))){
       return(f(x_cand))
@@ -294,9 +294,9 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
   }
 
   ffprime<-function(z){
-    x_cand<-xiSol+nullSpacePhi%*%z
+    x_cand<-xiSol+nullSpacePsi%*%z
     if(all(Az%*%z-bz<=0)){
-      return(crossprod(fprime(xiSol+nullSpacePhi%*%z),nullSpacePhi))
+      return(crossprod(fprime(xiSol+nullSpacePsi%*%z),nullSpacePsi))
     }else{
       ww<-Az%*%z-bz
       dirs<-which(ww>0)
@@ -304,12 +304,12 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
       return(crossprod(ww,-Az[dirs,]))
       #return(-Az[dirs,]%*%ww)
     }
-    return(crossprod(fprime(xiSol+nullSpacePhi%*%z),nullSpacePhi))
+    return(crossprod(fprime(xiSol+nullSpacePsi%*%z),nullSpacePsi))
   }
 
   if(!is.null(options$par)){
     #    startingPoint<-options$par
-    #   if(Phi%*%startingPoint< eta)
+    #   if(Psi%*%startingPoint< eta)
     warning("Constraints check not implemented!")
   }else{
     #    startingPoint<-runif(min = lower,max = upper,d-p)
@@ -361,7 +361,7 @@ getProfileInf_optim = function(eta,Phi,f,fprime,d,options=NULL){
   }
 
 
-  optRes$solution = xiSol+Null(t(Phi))%*%optRes$par
+  optRes$solution = xiSol+Null(t(Psi))%*%optRes$par
 
   rm(rcdd_Hrep0,Hlarge,solLP)
 #  gc()

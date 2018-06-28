@@ -1,21 +1,21 @@
 #' @author Dario Azzimonti
 #' @name getProfileExtrema
 #' @title Profile extrema with BFGS optimization
-#' @description Evaluate profile extrema for a set of matrices allPhi with full optimization.
+#' @description Evaluate profile extrema for a set of matrices allPsi with full optimization.
 #' @param f the function to be evaluated
 #' @param fprime derivative of the function
 #' @param d dimension of the input domain
-#' @param allPhi a list containing the matrices Phi (dim \eqn{pxd}) for which to compute the profile extrema
+#' @param allPsi a list containing the matrices Psi (dim \eqn{pxd}) for which to compute the profile extrema
 #' @param opts a list containing the options for this function and the subfunctions \link{getProfileSup_optim}, \link{getProfileInf_optim}. The options only for getProfileExtrema are
 #' \itemize{
 #' \item{\code{limits:}}{an optional list containing \code{lower} and \code{upper}, two vectors with the limits of the input space. If NULL then \code{limits=list(upper=rep(1,d),lower=rep(0,d))}}
 #' \item{\code{discretization:}}{an optional integer representing the discretization size for the profile computation for each dimension of eta. Pay attention that this leads to a grid of size \code{discretization^p}.}
 #' \item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
-#' \item{\code{plts:}}{If TRUE and p==1 for all Phi in allPhi, plots the profile functions at each Phi, default is FALSE.}
+#' \item{\code{plts:}}{If TRUE and p==1 for all Psi in allPsi, plots the profile functions at each Psi, default is FALSE.}
 #' \item{\code{verb:}}{If TRUE, outputs intermediate results, default is FALSE.}
 #' }
 #' @return a list of two data frames (min, max) of the evaluations of \eqn{P^sup_Psi f(eta) = sup_{Psi x = \eta} f(x) } and \eqn{P^inf_Psi f(eta) = inf_{Psi x = \eta} f(x) }
-#' discretized over 50 equally spaced points for each dimension for each Phi in \code{allPhi}. This number can be changed by defining it in options$discretization.
+#' discretized over 50 equally spaced points for each dimension for each Psi in \code{allPsi}. This number can be changed by defining it in options$discretization.
 #' @examples
 #' # Compute the oblique profile extrema with full optimization on 2d example
 #'
@@ -47,10 +47,10 @@
 #' }
 #'
 #' # Define list of directions where to evaluate the profile extrema
-#' all_Phi <- list(Phi1=vv1,Phi2=vv2)
+#' all_Psi <- list(Psi1=vv1,Psi2=vv2)
 #'
-#' # Evaluate profile extrema along directions of all_Phi
-#' allOblique<-getProfileExtrema(f=f,fprime = fprime,d = 2,allPhi = all_Phi,
+#' # Evaluate profile extrema along directions of all_Psi
+#' allOblique<-getProfileExtrema(f=f,fprime = fprime,d = 2,allPsi = all_Psi,
 #'                               opts = list(plts=FALSE,discretization=100,multistart=8))
 #'
 #' \dontrun{
@@ -86,16 +86,16 @@
 #' image(inDes,inDes,matrix(outs,ncol=100),col=grey.colors(20),main="Example and oblique profiles")
 #' contour(inDes,inDes,matrix(outs,ncol=100),add=T,nlevels = 20)
 #' contour(inDes,inDes,matrix(outs,ncol=100),add=T,levels = c(threshold),col=4,lwd=1.5)
-#' plotOblique(cccObl$alwaysEx$`0`[[1]],all_Phi[[1]],3)
-#' plotOblique(cccObl$alwaysEx$`0`[[2]],all_Phi[[2]],3)
-#' plotOblique(cccObl$neverEx$`0`[[1]],all_Phi[[1]],2)
-#' plotOblique(cccObl$neverEx$`0`[[2]],all_Phi[[2]],2)
+#' plotOblique(cccObl$alwaysEx$`0`[[1]],all_Psi[[1]],3)
+#' plotOblique(cccObl$alwaysEx$`0`[[2]],all_Psi[[2]],3)
+#' plotOblique(cccObl$neverEx$`0`[[1]],all_Psi[[1]],2)
+#' plotOblique(cccObl$neverEx$`0`[[2]],all_Psi[[2]],2)
 #'
 #' }
 #' @export
-getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
+getProfileExtrema<-function(f,fprime=NULL,d,allPsi,opts=NULL){
 
-  num_Phi<-length(allPhi)
+  num_Psi<-length(allPsi)
 
   # initialize opts
   if(is.null(opts$limits)){
@@ -125,33 +125,33 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
     cubeVertex <-rbind(cubeVertex, c(rep(ll_b[ii],ncol(cubeVertex)/2),c(rep(uu_b[ii],ncol(cubeVertex)/2))))
   }
 
-  p=nrow(matrix(allPhi[[1]],ncol=d))
+  p=nrow(matrix(allPsi[[1]],ncol=d))
 
   allMaxPoints<-list()
   allMinPoints<-list()
-  results<-list(min=data.frame(matrix(NA,ncol=num_Phi,nrow = dd_eta^p)),max=data.frame(matrix(NA,ncol=num_Phi,nrow = dd_eta^p)))
+  results<-list(min=data.frame(matrix(NA,ncol=num_Psi,nrow = dd_eta^p)),max=data.frame(matrix(NA,ncol=num_Psi,nrow = dd_eta^p)))
 
   # Save the design, useful for plotting functions
-  Design<- matrix(NA,ncol=num_Phi,nrow=dd_eta*p)
+  Design<- matrix(NA,ncol=num_Psi,nrow=dd_eta*p)
 
-  # Loop over the different Phi
-  for(i in seq(num_Phi)){
+  # Loop over the different Psi
+  for(i in seq(num_Psi)){
 
     if(!is.null(opts$verb))
       if(opts$verb)
-        cat("Phi number ",i," of ",num_Phi,"\n")
+        cat("Psi number ",i," of ",num_Psi,"\n")
 
-    # take current Phi
-    cPhi = allPhi[[i]]
+    # take current Psi
+    cPsi = allPsi[[i]]
 
-    p = nrow(cPhi)
+    p = nrow(cPsi)
     if(is.null(p)){
-      cPhi <-matrix(cPhi,ncol=d)
-      p=nrow(cPhi)
+      cPsi <-matrix(cPsi,ncol=d)
+      p=nrow(cPsi)
     }
-    # Choose limits for etas for current Phi
-    mmEtas<-apply(crossprod(t(cPhi),cubeVertex),1,min)
-    MMetas<-apply(crossprod(t(cPhi),cubeVertex),1,max)
+    # Choose limits for etas for current Psi
+    mmEtas<-apply(crossprod(t(cPsi),cubeVertex),1,min)
+    MMetas<-apply(crossprod(t(cPsi),cubeVertex),1,max)
 
     if(p==1){
       etas1<-matrix(seq(mmEtas,MMetas,,dd_eta),ncol=1)
@@ -166,11 +166,11 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
     # when p==1 we can use the null space code works and it's much faster
     # when p==2 the code shold be tested more but seems to produce better results than nloptr
 #    if(p==1){
-      pSup<-apply(etas1,1,function(x){a_res=getProfileSup_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts);gc();return(a_res)})
-      pInf<-apply(etas1,1,function(x){a_res=getProfileInf_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts);gc();return(a_res)})
+      pSup<-apply(etas1,1,function(x){a_res=getProfileSup_optim(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts);gc();return(a_res)})
+      pInf<-apply(etas1,1,function(x){a_res=getProfileInf_optim(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts);gc();return(a_res)})
 #    }else{
-#      pSup<-apply(etas1,1,function(x){return(getProfileSup(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
-#      pInf<-apply(etas1,1,function(x){return(getProfileInf(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+#      pSup<-apply(etas1,1,function(x){return(getProfileSup(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+#      pInf<-apply(etas1,1,function(x){return(getProfileInf(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
 #    }
 
     results$max[[i]] <- sapply(pSup,function(x){x$val})
@@ -184,14 +184,14 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
     if(!is.null(opts$plts)){
       if(opts$plts){
         if(p==1){
-          plot(etas1,results$min[,i],ylim=c(min(results$min[,i]),max(results$max[,i])),type='l',main=paste("Phi number",i))
+          plot(etas1,results$min[,i],ylim=c(min(results$min[,i]),max(results$max[,i])),type='l',main=paste("Psi number",i))
           lines(etas1,results$max[,i])
         }else if(p==2){
           par(mfrow=c(1,2))
-          image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(results$max[[i]],ncol=dd_eta),col=gray.colors(20),main=sprintf("Psup, Psi number %i",i))
+          image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(results$max[[i]],ncol=dd_eta),col=gray.colors(20),main=bquote(P[Psi[.(i)]]^sup ~ "f"))
           contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(results$max[[i]],ncol=dd_eta),nlevels = 10,add=T)
 
-          image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(results$min[[i]],ncol=dd_eta),col=gray.colors(20),main=sprintf("Pinf, Psi number %i",i))
+          image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(results$min[[i]],ncol=dd_eta),col=gray.colors(20),main=bquote(P[Psi[.(i)]]^inf ~ "f"))
           contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(results$min[[i]],ncol=dd_eta),nlevels = 10,add=T)
           par(mfrow=c(1,1))
         }else{
@@ -219,11 +219,11 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
 #' @author Dario Azzimonti
 #' @name approxProfileExtrema
 #' @title Approximate profile extrema functions
-#' @description Evaluate profile extrema for a set of Phi with approximations at few values
+#' @description Evaluate profile extrema for a set of Psi with approximations at few values
 #' @param f the function to be evaluated
 #' @param fprime derivative of the function
 #' @param d dimension of the input domain
-#' @param allPhi a list containing the matrices Phi (dim \eqn{pxd}) for which to compute the profile extrema
+#' @param allPsi a list containing the matrices Psi (dim \eqn{pxd}) for which to compute the profile extrema
 #' @param opts a list containing the options for this function and the subfunctions \link{getProfileSup_optim}, \link{getProfileInf_optim} or \link{getProfileExtrema}. The options only for approxProfileExtrema are
 #' \itemize{
 #' \item{\code{limits:}}{an optional list with the upper and lower limits of input space dimension, if NULL then \code{limits=list(upper=rep(1,d),lower=rep(0,d))}}
@@ -233,7 +233,7 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
 #'       \item{\code{"quantSpline"}}: profile inf and profile sup approximated with quantile spline regression at levels 0.1 and 0.9 respectively
 #' }}
 #' \item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
-#' \item{\code{initDesign:}}{A list of the same length as allPhi containing the designs of few points where the expensive sup is evaluated. If Null it is automatically initialized}
+#' \item{\code{initDesign:}}{A list of the same length as allPsi containing the designs of few points where the expensive sup is evaluated. If Null it is automatically initialized}
 #' \item{\code{fullDesignSize:}}{The full design where the function is approximated.}
 #' \item{\code{multistart:}}{number of multistarts for optim procedure.}
 #' \item{\code{numMCsamples:}}{number of MC samples for the sup.}
@@ -273,10 +273,10 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
 #' }
 #'
 #' # Define list of directions where to evaluate the profile extrema
-#' all_Phi <- list(Phi1=vv1,Phi2=vv2)
+#' all_Psi <- list(Psi1=vv1,Psi2=vv2)
 #'
-#' # Evaluate profile extrema along directions of all_Phi
-#' allOblique<-approxProfileExtrema(f=f,fprime = fprime,d = 2,allPhi = all_Phi,
+#' # Evaluate profile extrema along directions of all_Psi
+#' allOblique<-approxProfileExtrema(f=f,fprime = fprime,d = 2,allPsi = all_Psi,
 #'                                  opts = list(plts=FALSE,heavyReturn=TRUE))
 #'
 #' \dontrun{
@@ -312,21 +312,21 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPhi,opts=NULL){
 #' image(inDes,inDes,matrix(outs,ncol=100),col=grey.colors(20),main="Example and oblique profiles")
 #' contour(inDes,inDes,matrix(outs,ncol=100),add=T,nlevels = 20)
 #' contour(inDes,inDes,matrix(outs,ncol=100),add=T,levels = c(threshold),col=4,lwd=1.5)
-#' plotOblique(cccObl$alwaysEx$`0`[[1]],all_Phi[[1]],3)
-#' plotOblique(cccObl$alwaysEx$`0`[[2]],all_Phi[[2]],3)
-#' plotOblique(cccObl$neverEx$`0`[[1]],all_Phi[[1]],2)
-#' plotOblique(cccObl$neverEx$`0`[[2]],all_Phi[[2]],2)
+#' plotOblique(cccObl$alwaysEx$`0`[[1]],all_Psi[[1]],3)
+#' plotOblique(cccObl$alwaysEx$`0`[[2]],all_Psi[[2]],3)
+#' plotOblique(cccObl$neverEx$`0`[[1]],all_Psi[[1]],2)
+#' plotOblique(cccObl$neverEx$`0`[[2]],all_Psi[[2]],2)
 #'
 #' }
 #' @export
-approxProfileExtrema=function(f,fprime=NULL,d,allPhi,opts=NULL){
+approxProfileExtrema=function(f,fprime=NULL,d,allPsi,opts=NULL){
 
   # Set up options
   if(is.null(opts$limits)){
     limits<-list(lower=rep(0,d),upper=rep(1,d))
   }
 
-  num_Phi<-length(allPhi)
+  num_Psi<-length(allPsi)
 
   # initialize opts
   if(is.null(opts$limits)){
@@ -356,41 +356,41 @@ approxProfileExtrema=function(f,fprime=NULL,d,allPhi,opts=NULL){
     cubeVertex <-rbind(cubeVertex, c(rep(ll_b[ii],ncol(cubeVertex)/2),c(rep(uu_b[ii],ncol(cubeVertex)/2))))
   }
 
-  p=nrow(matrix(allPhi[[1]],ncol=d))
+  p=nrow(matrix(allPsi[[1]],ncol=d))
 
   exact_allMaxPoints<-list()
   exact_allMinPoints<-list()
-  exact_results<-list(min=data.frame(matrix(NA,ncol=num_Phi,nrow = ceiling(sqrt(d*p)*10))),max=data.frame(matrix(NA,ncol=num_Phi,nrow = ceiling(sqrt(d*p)*10))))
+  exact_results<-list(min=data.frame(matrix(NA,ncol=num_Psi,nrow = ceiling(sqrt(d*p)*10))),max=data.frame(matrix(NA,ncol=num_Psi,nrow = ceiling(sqrt(d*p)*10))))
 
   # initialize the max/min values
-  sK_max<-data.frame(matrix(NA,nrow=opts$fullDesignSize^p,ncol=num_Phi))
-  sK_min<-data.frame(matrix(NA,nrow=opts$fullDesignSize^p,ncol=num_Phi))
+  sK_max<-data.frame(matrix(NA,nrow=opts$fullDesignSize^p,ncol=num_Psi))
+  sK_min<-data.frame(matrix(NA,nrow=opts$fullDesignSize^p,ncol=num_Psi))
 
   # Save Design to return
-  Design<- matrix(NA,ncol=num_Phi,nrow=opts$fullDesignSize*p)
+  Design<- matrix(NA,ncol=num_Psi,nrow=opts$fullDesignSize*p)
 
-  # Loop over the different Phi
-  for(i in seq(num_Phi)){
+  # Loop over the different Psi
+  for(i in seq(num_Psi)){
 
     if(!is.null(opts$verb))
       if(opts$verb)
-        cat("Phi number ",i," of ",num_Phi,"\n")
+        cat("Psi number ",i," of ",num_Psi,"\n")
 
-    # take current Phi
-    cPhi = allPhi[[i]]
+    # take current Psi
+    cPsi = allPsi[[i]]
 
-    p = nrow(cPhi)
+    p = nrow(cPsi)
     if(is.null(p)){
-      cPhi <-matrix(cPhi,ncol=d)
-      p=nrow(cPhi)
+      cPsi <-matrix(cPsi,ncol=d)
+      p=nrow(cPsi)
     }
-    # Choose limits for etas for current Phi
-    mmEtas<-apply(crossprod(t(cPhi),cubeVertex),1,min)
-    MMetas<-apply(crossprod(t(cPhi),cubeVertex),1,max)
+    # Choose limits for etas for current Psi
+    mmEtas<-apply(crossprod(t(cPsi),cubeVertex),1,min)
+    MMetas<-apply(crossprod(t(cPsi),cubeVertex),1,max)
 
 
     # Get initial design
-    if(length(opts$initDesign)<num_Phi){
+    if(length(opts$initDesign)<num_Psi){
       if(p==1){
         opts$initDesign[[i]]<-matrix(seq(from=mmEtas[1],to=MMetas[1],,ceiling(sqrt(d)*10)),ncol=1)
       }else{
@@ -401,9 +401,9 @@ approxProfileExtrema=function(f,fprime=NULL,d,allPhi,opts=NULL){
     }
 
 
-    pSup<-apply(opts$initDesign[[i]],1,function(x){return(getProfileSup_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+    pSup<-apply(opts$initDesign[[i]],1,function(x){return(getProfileSup_optim(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
     gc()
-    pInf<-apply(opts$initDesign[[i]],1,function(x){return(getProfileInf_optim(eta = x,Phi = matrix(cPhi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
+    pInf<-apply(opts$initDesign[[i]],1,function(x){return(getProfileInf_optim(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
     gc()
 
     exact_results$max[[i]] <- sapply(pSup,function(x){x$val})

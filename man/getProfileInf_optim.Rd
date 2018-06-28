@@ -4,12 +4,12 @@
 \alias{getProfileInf_optim}
 \title{Generic profile inf function computation with optim}
 \usage{
-getProfileInf_optim(eta, Phi, f, fprime, d, options = NULL)
+getProfileInf_optim(eta, Psi, f, fprime, d, options = NULL)
 }
 \arguments{
 \item{eta}{\eqn{p} dimensional point where the function is to be evaluated}
 
-\item{Phi}{projection matrix of dimension \code{pxd}}
+\item{Psi}{projection matrix of dimension \code{pxd}}
 
 \item{f}{function to be optimized (takes a vector y of dimension d and returns a real number)}
 
@@ -28,7 +28,7 @@ getProfileInf_optim(eta, Phi, f, fprime, d, options = NULL)
 a real value corresponding to \eqn{min_{x \in D_Psi} f(x)}
 }
 \description{
-Compute profile inf function for an arbitrary matrix \code{Phi} with with the L-BFGS-B algorithm of \link[stats]{optim}. Here the linear equality constraint is eliminated by using the Null space of \code{Phi}.
+Compute profile inf function for an arbitrary matrix \code{Psi} with with the L-BFGS-B algorithm of \link[stats]{optim}. Here the linear equality constraint is eliminated by using the Null space of \code{Psi}.
 }
 \seealso{
 \link{getProfileSup_optim}, \link{getProfileInf}, \link{plotMaxMin}

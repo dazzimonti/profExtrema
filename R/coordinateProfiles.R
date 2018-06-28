@@ -8,21 +8,7 @@
 #' @param options_approx an optional list of options for approxMaxMin, see \link{approxMaxMin} for details.
 #' @param uq_computations boolean, if TRUE the uq computations for the profile mean are computed.
 #' @param plot_level an integer to select the plots to return (0=no plots, 1=basic plots, 2= all plots)
-#' @param plot_options an optional list of parameters for plots. Currently available options
-#' \itemize{
-#' \item{\code{save:}}{boolean, if TRUE saves the plots in \code{folderPlots}}
-#' \item{\code{folderPlots:}}{a string containing the destination folder for plots, if \code{save==TRUE} default is \code{./}}
-#' \item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate.}
-#' \item{\code{titleProf:}}{a string containing the title for the coordinate profile plots}
-#' \item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d)}
-#' \item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
-#' \item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
-#' \item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC.}
-#' \item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}.}
-#' \item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
-#' \item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
-#' \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
-#' }
+#' @param plot_options an optional list of parameters for plots. See \link{setPlotOptions} for currently available options.
 #' @param CI_const an optional vector containing the constants for the CI. If not NULL, then profiles extrema for \eqn{m_n(x) \pm CI_const[i]*s_n(x,x)} are computed.
 #' @param return_level an integer to select the amount of details returned
 #' @param ... additional parameters to be passed to \link{coordProf_UQ}.

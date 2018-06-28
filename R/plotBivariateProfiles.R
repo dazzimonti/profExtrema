@@ -4,22 +4,22 @@
 #' @name plotBivariateProfiles
 #' @description Plot bivariate profiles, for dimension up to 6.
 #' @param bivProf list returned by \code{obliqueProfiles}.
-#' @param allPhi a list containing the matrices Phi (dim \eqn{2xd}) for which to compute the profile extrema
-#' @param Design a matrix of dimension \eqn{(2d)x numPhi} encoding the first (\code{Design[1:d,]}) and the second ((\code{Design[(d+1):(2*d),]})) axis values.
+#' @param allPsi a list containing the matrices Psi (dim \eqn{2xd}) for which to compute the profile extrema
+#' @param Design a matrix of dimension \eqn{(2d)x numPsi} encoding the first (\code{Design[1:d,]}) and the second ((\code{Design[(d+1):(2*d),]})) axis values.
 #' @param threshold if not \code{NULL} plots the level as a contour.
 #' @param whichIQR which quantiles to use for the inter-quantile range plot. If \code{NULL}, automatically selects the first and the last element of \code{bivProfres_UQ$prof_quantiles_approx}
 #' @param plot_options list as returned by \code{setPlotOptions}.
 #' @param ... additional parameters to be passed to the plot function
-#' @return plots the 2d maps of the profile sup and inf of the function for each Phi in allPhi. If threshold is not NULL also contours the threshold level.
+#' @return plots the 2d maps of the profile sup and inf of the function for each Psi in allPsi. If threshold is not NULL also contours the threshold level.
 #' @export
-plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichIQR=NULL,plot_options=NULL,...){
+plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichIQR=NULL,plot_options=NULL,...){
 
   if(is.null(plot_options))
     plot_options <- setPlotOptions(plot_options = plot_options,d = bivProf$kmModel@d,num_T = 1,kmModel = bivProf$kmModel)
 
   trueEvals <-plot_options$fun_evals
 
-  num_Phi<-length(allPhi)
+  num_Psi<-length(allPsi)
 
   if(is.null(Design)){
     warning("Design not selected, auto choice not implemented")
@@ -41,9 +41,9 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
   if(plot_options$save)
     pdf(file = paste(plot_options$folderPlots,"profMean_full",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
 
-  for(i in seq(num_Phi)){
+  for(i in seq(num_Psi)){
 
-    whichVars<-as.logical(apply(allPhi[[i]]==1,2,sum))
+    whichVars<-as.logical(apply(allPsi[[i]]==1,2,sum))
     pp <- bivProf$kmModel@X[,whichVars]
 
     if(trueEvals<3){
@@ -66,7 +66,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
     switch (as.character(trueEvals),
             "0" = {},
             "1" = {points(pp,pch=3)},
-            {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+            {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
 
     image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
@@ -76,7 +76,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
     switch (as.character(trueEvals),
             "0" = {},
             "1" = {points(pp,pch=3)},
-            {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+            {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
   }
 
   if(plot_options$save)
@@ -92,9 +92,9 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
       if(plot_options$save)
         pdf(file = paste(plot_options$folderPlots,"profQuant_",names(bivProf$res_UQ$prof_quantiles_approx)[j],plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
 
-      for(i in seq(num_Phi)){
+      for(i in seq(num_Psi)){
 
-        whichVars<-as.logical(apply(allPhi[[i]]==1,2,sum))
+        whichVars<-as.logical(apply(allPsi[[i]]==1,2,sum))
         pp <- bivProf$kmModel@X[,whichVars]
 
         if(trueEvals<3){
@@ -117,7 +117,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
         switch (as.character(trueEvals),
                 "0" = {},
                 "1" = {points(pp,pch=3)},
-                {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+                {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
 
         image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
@@ -127,7 +127,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
         switch (as.character(trueEvals),
                 "0" = {},
                 "1" = {points(pp,pch=3)},
-                {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+                {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
       }
 
       if(plot_options$save)
@@ -165,9 +165,9 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
     if(plot_options$save)
       pdf(file = paste(plot_options$folderPlots,"profUQrange",plot_options$id_save,".pdf",sep=""),width = 18,height = 9,pointsize = 15)
 
-    for(i in seq(num_Phi)){
+    for(i in seq(num_Psi)){
 
-      whichVars<-as.logical(apply(allPhi[[i]]==1,2,sum))
+      whichVars<-as.logical(apply(allPsi[[i]]==1,2,sum))
       pp <- bivProf$kmModel@X[,whichVars]
 
       zzBackgroud_max<-matrix(ddRange$max[,i],ncol=dd_eta)
@@ -181,7 +181,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
       switch (as.character(trueEvals),
               "0" = {},
               "1" = {points(pp,pch=3)},
-              {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+              {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
 
       image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
@@ -191,7 +191,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
       switch (as.character(trueEvals),
               "0" = {},
               "1" = {points(pp,pch=3)},
-              {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+              {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
     }
 
     if(plot_options$save)
@@ -210,9 +210,9 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
         pdf(file = paste(plot_options$folderPlots,"profBound_",names(bivProf$res_UQ$bound$bound)[j],plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
 
 
-      for(i in seq(num_Phi)){
+      for(i in seq(num_Psi)){
 
-        whichVars<-as.logical(apply(allPhi[[i]]==1,2,sum))
+        whichVars<-as.logical(apply(allPsi[[i]]==1,2,sum))
         pp <- bivProf$kmModel@X[,whichVars]
 
         bck_name <- "mean"
@@ -236,7 +236,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
         switch (as.character(trueEvals),
                 "0" = {},
                 "1" = {points(pp,pch=3)},
-                {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+                {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
 
         image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
@@ -246,7 +246,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
         switch (as.character(trueEvals),
                 "0" = {},
                 "1" = {points(pp,pch=3)},
-                {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+                {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
       }
 
       if(plot_options$save)
@@ -279,9 +279,9 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
     if(plot_options$save)
       pdf(file = paste(plot_options$folderPlots,"profUBoundRange",plot_options$id_save,".pdf",sep=""),width = 18,height = 9,pointsize = 15)
 
-    for(i in seq(num_Phi)){
+    for(i in seq(num_Psi)){
 
-      whichVars<-as.logical(apply(allPhi[[i]]==1,2,sum))
+      whichVars<-as.logical(apply(allPsi[[i]]==1,2,sum))
       pp <- bivProf$kmModel@X[,whichVars]
 
       zzBackgroud_max<-matrix(ddRange$max[,i],ncol=dd_eta)
@@ -295,7 +295,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
       switch (as.character(trueEvals),
               "0" = {},
               "1" = {points(pp,pch=3)},
-              {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+              {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
 
       image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
@@ -305,7 +305,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
       switch (as.character(trueEvals),
               "0" = {},
               "1" = {points(pp,pch=3)},
-              {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+              {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
     }
 
     if(plot_options$save)
@@ -316,9 +316,9 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
     if(plot_options$save)
       pdf(file = paste(plot_options$folderPlots,"profUQ_sigmaD",plot_options$id_save,".pdf",sep=""),width = 18,height = 9,pointsize = 15)
 
-    for(i in seq(num_Phi)){
+    for(i in seq(num_Psi)){
 
-      whichVars<-as.logical(apply(allPhi[[i]]==1,2,sum))
+      whichVars<-as.logical(apply(allPsi[[i]]==1,2,sum))
       pp <- bivProf$kmModel@X[,whichVars]
 
       zzBackgroud_max<-matrix(sqrt(pmax(bivProf$res_UQ$bound$mean_var_D$var$res$max[,i],0)),ncol=dd_eta)
@@ -336,7 +336,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
       switch (as.character(trueEvals),
               "0" = {},
               "1" = {points(pp,pch=3)},
-              {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+              {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
 
       image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
@@ -346,7 +346,7 @@ plotBivariateProfiles<-function(bivProf,allPhi,Design=NULL,threshold=NULL,whichI
       switch (as.character(trueEvals),
               "0" = {},
               "1" = {points(pp,pch=3)},
-              {points(pp,pch=3);points(pp[whichAbove,],pch=3,col=3)})
+              {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
     }
 
     if(plot_options$save)

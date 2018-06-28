@@ -4,27 +4,13 @@
 #' @title Oblique coordinate profiles starting from a kriging model
 #' @description The function obliqueProfiles computes the (oblique) profile extrema functions for the posterior mean of a Gaussian process and its confidence bounds
 #' @param object either a \link[DiceKriging]{km} model or a list containing partial results. If \code{object} is a km model then all computations are carried out. If \code{object} is a list, then the function carries out all computations to complete the list results.
-#' @param allPhi a list containing the matrices Phi (dim \eqn{pxd}) for which to compute the profile extrema
+#' @param allPsi a list containing the matrices Psi (dim \eqn{pxd}) for which to compute the profile extrema
 #' @param threshold the threshold of interest
 #' @param options_full an optional list of options for getProfileExtrema, see \link{getProfileExtrema} for details.
 #' @param options_approx an optional list of options for approxProfileExtrema, see \link{approxProfileExtrema} for details.
 #' @param uq_computations boolean, if TRUE the uq computations for the profile mean are computed.
 #' @param plot_level an integer to select the plots to return (0=no plots, 1=basic plots, 2= all plots)
-#' @param plot_options an optional list of parameters for plots. Currently available options
-#' \itemize{
-#' \item{\code{save:}}{boolean, if TRUE saves the plots in \code{folderPlots}}
-#' \item{\code{folderPlots:}}{a string containing the destination folder for plots, if \code{save==TRUE} default is \code{./}}
-#' \item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate.}
-#' \item{\code{titleProf:}}{a string containing the title for the coordinate profile plots}
-#' \item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d)}
-#' \item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
-#' \item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
-#' \item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC.}
-#' \item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}.}
-#' \item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
-#' \item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
-#' \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
-#' }
+#' @param plot_options an optional list of parameters for plots. See \link{setPlotOptions} for currently available options.
 #' @param CI_const an optional vector containing the constants for the CI. If not NULL, then profiles extrema for \eqn{m_n(x) \pm CI_const[i]*s_n(x,x)} are computed.
 #' @param return_level an integer to select the amount of details returned
 #' @param ... additional parameters to be passed to \link{obliqueProf_UQ}.
@@ -64,10 +50,10 @@
 #' options_full<-list(multistart=4,heavyReturn=TRUE,discretization=100)
 #' options_approx<- list(multistart=4,heavyReturn=TRUE,initDesign=NULL,fullDesignSize=100)
 #' theta=pi/4
-#' allPhi = list(Phi1=matrix(c(cos(theta),sin(theta)),ncol=2),
-#' Phi2=matrix(c(cos(theta+pi/2),sin(theta+pi/2)),ncol=2))
+#' allPsi = list(Psi1=matrix(c(cos(theta),sin(theta)),ncol=2),
+#' Psi2=matrix(c(cos(theta+pi/2),sin(theta+pi/2)),ncol=2))
 #'
-#' profMeans<-obliqueProfiles(object = kmModel,allPhi = allPhi,threshold = threshold,
+#' profMeans<-obliqueProfiles(object = kmModel,allPsi = allPsi,threshold = threshold,
 #'                            options_full = options_full,options_approx = options_approx,
 #'                            uq_computations = FALSE,plot_level = 3,plot_options = NULL,
 #'                            CI_const = NULL,return_level = 2)
@@ -77,13 +63,13 @@
 #' plot_options<-list(save=FALSE, titleProf = "Coordinate profiles",
 #'                    title2d = "Posterior mean",qq_fill=TRUE)
 #' options_sims<-list(nsim=150)
-#' obProfUQ<-obliqueProfiles(object=profMeans,threshold=threshold,allPhi = allPhi,
+#' obProfUQ<-obliqueProfiles(object=profMeans,threshold=threshold,allPsi = allPsi,
 #'                            options_full=options_full, options_approx=options_approx,
 #'                            uq_computations=TRUE, plot_level=3,plot_options=NULL,
 #'                            CI_const=NULL,return_level=2,options_sims=options_sims)
 #' }
 #' @export
-obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_approx=NULL,uq_computations=FALSE,plot_level=0,plot_options=NULL,CI_const=NULL,return_level=1,...){
+obliqueProfiles = function(object,allPsi,threshold,options_full=NULL,options_approx=NULL,uq_computations=FALSE,plot_level=0,plot_options=NULL,CI_const=NULL,return_level=1,...){
 
   # Check object
   if(is(object,"km")){
@@ -123,17 +109,17 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
   }
 
   # Initialize initial design for approximation
-  num_Phi = length(allPhi)
+  num_Psi = length(allPsi)
   if(is.null(options_approx$initDesign)){
     init_des<-list()
-    for(i in seq(num_Phi)){
-      p<-nrow(allPhi[[i]])
-      # Choose limits for etas for current Phi
-      mmEtas<-apply(crossprod(t(allPhi[[i]]),cubeVertex),1,min)
-      MMetas<-apply(crossprod(t(allPhi[[i]]),cubeVertex),1,max)
+    for(i in seq(num_Psi)){
+      p<-nrow(allPsi[[i]])
+      # Choose limits for etas for current Psi
+      mmEtas<-apply(crossprod(t(allPsi[[i]]),cubeVertex),1,min)
+      MMetas<-apply(crossprod(t(allPsi[[i]]),cubeVertex),1,max)
 
       # Get initial design
-      if(length(options_approx$initDesign)<num_Phi){
+      if(length(options_approx$initDesign)<num_Psi){
         if(p==1){
           init_des[[i]]<-matrix(seq(from=mmEtas[1],to=MMetas[1],,ceiling(sqrt(d)*10)),ncol=1)
         }else{
@@ -145,7 +131,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
     }
     options_approx$initDesign<-init_des
   }
-  p<-nrow(allPhi[[1]])
+  p<-nrow(allPsi[[1]])
 
   # save number of thresholds
   num_T<-length(threshold)
@@ -169,7 +155,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
   # Compute profile mean full, if not already computed
   if(is.null(object$profMean_full)){
     timeIn<-get_nanotime()
-    object$profMean_full<-getProfileExtrema(f = g,fprime = gprime,d = d,allPhi = allPhi,opts = options_full)
+    object$profMean_full<-getProfileExtrema(f = g,fprime = gprime,d = d,allPsi = allPsi,opts = options_full)
     timeMean_full<-(get_nanotime()-timeIn)*1e-9
   }else{
     if(return_level>1 && is.null(object$more$times$full))
@@ -190,7 +176,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
   }
 
   # Plot posterior mean, ONLY for dimension==2
-  if(plot_level>=2 & num_Phi==2 & d==2){
+  if(plot_level>=2 & num_Psi==2 & d==2){
 
     # since dimension==2 we can plot the posterior mean
     newdata<-expand.grid(seq(ll_b[1],uu_b[1],,100),seq(ll_b[2],uu_b[2],,100))
@@ -206,10 +192,10 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
     contour(matrix(pred2d$mean,nrow = 100),add=T,nlevels = 10,lwd=1.5,labcex=1.2)
     contour(matrix(pred2d$mean,nrow = 100),add=T,levels = threshold,col=plot_options$col_thresh,lwd=3,labcex=1.5)
     for(tt in seq(num_T)){
-      plotOblique(changePoints = changePP$alwaysEx[[tt]][[1]],direction = allPhi[[1]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
-      plotOblique(changePoints = changePP$alwaysEx[[tt]][[2]],direction = allPhi[[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
-      plotOblique(changePoints = changePP$neverEx[[tt]][[1]],direction = allPhi[[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
-      plotOblique(changePoints = changePP$neverEx[[tt]][[2]],direction = allPhi[[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
+      plotOblique(changePoints = changePP$alwaysEx[[tt]][[1]],direction = allPsi[[1]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
+      plotOblique(changePoints = changePP$alwaysEx[[tt]][[2]],direction = allPsi[[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
+      plotOblique(changePoints = changePP$neverEx[[tt]][[1]],direction = allPsi[[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
+      plotOblique(changePoints = changePP$neverEx[[tt]][[2]],direction = allPsi[[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
     }
     if(plot_options$fun_evals>0){
       points(object$kmModel@X,pch=17,cex=1.6)
@@ -228,7 +214,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
     }else{
       if(plot_options$save)
         pdf(file = paste(plot_options$folderPlots,"profMean_full",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-      plotBivProf(allRes = object$profMean_full,allPhi = allPhi,Design=object$profMean_full$Design,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+      plotBivProf(allRes = object$profMean_full,allPsi = allPsi,Design=object$profMean_full$Design,threshold=threshold,main_addendum="(mean, full)",xlab=expression(eta[1]),ylab=expression(eta[2]))
     }
     if(plot_options$save)
       dev.off()
@@ -237,7 +223,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
   # Compute profile extrema with approximation, if not already computed
   if(is.null(object$profMean_approx)){
     timeIn<-get_nanotime()
-    object$profMean_approx<-approxProfileExtrema(f = g,fprime = gprime,d = d,allPhi = allPhi,opts = options_approx)
+    object$profMean_approx<-approxProfileExtrema(f = g,fprime = gprime,d = d,allPsi = allPsi,opts = options_approx)
     timeMean_approx<-(get_nanotime()-timeIn)*1e-9
   }else{
     if(return_level>1 && is.null(object$more$times$approx))
@@ -250,7 +236,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
       cairo_pdf(filename = paste(plot_options$folderPlots,"profMean_comparison",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
     mfrows<-switch(d,"1"=c(1,1),"2"=c(2,1),"3"=c(2,2),"4"=c(2,2),"5"=c(3,2),"6"=c(3,2))
     par(mfrow=mfrows, mar = c(4, 5, 3, 1) + 0.1)
-    for(coord in seq(num_Phi)){
+    for(coord in seq(num_Psi)){
       if(is.null(plot_options$ylim)){
         ylimTemp<-c(min(object$profMean_full$res$min[,coord]),max(object$profMean_full$res$max[,coord]))
       }else{
@@ -287,7 +273,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
   }else{
     if(plot_options$save)
       pdf(file = paste(plot_options$folderPlots,"profMean_approx",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-    plotBivProf(allRes = object$profMean_approx,allPhi = allPhi,Design=object$profMean_approx$Design,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+    plotBivProf(allRes = object$profMean_approx,allPsi = allPsi,Design=object$profMean_approx$Design,threshold=threshold,main_addendum="(mean, approx)",xlab=expression(eta[1]),ylab=expression(eta[2]))
     if(plot_options$save)
       dev.off()
   }
@@ -317,7 +303,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
     # Compute profile sd full, if not already computed
     if(is.null(object$profSd_full)){
       timeIn<-get_nanotime()
-      object$profSd_full<-getProfileExtrema(f = g_s2,fprime = g_s2prime,d = d,allPhi = allPhi,opts = options_full)
+      object$profSd_full<-getProfileExtrema(f = g_s2,fprime = g_s2prime,d = d,allPsi = allPsi,opts = options_full)
       timeVar_full<-(get_nanotime()-timeIn)*1e-9
     }else{
       if(return_level>1 && is.null(object$more$times$full))
@@ -358,7 +344,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
         cairo_pdf(filename = paste(plot_options$folderPlots,"profMeanCI_comparison",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
       mfrows<-switch(d,"1"=c(1,1),"2"=c(2,1),"3"=c(2,2),"4"=c(2,2),"5"=c(3,2),"6"=c(3,2))
       par(mfrow=mfrows, mar = c(4, 5, 3, 1) + 0.1)
-      for(coord in seq(num_Phi)){
+      for(coord in seq(num_Psi)){
         if(is.null(plot_options$ylim)){
           ylimTemp_CI<-c(object$profMean_full$res$min[,coord],object$profMean_full$res$max[,coord])
           for(i in seq(length(CI_const))){
@@ -415,13 +401,13 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
       for(i in seq(length(CI_const))){
         if(plot_options$save)
           pdf(file = paste(plot_options$folderPlots,"profMeanCI",CI_const[i]*100,"_lower",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-        plotBivProf(allRes = prof_CI_const_full[[i]]$lower,allPhi = allPhi,Design=object$profMean_full$Design,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+        plotBivProf(allRes = prof_CI_const_full[[i]]$lower,allPsi = allPsi,Design=object$profMean_full$Design,threshold=threshold,main_addendum=paste("(CI,",CI_const[i],", lower)"),xlab=expression(eta[1]),ylab=expression(eta[2]))
         if(plot_options$save)
           dev.off()
 
         if(plot_options$save)
           pdf(file = paste(plot_options$folderPlots,"profMeanCI",CI_const[i]*100,"_upper",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-        plotBivProf(allRes = prof_CI_const_full[[i]]$upper,allPhi = allPhi,Design=object$profMean_full$Design,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+        plotBivProf(allRes = prof_CI_const_full[[i]]$upper,allPsi = allPsi,Design=object$profMean_full$Design,threshold=threshold,main_addendum=paste("(CI,",CI_const[i],", upper)"),xlab=expression(eta[1]),ylab=expression(eta[2]))
         if(plot_options$save)
           dev.off()
       }
@@ -436,7 +422,7 @@ obliqueProfiles = function(object,allPhi,threshold,options_full=NULL,options_app
   #  warning("UQ computations need to be checked!")
     if(is.null(object$res_UQ$kmModel))
       object$res_UQ$kmModel=object$kmModel
-    object$res_UQ<-obliqueProf_UQ(object=object$res_UQ,threshold=threshold,allPhi=allPhi,allResMean=object$profMean_full,
+    object$res_UQ<-obliqueProf_UQ(object=object$res_UQ,threshold=threshold,allPsi=allPsi,allResMean=object$profMean_full,
                                 options_approx=options_approx,plot_level=max(0,plot_level-1),
                                 plot_options=plot_options,return_level=max(1,return_level-1),...)
 

@@ -4,7 +4,7 @@
 #' @title Oblique profiles UQ from a kriging model
 #' @description The function obliqueProf_UQ computes the profile extrema functions for posterior realizations of a Gaussian process and its confidence bounds
 #' @param object either a \link[DiceKriging]{km} model or a list containing partial results. If \code{object} is a km model then all computations are carried out. If \code{object} is a list, then the function carries out all computations to complete the results list.
-#' @param allPhi a list containing the matrices Phi (dim \eqn{pxd}) for which to compute the profile extrema
+#' @param allPsi a list containing the matrices Psi (dim \eqn{pxd}) for which to compute the profile extrema
 #' @param threshold the threshold of interest
 #' @param allResMean a list resulting from \code{getProfileExtrema} or \code{approxProfileExtrema} for the profile extrema on the mean. If NULL the median from the observations is plotted
 #' @param quantiles_uq a vector containing the quantiles to be computed
@@ -20,23 +20,9 @@
 #' \item{\code{integcontrol:}} list containing the options for numerical integration of the criterion;
 #' \item{\code{integration.param:}} list containing the integration design, obtained with the function \link[KrigInv]{integration_design}.
 #' }
-#' @param options_bound an optional list containing \code{beta} the confidence level for the approximation and \code{alpha} the confidence level for the bound. If \code{NULL}, the bound is not computed.
+#' @param options_bound an optional list containing \code{beta} the confidence level for the approximation and \code{alpha} the confidence level for the bound. Note that \code{alpha > 2*beta}. If \code{NULL}, the bound is not computed.
 #' @param plot_level an integer to select the plots to return (0=no plots, 1=basic plots, 2= all plots)
-#' @param plot_options an optional list of parameters for plots. Currently available options
-#' \itemize{
-#' \item{\code{save:}}{boolean, if TRUE saves the plots in \code{folderPlots}}
-#' \item{\code{folderPlots:}}{a string containing the destination folder for plots, if \code{save==TRUE} default is \code{./}}
-#' \item{\code{ylim:}}{a matrix \code{coord}x2 containing the ylim for each coordinate.}
-#' \item{\code{titleProf:}}{a string containing the title for the coordinate profile plots}
-#' \item{\code{title2d:}}{a string containing the title for the 2d plots (if the input is 2d)}
-#' \item{\code{coord_names:}}{a \eqn{d}-vector of characters naming the dimensions. If NULL and \code{kmModel} not NULL then it is the names of \code{kmModel@X} otherwise \code{x_1,...,x_d}}
-#' \item{\code{design:}}{a \eqn{dxr} matrix where \eqn{d} is the input dimension and \eqn{r} is the size of the discretization for plots at each dimension}
-#' \item{\code{id_save:}}{a string to be added to the plot file names, useful for serial computations on HPC.}
-#' \item{\code{qq_fill:}}{if TRUE it fills the region between the first 2 quantiles in \code{quantiles_uq}.}
-#' \item{\code{col_CCPthresh_nev:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles sup and the thresholds}
-#' \item{\code{col_CCPthresh_alw:}}{Color palette of dimension \code{num_T} for the colors of the vertical lines delimiting the intersections between the profiles inf and the thresholds}
-#' \item{\code{col_thresh:}}{Color palette of dimension \code{num_T} for the colors of the thresholds}
-#' }
+#' @param plot_options an optional list of parameters for plots. See \link{setPlotOptions} for currently available options.
 #' @param return_level an integer to select the amount of details returned
 #' @return If return_level=1 a list containing \itemize{
 #' \item{\code{profSups:}}{an array \code{dxfullDesignSizexnsims} containing the profile sup for each coordinate for each realization.}
@@ -84,11 +70,11 @@
 #' # Define the oblique directions
 #' # (for theta=0 it is equal to coordinateProfiles)
 #' theta=pi/4
-#' allPhi = list(Phi1=matrix(c(cos(theta),sin(theta)),ncol=2),
-#'               Phi2=matrix(c(cos(theta+pi/2),sin(theta+pi/2)),ncol=2))
+#' allPsi = list(Psi1=matrix(c(cos(theta),sin(theta)),ncol=2),
+#'               Psi2=matrix(c(cos(theta+pi/2),sin(theta+pi/2)),ncol=2))
 #' \dontrun{
 #' # profile UQ on approximate oblique profiles
-#' oProfiles_UQ<-obliqueProf_UQ(object = kmModel,threshold = threshold,allPhi=allPhi,
+#' oProfiles_UQ<-obliqueProf_UQ(object = kmModel,threshold = threshold,allPsi=allPsi,
 #'                              allResMean = NULL,quantiles_uq = c(0.05,0.95),
 #'                              options_approx = options_approx, options_full_sims = NULL,
 #'                              options_sims = options_sims,options_bound = NULL,
@@ -97,7 +83,7 @@
 #'
 #' options_full_sims<-list(multistart=4,heavyReturn=TRUE)
 #' options_sims$nsim <- 50
-#' oProfiles_UQ_full<- obliqueProf_UQ(object = oProfiles_UQ,threshold = threshold,allPhi=allPhi,
+#' oProfiles_UQ_full<- obliqueProf_UQ(object = oProfiles_UQ,threshold = threshold,allPsi=allPsi,
 #'                              allResMean = NULL,quantiles_uq = c(0.05,0.95),
 #'                              options_approx = options_approx, options_full_sims = options_full_sims,
 #'                              options_sims = options_sims,options_bound = NULL,
@@ -107,17 +93,17 @@
 #'
 #' # profile UQ on full optim oblique profiles with bound
 #' oProfiles_UQ_full_bound<-obliqueProf_UQ(object = oProfiles_UQ_full,threshold = threshold,
-#'                                         allPhi=allPhi, allResMean = NULL,
+#'                                         allPsi=allPsi, allResMean = NULL,
 #'                                         quantiles_uq = c(0.05,0.95),
 #'                                         options_approx = options_approx,
 #'                                         options_full_sims = options_full_sims,
 #'                                       options_sims = options_sims,
-#'                                       options_bound = list(beta=0.055,alpha=0.05),
+#'                                       options_bound = list(beta=0.024,alpha=0.05),
 #'                                       plot_level = 3, plot_options = options_plots,
 #'                                       return_level = 3)
 #' }
 #' @export
-obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.95),options_approx=NULL,options_full_sims=NULL,options_sims=NULL,options_bound=NULL,plot_level=0,plot_options=NULL,return_level=1){
+obliqueProf_UQ = function(object,allPsi,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.95),options_approx=NULL,options_full_sims=NULL,options_sims=NULL,options_bound=NULL,plot_level=0,plot_options=NULL,return_level=1){
 
   # number of thresholds
   num_T<-length(threshold)
@@ -133,7 +119,7 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
   d<-object$kmModel@d
 
   # set up Psi dimension
-  p=nrow(matrix(allPhi[[1]],ncol=d))
+  p=nrow(matrix(allPsi[[1]],ncol=d))
 
   # Options setup
   # Initialize options_approx
@@ -159,17 +145,17 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
   }
 
   # Initialize initial design for approximation
-  num_Phi = length(allPhi)
+  num_Psi = length(allPsi)
   if(is.null(options_approx$initDesign)){
     init_des<-list()
-    for(i in seq(num_Phi)){
-      p<-nrow(allPhi[[i]])
-      # Choose limits for etas for current Phi
-      mmEtas<-min(crossprod(t(allPhi[[i]]),cubeVertex))
-      MMetas<-max(crossprod(t(allPhi[[i]]),cubeVertex))
+    for(i in seq(num_Psi)){
+      p<-nrow(allPsi[[i]])
+      # Choose limits for etas for current Psi
+      mmEtas<-min(crossprod(t(allPsi[[i]]),cubeVertex))
+      MMetas<-max(crossprod(t(allPsi[[i]]),cubeVertex))
 
       # Get initial design
-      if(length(options_approx$initDesign)<num_Phi){
+      if(length(options_approx$initDesign)<num_Psi){
         if(p==1){
           init_des[[i]]<-matrix(seq(from=mmEtas[1],to=MMetas[1],,ceiling(sqrt(d)*10)),ncol=1)
         }else{
@@ -276,15 +262,15 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
   # if the profSups and profInfs are not already there, compute them
   if(is.null(object$profSups) || is.null(object$profInfs)){
     # choose size of full design
-    object$profSups<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^p,options_sims$nsim))
-    object$profInfs<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^p,options_sims$nsim))
+    object$profSups<-array(NA,dim = c(num_Psi,options_approx$fullDesignSize^p,options_sims$nsim))
+    object$profInfs<-array(NA,dim = c(num_Psi,options_approx$fullDesignSize^p,options_sims$nsim))
     object$more$times$tApprox1ord<-rep(NA,options_sims$nsim)
   }
 
   if(!is.null(options_full_sims) && is.null(object$profSups_full)){
     options_full_sims<-modifyList(list(multistart=4,heavyReturn=TRUE,discretization=options_approx$fullDesignSize),options_full_sims)
-    object$profSups_full<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^d,options_sims$nsim))
-    object$profInfs_full<-array(NA,dim = c(num_Phi,options_approx$fullDesignSize^d,options_sims$nsim))
+    object$profSups_full<-array(NA,dim = c(num_Psi,options_approx$fullDesignSize^d,options_sims$nsim))
+    object$profInfs_full<-array(NA,dim = c(num_Psi,options_approx$fullDesignSize^d,options_sims$nsim))
     object$more$times$tFull<-rep(NA,options_sims$nsim)
   }
 
@@ -303,7 +289,7 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
         cat("Full_sims.Realization ",i,"\n")
       }
       timeIn<-get_nanotime()
-      temp_full<-getProfileExtrema(f = g_uq_spec,fprime = g_uq_der_spec,allPhi = allPhi,d = d,opts = options_full_sims)
+      temp_full<-getProfileExtrema(f = g_uq_spec,fprime = g_uq_der_spec,allPsi = allPsi,d = d,opts = options_full_sims)
       object$more$times$tFull[i]<-(get_nanotime()-timeIn)*1e-9
 
       object$profSups_full[,,i]<-t(temp_full$res$max)
@@ -318,7 +304,7 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
         cat("Approx_sims. Realization ",i,"\n")
       }
       timeIn<-get_nanotime()
-      temp_1o<-approxProfileExtrema(f = g_uq_spec,fprime = g_uq_der_spec,allPhi = allPhi,d = d,opts = options_approx)
+      temp_1o<-approxProfileExtrema(f = g_uq_spec,fprime = g_uq_der_spec,allPsi = allPsi,d = d,opts = options_approx)
       object$more$times$tApprox1ord[i]<-(get_nanotime()-timeIn)*1e-9
 
       #  temp<-getProfileExtrema(f=g_uq_spec,fprime = NULL,d=2,options = list(multistart=2,heavyReturn=TRUE))
@@ -335,14 +321,14 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
   # save quantiles for approximations
   object$prof_quantiles_approx<-list()
   for(i in seq(length(quantiles_uq))){
-    object$prof_quantiles_approx[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = num_Phi),
-                                                     max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = num_Phi)))
+    object$prof_quantiles_approx[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = num_Psi),
+                                                     max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = num_Psi)))
   }
   names(object$prof_quantiles_approx)<-quantiles_uq
 
   ccPP<-list()
   for(j in seq(length(quantiles_uq))){
-    for(coord in seq(num_Phi)){
+    for(coord in seq(num_Psi)){
       object$prof_quantiles_approx[[j]]$res$max[,coord]<-apply(object$profSups[coord,,],1,function(x){return(quantile(x,quantiles_uq[j]))})
       object$prof_quantiles_approx[[j]]$res$min[,coord]<-apply(object$profInfs[coord,,],1,function(x){return(quantile(x,quantiles_uq[j]))})
     }
@@ -364,14 +350,14 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
   if(!is.null(options_full_sims)){
     object$prof_quantiles_full<-list()
     for(i in seq(length(quantiles_uq))){
-      object$prof_quantiles_full[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^d,ncol = num_Phi),
-                                                     max=matrix(NA,nrow = options_approx$fullDesignSize^d,ncol = num_Phi)))
+      object$prof_quantiles_full[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^d,ncol = num_Psi),
+                                                     max=matrix(NA,nrow = options_approx$fullDesignSize^d,ncol = num_Psi)))
     }
     names(object$prof_quantiles_full)<-quantiles_uq
 
     ccPP_full<-list()
     for(j in seq(length(quantiles_uq))){
-      for(coord in seq(num_Phi)){
+      for(coord in seq(num_Psi)){
         object$prof_quantiles_full[[j]]$res$max[,coord]<-apply(object$profSups_full[coord,,],1,function(x){return(quantile(x,quantiles_uq[j]))})
         object$prof_quantiles_full[[j]]$res$min[,coord]<-apply(object$profInfs_full[coord,,],1,function(x){return(quantile(x,quantiles_uq[j]))})
       }
@@ -398,7 +384,7 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
     changePP<-ccPP$`0.5`
 
   # Plot the posterior mean and visualize the actual excursion set and the regions of no-excursion according to the profile extrema functions.
-  if(plot_level>=2 && num_Phi==2 &&  d==2){
+  if(plot_level>=2 && num_Psi==2 &&  d==2){
     # since dimension==2 we can plot the posterior mean
     newdata<-expand.grid(seq(0,1,,100),seq(0,1,,100))
     colnames(newdata)<-colnames(object$kmModel@X)
@@ -412,27 +398,27 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
     contour(matrix(pred2d$mean,nrow = 100),add=T,nlevels = 10,lwd=1.5,labcex=1.2)
     contour(matrix(pred2d$mean,nrow = 100),add=T,levels = threshold,col=plot_options$col_thresh,lwd=3,labcex=1.5)
     for(tt in seq(num_T)){
-      plotOblique(changePP$alwaysEx[[tt]][[1]],allPhi[[1]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
-      plotOblique(changePP$alwaysEx[[tt]][[2]],allPhi[[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
-      plotOblique(changePP$neverEx[[tt]][[1]],allPhi[[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
-      plotOblique(changePP$neverEx[[tt]][[2]],allPhi[[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
+      plotOblique(changePP$alwaysEx[[tt]][[1]],allPsi[[1]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
+      plotOblique(changePP$alwaysEx[[tt]][[2]],allPsi[[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2.5)
+      plotOblique(changePP$neverEx[[tt]][[1]],allPsi[[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
+      plotOblique(changePP$neverEx[[tt]][[2]],allPsi[[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2.5)
     }
     if(!is.null(options_full_sims)){
       for(j in seq(length(quantiles_uq))){
         for(tt in seq(num_T)){
-          plotOblique(ccPP_full[[j]]$alwaysEx[[tt]][[1]],allPhi[[1]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
-          plotOblique(ccPP_full[[j]]$alwaysEx[[tt]][[2]],allPhi[[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
-          plotOblique(ccPP_full[[j]]$neverEx[[tt]][[1]],allPhi[[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
-          plotOblique(ccPP_full[[j]]$neverEx[[tt]][[2]],allPhi[[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
+          plotOblique(ccPP_full[[j]]$alwaysEx[[tt]][[1]],allPsi[[1]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
+          plotOblique(ccPP_full[[j]]$alwaysEx[[tt]][[2]],allPsi[[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
+          plotOblique(ccPP_full[[j]]$neverEx[[tt]][[1]],allPsi[[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
+          plotOblique(ccPP_full[[j]]$neverEx[[tt]][[2]],allPsi[[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
         }
       }
     }else{
       for(j in seq(length(quantiles_uq))){
         for(tt in seq(num_T)){
-          plotOblique(ccPP[[j]]$alwaysEx[[tt]][[1]],allPhi[[1]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
-          plotOblique(ccPP[[j]]$alwaysEx[[tt]][[2]],allPhi[[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
-          plotOblique(ccPP[[j]]$neverEx[[tt]][[1]],allPhi[[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
-          plotOblique(ccPP[[j]]$neverEx[[tt]][[2]],allPhi[[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
+          plotOblique(ccPP[[j]]$alwaysEx[[tt]][[1]],allPsi[[1]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
+          plotOblique(ccPP[[j]]$alwaysEx[[tt]][[2]],allPsi[[2]],col=plot_options$col_CCPthresh_alw[tt],lwd=2,lty=2)
+          plotOblique(ccPP[[j]]$neverEx[[tt]][[1]],allPsi[[1]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
+          plotOblique(ccPP[[j]]$neverEx[[tt]][[2]],allPsi[[2]],col=plot_options$col_CCPthresh_nev[tt],lwd=2,lty=2)
         }
       }
     }
@@ -460,7 +446,7 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
       for(j in seq(length(quantiles_uq))){
           if(plot_options$save)
             pdf(file = paste(plot_options$folderPlots,"prof_UQ_approx_q",names(object$prof_quantiles_approx)[j],plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-          plotBivProf(allRes = object$prof_quantiles_approx[[j]],allPhi = allPhi,Design=object$Design_approx,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+          plotBivProf(allRes = object$prof_quantiles_approx[[j]],allPsi = allPsi,Design=object$Design_approx,threshold=threshold,main_addendum=paste("(UQ quantile,",names(object$prof_quantiles_approx)[j],")"),xlab=expression(eta[1]),ylab=expression(eta[2]))
           if(plot_options$save)
             dev.off()
       }
@@ -475,7 +461,7 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
   # Compute the bound correction
   if(!is.null(options_bound)){
     object$bound<-bound_profiles(objectUQ = object,mean_var_delta = object$bound$mean_var_D,beta = options_bound$beta,alpha = options_bound$alpha,
-                                 options_approx = options_approx,options_full_sims = options_full_sims,allPhi=allPhi)
+                                 options_approx = options_approx,options_full_sims = options_full_sims,allPsi=allPsi)
 
     if(plot_level>=1){
       if(p==1){
@@ -488,13 +474,13 @@ obliqueProf_UQ = function(object,allPhi,threshold,allResMean=NULL,quantiles_uq=c
       }else{
           if(plot_options$save)
             pdf(file = paste(plot_options$folderPlots,"prof_UQ_bound_approx_lower",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-          plotBivProf(allRes = object$bound$bound$lower,allPhi = allPhi,Design=object$Design_approx,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+          plotBivProf(allRes = object$bound$bound$lower,allPsi = allPsi,Design=object$Design_approx,threshold=threshold,main_addendum=paste("(UQ bound lower, ",2*options_bound$alpha,")"),xlab=expression(eta[1]),ylab=expression(eta[2]))
           if(plot_options$save)
             dev.off()
 
           if(plot_options$save)
             pdf(file = paste(plot_options$folderPlots,"prof_UQ_bound_approx_upper",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-          plotBivProf(allRes = object$bound$bound$upper,allPhi = allPhi,Design=object$Design_approx,threshold=threshold,xlab=expression(eta[1]),ylab=expression(eta[2]))
+          plotBivProf(allRes = object$bound$bound$upper,allPsi = allPsi,Design=object$Design_approx,threshold=threshold,main_addendum=paste("(UQ bound upper, ",2*options_bound$alpha,")"),xlab=expression(eta[1]),ylab=expression(eta[2]))
           if(plot_options$save)
             dev.off()
 
