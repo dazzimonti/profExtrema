@@ -28,6 +28,8 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
 
   dd_eta<-length(Design[,1])/2
 
+  bkg_col <- gray.colors(20)
+
   if(!is.null(threshold)){
     whichAbove = bivProf$kmModel@y>threshold
   }else{
@@ -58,8 +60,10 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
       zzBackgroud_min<-propPoints$freq
       bck_name <- "frequency"
     }
-    layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
-    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
+#    layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
+    layout(matrix(1:4,nrow=1),widths=c(0.45,0.05,0.45,0.05))
+    par(mar=c(4,4,4,0.2) + 0.2)
+    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=bkg_col,
           main=bquote(P[Psi[.(i)]]^sup ~" mean, "~  .(bck_name) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
@@ -68,8 +72,14 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
             "1" = {points(pp,pch=3)},
             {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
+    legend_info<-hist(zzBackgroud_max,plot=FALSE,breaks=20)
+    which_col_leg <- which(legend_info$counts>0)
+    par(mar=c(5,0.2,5,2.8))
+    image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+    axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
 
-    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
+    par(mar=c(4,4,4,0.2) + 0.2)
+    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=bkg_col,
           main=bquote(P[Psi[.(i)]]^inf ~" mean, "~  .(bck_name) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T)
     contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
@@ -77,6 +87,13 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
             "0" = {},
             "1" = {points(pp,pch=3)},
             {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
+
+    legend_info<-hist(zzBackgroud_min,plot=FALSE,breaks=20)
+    which_col_leg <- which(legend_info$counts>0)
+    par(mar=c(5,0.2,5,2.8))
+    image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+    axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
+
   }
 
   if(plot_options$save)
@@ -109,8 +126,10 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
           zzBackgroud_min<-propPoints$freq
           bck_name <- "frequency"
         }
-        layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
-        image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
+#        layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
+        layout(matrix(1:4,nrow=1),widths=c(0.45,0.05,0.45,0.05))
+        par(mar=c(4,4,4,0.2) + 0.2)
+        image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=bkg_col,
               main=bquote(P[Psi[.(i)]]^sup ~" Z (" ~ .(names(bivProf$res_UQ$prof_quantiles_approx)[j]) ~ "), "~  .(bck_name) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
@@ -120,7 +139,14 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
                 {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
 
-        image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
+        legend_info<-hist(zzBackgroud_max,plot=FALSE,breaks=20)
+        which_col_leg <- which(legend_info$counts>0)
+        par(mar=c(5,0.2,5,2.8))
+        image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+        axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
+
+        par(mar=c(4,4,4,0.2) + 0.2)
+        image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=bkg_col,
               main=bquote(P[Psi[.(i)]]^inf ~" Z (" ~ .(names(bivProf$res_UQ$prof_quantiles_approx)[j]) ~ "), " ~ .(bck_name) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
@@ -128,6 +154,13 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
                 "0" = {},
                 "1" = {points(pp,pch=3)},
                 {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
+
+
+        legend_info<-hist(zzBackgroud_min,plot=FALSE,breaks=20)
+        which_col_leg <- which(legend_info$counts>0)
+        par(mar=c(5,0.2,5,2.8))
+        image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+        axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg))#,mgp=c(0,.5,0))
       }
 
       if(plot_options$save)
@@ -173,8 +206,10 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
       zzBackgroud_max<-matrix(ddRange$max[,i],ncol=dd_eta)
       zzBackgroud_min<-matrix(ddRange$min[,i],ncol=dd_eta)
 
-      layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
-      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
+#      layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
+      layout(matrix(1:4,nrow=1),widths=c(0.45,0.05,0.45,0.05))
+      par(mar=c(4,4,4,0.2) + 0.2)
+      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=bkg_col,
             main=bquote(P[Psi[.(i)]]^sup ~" mean, wIQR " ~ .(actualQQ[1]) ~ "-" ~ .(actualQQ[2]) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
@@ -183,8 +218,14 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
               "1" = {points(pp,pch=3)},
               {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
+      legend_info<-hist(zzBackgroud_max,plot=FALSE,breaks=20)
+      which_col_leg <- which(legend_info$counts>0)
+      par(mar=c(5,0.2,5,2.8))
+      image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+      axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
 
-      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
+      par(mar=c(4,4,4,0.2) + 0.2)
+      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=bkg_col,
             main=bquote(P[Psi[.(i)]]^inf ~" mean, wIQR " ~ .(actualQQ[1]) ~ "-" ~ .(actualQQ[2]) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
@@ -192,6 +233,12 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
               "0" = {},
               "1" = {points(pp,pch=3)},
               {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
+
+      legend_info<-hist(zzBackgroud_min,plot=FALSE,breaks=20)
+      which_col_leg <- which(legend_info$counts>0)
+      par(mar=c(5,0.2,5,2.8))
+      image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+      axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
     }
 
     if(plot_options$save)
@@ -228,8 +275,10 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
           zzBackgroud_min<-propPoints$freq
           bck_name <- "frequency"
         }
-        layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
-        image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
+#        layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
+        layout(matrix(1:4,nrow=1),widths=c(0.45,0.05,0.45,0.05))
+        par(mar=c(4,4,4,0.2) + 0.2)
+        image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=bkg_col,
               main=bquote(P[Psi[.(i)]]^sup ~ .(names(bivProf$res_UQ$bound$bound)[j]) ~ " bound," ~ " "~ .(bck_name)),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
@@ -238,8 +287,14 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
                 "1" = {points(pp,pch=3)},
                 {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
+        legend_info<-hist(zzBackgroud_max,plot=FALSE,breaks=20)
+        which_col_leg <- which(legend_info$counts>0)
+        par(mar=c(5,0.2,5,2.8))
+        image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+        axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
 
-        image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
+        par(mar=c(4,4,4,0.2) + 0.2)
+        image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=bkg_col,
               main=bquote(P[Psi[.(i)]]^inf ~ .(names(bivProf$res_UQ$bound$bound)[j]) ~ " bound," ~ " "~ .(bck_name)),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T)
         contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
@@ -247,6 +302,12 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
                 "0" = {},
                 "1" = {points(pp,pch=3)},
                 {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
+
+        legend_info<-hist(zzBackgroud_min,plot=FALSE,breaks=20)
+        which_col_leg <- which(legend_info$counts>0)
+        par(mar=c(5,0.2,5,2.8))
+        image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+        axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
       }
 
       if(plot_options$save)
@@ -287,8 +348,10 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
       zzBackgroud_max<-matrix(ddRange$max[,i],ncol=dd_eta)
       zzBackgroud_min<-matrix(ddRange$min[,i],ncol=dd_eta)
 
-      layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
-      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
+#      layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
+      layout(matrix(1:4,nrow=1),widths=c(0.45,0.05,0.45,0.05))
+      par(mar=c(4,4,4,0.2) + 0.2)
+      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=bkg_col,
             main=bquote(P[Psi[.(i)]]^sup ~ "mean, bound range"),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
@@ -298,7 +361,14 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
               {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
 
-      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
+      legend_info<-hist(zzBackgroud_max,plot=FALSE,breaks=20)
+      which_col_leg <- which(legend_info$counts>0)
+      par(mar=c(5,0.2,5,2.8))
+      image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+      axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
+
+      par(mar=c(4,4,4,0.2) + 0.2)
+      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=bkg_col,
             main=bquote(P[Psi[.(i)]]^inf ~ "mean, bound range"),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
@@ -306,6 +376,12 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
               "0" = {},
               "1" = {points(pp,pch=3)},
               {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
+
+      legend_info<-hist(zzBackgroud_min,plot=FALSE,breaks=20)
+      which_col_leg <- which(legend_info$counts>0)
+      par(mar=c(5,0.2,5,2.8))
+      image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+      axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
     }
 
     if(plot_options$save)
@@ -328,8 +404,10 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
 #      zzBackgroud_max<-matrix(ddRange$max[,i],ncol=dd_eta)
 #      zzBackgroud_min<-matrix(ddRange$min[,i],ncol=dd_eta)
 
-      layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
-      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=gray.colors(20),
+#      layout(matrix(1:2,nrow=1),widths=c(0.5,0.5))
+      layout(matrix(1:4,nrow=1),widths=c(0.45,0.05,0.45,0.05))
+      par(mar=c(4,4,4,0.2) + 0.2)
+      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=bkg_col,
             main=bquote(P[Psi[.(i)]]^sup ~ "mean, " ~(sigma[T]^tilde(Delta))^2 ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
@@ -339,7 +417,14 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
               {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
 
 
-      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=gray.colors(20),
+      legend_info<-hist(zzBackgroud_max,plot=FALSE,breaks=20)
+      which_col_leg <- which(legend_info$counts>0)
+      par(mar=c(5,0.2,5,2.8))
+      image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+      axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
+
+      par(mar=c(4,4,4,0.2) + 0.2)
+      image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=bkg_col,
             main=bquote(P[Psi[.(i)]]^inf ~ "mean, " ~(sigma[T]^tilde(Delta))^2 ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
@@ -347,6 +432,12 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
               "0" = {},
               "1" = {points(pp,pch=3)},
               {points(pp[-whichAbove,],pch=3,col="blue3");points(pp[whichAbove,],pch=3,col=3)})
+
+      legend_info<-hist(zzBackgroud_min,plot=FALSE,breaks=20)
+      which_col_leg <- which(legend_info$counts>0)
+      par(mar=c(5,0.2,5,2.8))
+      image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+      axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
     }
 
     if(plot_options$save)

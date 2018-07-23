@@ -44,9 +44,9 @@
 #' threshold=-10
 #'
 #' # Compute coordinate profiles on the posterior mean
-#' options_full<-list(multistart=4,heavyReturn=TRUE)
+#' options_full<-list(multistart=4,heavyReturn=TRUE, Design = replicate(2,seq(0,1,,60)))
 #' init_des<-lhs::maximinLHS(15,2)
-#' options_approx<- list(multistart=4,heavyReturn=TRUE,initDesign=init_des,fullDesignSize=100)
+#' options_approx<- list(multistart=4,heavyReturn=TRUE,initDesign=init_des,fullDesignSize=60)
 #' cProfilesMean<-coordinateProfiles(object=kmModel,threshold=threshold,options_full=options_full,
 #'                                   options_approx=options_approx,uq_computations=FALSE,
 #'                                   plot_level=3,plot_options=NULL,CI_const=NULL,return_level=2)
@@ -77,7 +77,7 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
 
   # Options setup
   if(is.null(options_full)){
-    options_full<-list(multistart=8,heavyReturn=TRUE)
+    options_full<-list(multistart=8,heavyReturn=TRUE,Design = replicate(object$kmModel@d,seq(0,1,,100)))
   }
 
   if(is.null(options_approx)){
@@ -92,6 +92,8 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
   num_T<-length(threshold)
 
   # Set up plot options
+  if(!is.null(options_full$Design))
+    plot_options <- list(design = options_full$Design)
   plot_options<-setPlotOptions(plot_options = plot_options,d=d,num_T=num_T,kmModel=object$kmModel)
 
   ## posterior mean part ##
@@ -160,7 +162,7 @@ coordinateProfiles = function(object,threshold,options_full=NULL,options_approx=
     colnames(object$profMean_full$res$min)<-plot_options$coord_names
     if(plot_options$save)
       cairo_pdf(filename = paste(plot_options$folderPlots,"profMean_full",plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
-    plotMaxMin(allRes = object$profMean_full,threshold = threshold)
+    plotMaxMin(allRes = object$profMean_full,threshold = threshold,Design = options_full$Design)
     if(plot_options$save)
       dev.off()
   }

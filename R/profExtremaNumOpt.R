@@ -49,11 +49,13 @@
 #' # Define list of directions where to evaluate the profile extrema
 #' all_Psi <- list(Psi1=vv1,Psi2=vv2)
 #'
+#'
+#' \dontrun{
 #' # Evaluate profile extrema along directions of all_Psi
 #' allOblique<-getProfileExtrema(f=f,fprime = fprime,d = 2,allPsi = all_Psi,
 #'                               opts = list(plts=FALSE,discretization=100,multistart=8))
 #'
-#' \dontrun{
+#'
 #' # Consider threshold=0
 #' threshold <- 0
 #'
