@@ -21,7 +21,7 @@ Computation and plots of profile extrema functions. The package main functions a
     \item \code{\link{plot_univariate_profiles_UQ}}: plots for the results of \code{coordProf_UQ} or \code{obliqueProf_UQ}. Note that this function only works for univariate profiles.
     \item \code{\link{plotBivariateProfiles}}: plots the bivariate maps results of a call to \code{obliqueProfiles} with a two dimensional projection matrix Psi.
     \item \code{\link{plotMaxMin}}: simple plotting function for univariate profile extrema.
-    \item \code{\link{plotBivProf}}: simple plotting function for bivariate profile extrema.
+    \item \code{\link{plotOneBivProfile}}: simple plotting function for bivariate profile extrema.
    }  }
 
 }

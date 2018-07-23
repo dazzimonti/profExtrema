@@ -446,7 +446,7 @@ obliqueProf_UQ = function(object,allPsi,threshold,allResMean=NULL,quantiles_uq=c
       for(j in seq(length(quantiles_uq))){
           if(plot_options$save)
             pdf(file = paste(plot_options$folderPlots,"prof_UQ_approx_q",names(object$prof_quantiles_approx)[j],plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-          plotBivProf(allRes = object$prof_quantiles_approx[[j]],allPsi = allPsi,Design=object$Design_approx,threshold=threshold,main_addendum=paste("(UQ quantile,",names(object$prof_quantiles_approx)[j],")"),xlab=expression(eta[1]),ylab=expression(eta[2]))
+          plotOneBivProfile(allRes = object$prof_quantiles_approx[[j]],allPsi = allPsi,Design=object$Design_approx,threshold=threshold,main_addendum=paste("(UQ quantile,",names(object$prof_quantiles_approx)[j],")"),xlab=expression(eta[1]),ylab=expression(eta[2]))
           if(plot_options$save)
             dev.off()
       }
@@ -474,13 +474,13 @@ obliqueProf_UQ = function(object,allPsi,threshold,allResMean=NULL,quantiles_uq=c
       }else{
           if(plot_options$save)
             pdf(file = paste(plot_options$folderPlots,"prof_UQ_bound_approx_lower",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-          plotBivProf(allRes = object$bound$bound$lower,allPsi = allPsi,Design=object$Design_approx,threshold=threshold,main_addendum=paste("(UQ bound lower, ",2*options_bound$alpha,")"),xlab=expression(eta[1]),ylab=expression(eta[2]))
+          plotOneBivProfile(allRes = object$bound$bound$lower,allPsi = allPsi,Design=object$Design_approx,threshold=threshold,main_addendum=paste("(UQ bound lower, ",2*options_bound$alpha,")"),xlab=expression(eta[1]),ylab=expression(eta[2]))
           if(plot_options$save)
             dev.off()
 
           if(plot_options$save)
             pdf(file = paste(plot_options$folderPlots,"prof_UQ_bound_approx_upper",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-          plotBivProf(allRes = object$bound$bound$upper,allPsi = allPsi,Design=object$Design_approx,threshold=threshold,main_addendum=paste("(UQ bound upper, ",2*options_bound$alpha,")"),xlab=expression(eta[1]),ylab=expression(eta[2]))
+          plotOneBivProfile(allRes = object$bound$bound$upper,allPsi = allPsi,Design=object$Design_approx,threshold=threshold,main_addendum=paste("(UQ bound upper, ",2*options_bound$alpha,")"),xlab=expression(eta[1]),ylab=expression(eta[2]))
           if(plot_options$save)
             dev.off()
 

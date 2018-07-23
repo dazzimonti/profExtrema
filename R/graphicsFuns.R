@@ -166,11 +166,11 @@ plotOblique<-function(changePoints,direction,...){
 }
 
 
-# plotBivProf function
+# plotOneBivProfile function
 #' @author Dario Azzimonti
 #' @title Plot bivariate profiles
-#' @name plotBivProf
-#' @description Plot bivariate profiles, for dimension up to 6.
+#' @name plotOneBivProfile
+#' @description Plots the bivariate profiles stored in \code{allRes} for each Psi in \code{allPsi}.
 #' @param allRes list containing the list \code{res} which contains the computed minima and maxima. The object returned by the function \code{getProfileExtrema}.
 #' @param allPsi a list containing the matrices Psi (dim \eqn{2xd}) for which to compute the profile extrema
 #' @param Design a matrix of dimension \eqn{(2d)x numPsi} encoding the first (\code{Design[1:d,]}) and the second ((\code{Design[(d+1):(2*d),]})) axis values.
@@ -178,9 +178,10 @@ plotOblique<-function(changePoints,direction,...){
 #' @param trueEvals if not \code{NULL} adds to each plot the data points and the observed value
 #' @param main_addendum additional string to add to image title. Default is empty string.
 #' @param ... additional parameters to be passed to the plot function
-#' @return plots the 2d maps of the profile sup and inf of the function for each Psi in allPsi. If threshold is not NULL also contours the threshold level.
+#' @return plots the 2d maps of the profile sup and inf in \code{allRes} for each Psi in \code{allPsi}. If threshold is not NULL also contours the threshold level.
+#' @seealso plotBivariateProfiles
 #' @export
-plotBivProf<-function(allRes,allPsi,Design=NULL,threshold=NULL,trueEvals=NULL,main_addendum="",...){
+plotOneBivProfile<-function(allRes,allPsi,Design=NULL,threshold=NULL,trueEvals=NULL,main_addendum="",...){
 
 
   num_Psi<-length(allPsi)
@@ -194,18 +195,39 @@ plotBivProf<-function(allRes,allPsi,Design=NULL,threshold=NULL,trueEvals=NULL,ma
 
   dd_eta<-length(Design[,1])/2
 
-  for(i in seq(num_Psi)){
-    par(mfrow=c(1,2))
-    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),col=gray.colors(20),
-          main=bquote(P[Psi[.(i)]]^sup ~ "f " ~ .(main_addendum)),...)
-    contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T)
-    contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
+  bkg_col <- gray.colors(20)
 
-    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),col=gray.colors(20),main=bquote(P[Psi[.(i)]]^inf ~ "f" ~ .(main_addendum)),...)
-    contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T)
-    contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=1.4)
+  for(i in seq(num_Psi)){
+
+    zzBackground_max <- matrix(allRes$res$max[[i]],ncol=dd_eta)
+    zzBackground_min <- matrix(allRes$res$min[[i]],ncol=dd_eta)
+
+#    par(mfrow=c(1,2))
+    layout(matrix(1:4,nrow=1),widths=c(0.45,0.05,0.45,0.05))
+    par(mar=c(4,4,4,0.2) + 0.2)
+    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackground_max,col=bkg_col,
+          main=bquote(P[Psi[.(i)]]^sup ~ "f " ~ .(main_addendum)),...)
+    contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackground_max,nlevels = 10,add=T)
+    contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackground_max,levels = threshold,add=T,col=2,lwd=1.4)
+
+    legend_info<-hist(zzBackground_max,plot=FALSE,breaks=20)
+    which_col_leg <- which(legend_info$counts>0)
+    par(mar=c(5,0.2,5,2.8))
+    image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+    axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
+
+    par(mar=c(4,4,4,0.2) + 0.2)
+    image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackground_min,col=bkg_col,main=bquote(P[Psi[.(i)]]^inf ~ "f" ~ .(main_addendum)),...)
+    contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackground_min,nlevels = 10,add=T)
+    contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackground_min,levels = threshold,add=T,col=2,lwd=1.4)
+
+    legend_info<-hist(zzBackground_min,plot=FALSE,breaks=20)
+    which_col_leg <- which(legend_info$counts>0)
+    par(mar=c(5,0.2,5,2.8))
+    image(y=1:length(which_col_leg),z=t(1:length(which_col_leg)), col=bkg_col[which_col_leg], axes=FALSE)#, main="Slope", cex.main=.8)
+    axis(4,cex.axis=0.8,labels = legend_info$breaks[which_col_leg],at=1:length(which_col_leg),...)#,mgp=c(0,.5,0))
   }
-  par(mfrow=c(1,1))
+#  par(mfrow=c(1,1))
 
 
 }

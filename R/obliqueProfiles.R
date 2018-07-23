@@ -215,7 +215,7 @@ obliqueProfiles = function(object,allPsi,threshold,options_full=NULL,options_app
     }else{
       if(plot_options$save)
         pdf(file = paste(plot_options$folderPlots,"profMean_full",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-      plotBivProf(allRes = object$profMean_full,allPsi = allPsi,Design=object$profMean_full$Design,threshold=threshold,main_addendum="(mean, full)",xlab=expression(eta[1]),ylab=expression(eta[2]))
+      plotOneBivProfile(allRes = object$profMean_full,allPsi = allPsi,Design=object$profMean_full$Design,threshold=threshold,main_addendum="(mean, full)",xlab=expression(eta[1]),ylab=expression(eta[2]))
     }
     if(plot_options$save)
       dev.off()
@@ -274,7 +274,7 @@ obliqueProfiles = function(object,allPsi,threshold,options_full=NULL,options_app
   }else{
     if(plot_options$save)
       pdf(file = paste(plot_options$folderPlots,"profMean_approx",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-    plotBivProf(allRes = object$profMean_approx,allPsi = allPsi,Design=object$profMean_approx$Design,threshold=threshold,main_addendum="(mean, approx)",xlab=expression(eta[1]),ylab=expression(eta[2]))
+    plotOneBivProfile(allRes = object$profMean_approx,allPsi = allPsi,Design=object$profMean_approx$Design,threshold=threshold,main_addendum="(mean, approx)",xlab=expression(eta[1]),ylab=expression(eta[2]))
     if(plot_options$save)
       dev.off()
   }
@@ -402,13 +402,13 @@ obliqueProfiles = function(object,allPsi,threshold,options_full=NULL,options_app
       for(i in seq(length(CI_const))){
         if(plot_options$save)
           pdf(file = paste(plot_options$folderPlots,"profMeanCI",CI_const[i]*100,"_lower",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-        plotBivProf(allRes = prof_CI_const_full[[i]]$lower,allPsi = allPsi,Design=object$profMean_full$Design,threshold=threshold,main_addendum=paste("(CI,",CI_const[i],", lower)"),xlab=expression(eta[1]),ylab=expression(eta[2]))
+        plotOneBivProfile(allRes = prof_CI_const_full[[i]]$lower,allPsi = allPsi,Design=object$profMean_full$Design,threshold=threshold,main_addendum=paste("(CI,",CI_const[i],", lower)"),xlab=expression(eta[1]),ylab=expression(eta[2]))
         if(plot_options$save)
           dev.off()
 
         if(plot_options$save)
           pdf(file = paste(plot_options$folderPlots,"profMeanCI",CI_const[i]*100,"_upper",plot_options$id_save,".pdf",sep=""),width = 18,height = 9)
-        plotBivProf(allRes = prof_CI_const_full[[i]]$upper,allPsi = allPsi,Design=object$profMean_full$Design,threshold=threshold,main_addendum=paste("(CI,",CI_const[i],", upper)"),xlab=expression(eta[1]),ylab=expression(eta[2]))
+        plotOneBivProfile(allRes = prof_CI_const_full[[i]]$upper,allPsi = allPsi,Design=object$profMean_full$Design,threshold=threshold,main_addendum=paste("(CI,",CI_const[i],", upper)"),xlab=expression(eta[1]),ylab=expression(eta[2]))
         if(plot_options$save)
           dev.off()
       }
