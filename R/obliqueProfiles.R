@@ -280,9 +280,14 @@ obliqueProfiles = function(object,allPsi,threshold,options_full=NULL,options_app
   }
 
   # save absolute errors with approximation
+  if(nrow(object$profMean_approx$res$min)==nrow(object$profMean_full$res$min)){
   abs_err_min<-max(abs(object$profMean_approx$res$min-object$profMean_full$res$min)/object$profMean_full$res$min)
   abs_err_max<-max(abs(object$profMean_approx$res$max-object$profMean_full$res$max)/object$profMean_full$res$max)
   abs_err<-c(abs_err_min,abs_err_max)
+  }else{
+    warning("Different discretizations for approx and full profiles, error not computed!")
+    abs_err = c(NA,NA)
+  }
 #   abs_err = c(NA,NA)
   ## End posterior mean part ##
 

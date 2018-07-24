@@ -24,6 +24,7 @@ plot_univariate_profiles_UQ<-function(objectUQ,plot_options,nsims,threshold,name
 
   plot_options<-setPlotOptions(plot_options = plot_options,d=d,num_T=num_T,kmModel = objectUQ$kmModel)
 
+  d <- ncol(plot_options$design)
 
   if(plot_options$save)
     cairo_pdf(filename = paste(plot_options$folderPlots,nameFile,plot_options$id_save,".pdf",sep=""),width = 12,height = 12)
