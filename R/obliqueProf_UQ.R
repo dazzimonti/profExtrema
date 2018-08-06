@@ -73,6 +73,10 @@
 #' allPsi = list(Psi1=matrix(c(cos(theta),sin(theta)),ncol=2),
 #'               Psi2=matrix(c(cos(theta+pi/2),sin(theta+pi/2)),ncol=2))
 #' \dontrun{
+#' # here we reduce the number of simulations to speed up the example
+#' # a higher number should be used
+#' options_sims$nsim <- 50
+#'
 #' # profile UQ on approximate oblique profiles
 #' oProfiles_UQ<-obliqueProf_UQ(object = kmModel,threshold = threshold,allPsi=allPsi,
 #'                              allResMean = NULL,quantiles_uq = c(0.05,0.95),
@@ -82,7 +86,6 @@
 #' # profile UQ on full optim oblique profiles
 #'
 #' options_full_sims<-list(multistart=4,heavyReturn=TRUE)
-#' options_sims$nsim <- 50
 #' oProfiles_UQ_full<- obliqueProf_UQ(object = oProfiles_UQ,threshold = threshold,allPsi=allPsi,
 #'                              allResMean = NULL,quantiles_uq = c(0.05,0.95),
 #'                              options_approx = options_approx, options_full_sims = options_full_sims,
@@ -227,8 +230,8 @@ obliqueProf_UQ = function(object,allPsi,threshold,allResMean=NULL,quantiles_uq=c
   simu_points<-object$sPts$par
 
   if(is.null(object$more$simuls)){
-    some.simu <- simulate_km(object=object$kmModel,nsim=options_sims$nsim,newdata=simu_points,nugget.sim=nugget.sim,
-                             cond=TRUE,checkNames = FALSE, type=type)
+    some.simu <- simulate(object=object$kmModel,nsim=options_sims$nsim,newdata=simu_points,nugget.sim=nugget.sim,
+                             cond=TRUE,checkNames = FALSE)
   }else{
     some.simu<-object$more$simuls
   }
@@ -269,8 +272,8 @@ obliqueProf_UQ = function(object,allPsi,threshold,allResMean=NULL,quantiles_uq=c
 
   if(!is.null(options_full_sims) && is.null(object$profSups_full)){
     options_full_sims<-modifyList(list(multistart=4,heavyReturn=TRUE,discretization=options_approx$fullDesignSize),options_full_sims)
-    object$profSups_full<-array(NA,dim = c(num_Psi,options_approx$fullDesignSize^d,options_sims$nsim))
-    object$profInfs_full<-array(NA,dim = c(num_Psi,options_approx$fullDesignSize^d,options_sims$nsim))
+    object$profSups_full<-array(NA,dim = c(num_Psi,options_approx$fullDesignSize^p,options_sims$nsim))
+    object$profInfs_full<-array(NA,dim = c(num_Psi,options_approx$fullDesignSize^p,options_sims$nsim))
     object$more$times$tFull<-rep(NA,options_sims$nsim)
   }
 
@@ -350,8 +353,8 @@ obliqueProf_UQ = function(object,allPsi,threshold,allResMean=NULL,quantiles_uq=c
   if(!is.null(options_full_sims)){
     object$prof_quantiles_full<-list()
     for(i in seq(length(quantiles_uq))){
-      object$prof_quantiles_full[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^d,ncol = num_Psi),
-                                                     max=matrix(NA,nrow = options_approx$fullDesignSize^d,ncol = num_Psi)))
+      object$prof_quantiles_full[[i]]<-list(res=list(min=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = num_Psi),
+                                                     max=matrix(NA,nrow = options_approx$fullDesignSize^p,ncol = num_Psi)))
     }
     names(object$prof_quantiles_full)<-quantiles_uq
 

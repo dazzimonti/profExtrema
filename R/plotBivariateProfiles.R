@@ -408,7 +408,7 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
       layout(matrix(1:4,nrow=1),widths=c(0.45,0.05,0.45,0.05))
       par(mar=c(4,4,4,0.2) + 0.2)
       image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_max,col=bkg_col,
-            main=bquote(P[Psi[.(i)]]^sup ~ "mean, " ~(sigma[T]^tilde(Delta))^2 ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+            main=bquote(P[Psi[.(i)]]^sup ~ "mean, " ~(sigma[T]^tilde(Delta)) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$max[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
       switch (as.character(trueEvals),
@@ -425,7 +425,7 @@ plotBivariateProfiles<-function(bivProf,allPsi,Design=NULL,threshold=NULL,whichI
 
       par(mar=c(4,4,4,0.2) + 0.2)
       image(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=zzBackgroud_min,col=bkg_col,
-            main=bquote(P[Psi[.(i)]]^inf ~ "mean, " ~(sigma[T]^tilde(Delta))^2 ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
+            main=bquote(P[Psi[.(i)]]^inf ~ "mean, " ~(sigma[T]^tilde(Delta)) ),xlab= colnames(bivProf$kmModel@X)[whichVars][1], ylab = colnames(bivProf$kmModel@X)[whichVars][2],...)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),nlevels = 10,add=T,lwd = 1.5,labcex=1)
       contour(x=Design[1:(dd_eta),i],y=Design[(dd_eta+1):(2*dd_eta),i],z=matrix(allRes$res$min[[i]],ncol=dd_eta),levels = threshold,add=T,col=2,lwd=2,labcex=1,lty=2)
       switch (as.character(trueEvals),

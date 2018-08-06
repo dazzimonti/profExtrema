@@ -21,7 +21,7 @@
 #' @details Package: profExtrema \cr
 #' Type: Package \cr
 #' Version: 0.2.0 \cr
-#' Date: 2018-06-08
+#' Date: 2018-08-06
 #'
 #' @author Dario Azzimonti (dario.azzimonti@@gmail.com) .
 #' @docType package
@@ -29,7 +29,7 @@
 #' @import microbenchmark
 #' @importFrom DiceKriging predict.km covMat1Mat2 covVector.dx covMatrix simulate km
 #' @importFrom KrigInv integration_design
-#' @importFrom GPsims krig_weight_GPsimu optim_dist_measure grad_kweights simulate_km
+#' @importFrom pGPx krig_weight_GPsimu optim_dist_measure grad_kweights
 #' @importFrom quantreg rq predict.rq
 #' @importFrom grDevices cairo_pdf dev.off gray.colors adjustcolor pdf
 #' @importFrom graphics abline contour image legend lines par plot points hist axis

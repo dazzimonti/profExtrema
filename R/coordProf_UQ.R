@@ -170,8 +170,8 @@ coordProf_UQ = function(object,threshold,allResMean=NULL,quantiles_uq=c(0.05,0.9
   simu_points<-object$sPts$par
 
   if(is.null(object$more$simuls)){
-    some.simu <- simulate_km(object=object$kmModel,nsim=options_sims$nsim,newdata=simu_points,nugget.sim=nugget.sim,
-                             cond=TRUE,checkNames = FALSE, type=type)
+    some.simu <- simulate(object=object$kmModel,nsim=options_sims$nsim,newdata=simu_points,nugget.sim=nugget.sim,
+                             cond=TRUE,checkNames = FALSE)
   }else{
     some.simu<-object$more$simuls
   }

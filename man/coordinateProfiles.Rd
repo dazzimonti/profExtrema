@@ -81,7 +81,7 @@ cProfilesUQ<-coordinateProfiles(object=cProfilesMean,threshold=threshold,options
                                   plot_level=3,plot_options=NULL,CI_const=NULL,return_level=2)
 
 # Coordinate profiles with UQ with fully optim profiles
-options_full_sims<-list(multistart=4,heavyReturn=TRUE)
+options_full_sims<-list(multistart=4,heavyReturn=TRUE, Design = replicate(2,seq(0,1,,60)))
 cProfilesUQ<-coordinateProfiles(object=cProfilesMean,threshold=threshold,options_full=options_full,
                                   options_approx=options_approx,uq_computations=TRUE,
                                   plot_level=3,plot_options=NULL,CI_const=NULL,return_level=2,
