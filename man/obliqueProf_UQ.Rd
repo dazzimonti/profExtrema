@@ -97,6 +97,10 @@ theta=pi/4
 allPsi = list(Psi1=matrix(c(cos(theta),sin(theta)),ncol=2),
               Psi2=matrix(c(cos(theta+pi/2),sin(theta+pi/2)),ncol=2))
 \dontrun{
+# here we reduce the number of simulations to speed up the example
+# a higher number should be used
+options_sims$nsim <- 50
+
 # profile UQ on approximate oblique profiles
 oProfiles_UQ<-obliqueProf_UQ(object = kmModel,threshold = threshold,allPsi=allPsi,
                              allResMean = NULL,quantiles_uq = c(0.05,0.95),
@@ -106,7 +110,6 @@ oProfiles_UQ<-obliqueProf_UQ(object = kmModel,threshold = threshold,allPsi=allPs
 # profile UQ on full optim oblique profiles
 
 options_full_sims<-list(multistart=4,heavyReturn=TRUE)
-options_sims$nsim <- 50
 oProfiles_UQ_full<- obliqueProf_UQ(object = oProfiles_UQ,threshold = threshold,allPsi=allPsi,
                              allResMean = NULL,quantiles_uq = c(0.05,0.95),
                              options_approx = options_approx, options_full_sims = options_full_sims,
