@@ -156,24 +156,17 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPsi,opts=NULL){
     MMetas<-apply(crossprod(t(cPsi),cubeVertex),1,max)
 
     if(p==1){
-      etas1<-matrix(seq(mmEtas,MMetas,,dd_eta),ncol=1)
+      etas1<-matrix(seq(from = mmEtas,to = MMetas,length.out = dd_eta),ncol=1)
       Design[,i]<-etas1
     }else if(p==2){
-      etas1<-expand.grid(seq(mmEtas[1],MMetas[1],,dd_eta),seq(mmEtas[2],MMetas[2],,dd_eta))
-      Design[,i]<-c(seq(mmEtas[1],MMetas[1],,dd_eta),seq(mmEtas[2],MMetas[2],,dd_eta))
+      etas1<-expand.grid(seq(from = mmEtas[1],to = MMetas[1],length.out = dd_eta),seq(from = mmEtas[2],to = MMetas[2],length.out = dd_eta))
+      Design[,i]<-c(seq(from = mmEtas[1],to = MMetas[1],length.out = dd_eta),seq(from = mmEtas[2],to = MMetas[2],length.out = dd_eta))
     }else{
       stop("ERROR: no implementation for p>2!")
     }
 
-    # when p==1 we can use the null space code works and it's much faster
-    # when p==2 the code shold be tested more but seems to produce better results than nloptr
-#    if(p==1){
-      pSup<-apply(etas1,1,function(x){a_res=getProfileSup_optim(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts);gc();return(a_res)})
-      pInf<-apply(etas1,1,function(x){a_res=getProfileInf_optim(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts);gc();return(a_res)})
-#    }else{
-#      pSup<-apply(etas1,1,function(x){return(getProfileSup(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
-#      pInf<-apply(etas1,1,function(x){return(getProfileInf(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts))})
-#    }
+    pSup<-apply(etas1,1,function(x){a_res=getProfileSup_optim(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts);gc();return(a_res)})
+    pInf<-apply(etas1,1,function(x){a_res=getProfileInf_optim(eta = x,Psi = matrix(cPsi,ncol=d),f = f,fprime = fprime,d = d,options = opts);gc();return(a_res)})
 
     results$max[[i]] <- sapply(pSup,function(x){x$val})
     allMaxPoints[[i]]<- sapply(pSup,function(x){x$aux$solution})

@@ -31,7 +31,7 @@ a real value corresponding to \eqn{min_{x \in D_Psi} f(x)}
 Compute profile inf function for an arbitrary matrix \code{Psi} with with the L-BFGS-B algorithm of \link[stats]{optim}. Here the linear equality constraint is eliminated by using the Null space of \code{Psi}.
 }
 \seealso{
-\link{getProfileSup_optim}, \link{getProfileInf}, \link{plotMaxMin}
+\link{getProfileSup_optim}, \link{plotMaxMin}
 }
 \author{
 Dario Azzimonti

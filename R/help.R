@@ -21,7 +21,7 @@
 #' @details Package: profExtrema \cr
 #' Type: Package \cr
 #' Version: 0.2.0 \cr
-#' Date: 2018-08-06
+#' Date: 2018-08-17
 #'
 #' @author Dario Azzimonti (dario.azzimonti@@gmail.com) .
 #' @docType package
@@ -34,7 +34,6 @@
 #' @importFrom grDevices cairo_pdf dev.off gray.colors adjustcolor pdf
 #' @importFrom graphics abline contour image legend lines par plot points hist axis
 #' @importFrom stats deriv model.matrix optim predict rnorm quantile runif smooth.spline
-#' @importFrom nloptr nloptr
 #' @importFrom utils combn
 #' @importFrom utils modifyList
 #' @importFrom MASS Null

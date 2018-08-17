@@ -15,7 +15,7 @@
 #' \item{\code{upper:}}{the upper bounds for the optimization domain (see optim for details)}
 #' }
 #' @return a real value corresponding to \eqn{max_{x \in D_Psi} f(x)}
-#' @seealso \link{getProfileInf_optim}, \link{getProfileSup}, \link{plotMaxMin}
+#' @seealso \link{getProfileInf_optim}, \link{plotMaxMin}
 #' @export
 # requires library(MASS) and lpSolve
 getProfileSup_optim = function(eta,Psi,f,fprime,d,options=NULL){
@@ -171,7 +171,7 @@ getProfileSup_optim = function(eta,Psi,f,fprime,d,options=NULL){
 #' \item{\code{upper:}}{the upper bounds for the optimization domain (see optim for details)}
 #' }
 #' @return a real value corresponding to \eqn{min_{x \in D_Psi} f(x)}
-#' @seealso \link{getProfileSup_optim}, \link{getProfileInf}, \link{plotMaxMin}
+#' @seealso \link{getProfileSup_optim}, \link{plotMaxMin}
 #' @export
 getProfileInf_optim = function(eta,Psi,f,fprime,d,options=NULL){
 

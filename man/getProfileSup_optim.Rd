@@ -31,7 +31,7 @@ a real value corresponding to \eqn{max_{x \in D_Psi} f(x)}
 Compute profile sup function for an arbitrary matrix \code{Psi} with the L-BFGS-B algorithm of \link[stats]{optim}.
 }
 \seealso{
-\link{getProfileInf_optim}, \link{getProfileSup}, \link{plotMaxMin}
+\link{getProfileInf_optim}, \link{plotMaxMin}
 }
 \author{
 Dario Azzimonti
