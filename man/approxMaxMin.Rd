@@ -73,7 +73,7 @@ options_approx$smoother<-"quantSpline"
 coordProf_approx_quantReg<-approxMaxMin(f = g,fprime = gprime,d=2,opts = options_approx)
 
 
-\dontrun{
+\donttest{
 # Consider threshold=-10
 threshold<- -10
 # obtain the points where the profiles take the threshold value

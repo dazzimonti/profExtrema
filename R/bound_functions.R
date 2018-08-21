@@ -5,7 +5,7 @@
 #' @description The function mean_Delta_T computes the mean function of the difference process \eqn{Z_x - \widetilde{Z}_x} at \code{x}.
 #' @param x a matrix \eqn{r x d} containing the \eqn{r} points where the function is to be computed.
 #' @param kmModel the \link[DiceKriging]{km} model of the Gaussian process \eqn{Z}.
-#' @param simupoints the matrix \eqn{l x d} containing the simulation points \eqn{E}.
+#' @param simupoints the matrix \eqn{l x d} containing the pilot points \eqn{G}.
 #' @param T.mat the upper triangular factor of the Choleski decomposition of the covariance matrix of \code{rbind(kmModel@X,simupoints)}
 #' @param F.mat the evaluation of the trend function at \code{rbind(kmModel@X,simupoints)}, see \link[stats]{model.matrix}.
 #' @return the value of the mean function at \code{x} for the difference process \eqn{Z^\Delta = Z_x - \widetilde{Z}_x}.
@@ -26,7 +26,7 @@ mean_Delta_T<-function(x,kmModel,simupoints,T.mat,F.mat){
 #' @description The function grad_mean_Delta_T computes the gradient for the mean function of the difference process \eqn{Z_x - \widetilde{Z}_x} at \code{x}.
 #' @param x a matrix \eqn{r x d} containing the \eqn{r} points where the function is to be computed.
 #' @param kmModel the \link[DiceKriging]{km} model of the Gaussian process \eqn{Z}.
-#' @param simupoints the matrix \eqn{l x d} containing the simulation points \eqn{E}.
+#' @param simupoints the matrix \eqn{l x d} containing the pilot points \eqn{G}.
 #' @param T.mat the upper triangular factor of the Choleski decomposition of the covariance matrix of \code{rbind(kmModel@X,simupoints)}
 #' @param F.mat the evaluation of the trend function at \code{rbind(kmModel@X,simupoints)}, see \link[stats]{model.matrix}.
 #' @return the value of the gradient for the mean function at \code{x} for the difference process \eqn{Z^\Delta = Z_x - \widetilde{Z}_x}.
@@ -52,7 +52,7 @@ grad_mean_Delta_T<-function(x,kmModel,simupoints,T.mat,F.mat){
 #' @description The function var_Delta_T computes the gradient for the variance function of the difference process \eqn{Z_x - \widetilde{Z}_x} at \code{x}.
 #' @param x a matrix \eqn{r x d} containing the \eqn{r} points where the function is to be computed.
 #' @param kmModel the \link[DiceKriging]{km} model of the Gaussian process \eqn{Z}.
-#' @param simupoints the matrix \eqn{l x d} containing the simulation points \eqn{E}.
+#' @param simupoints the matrix \eqn{l x d} containing the pilot points \eqn{G}.
 #' @param T.mat the upper triangular factor of the Choleski decomposition of the covariance matrix of \code{rbind(kmModel@X,simupoints)}
 #' @param F.mat the evaluation of the trend function at \code{rbind(kmModel@X,simupoints)}, see \link[stats]{model.matrix}.
 #' @return the value of the variance function at \code{x} for the difference process \eqn{Z^\Delta = Z_x - \widetilde{Z}_x}.
@@ -75,7 +75,7 @@ var_Delta_T<-function(x,kmModel,simupoints,T.mat,F.mat){
 #' @description The function grad_var_Delta_T computes the gradient for the variance function of the difference process \eqn{Z_x - \widetilde{Z}_x} at \code{x}.
 #' @param x a matrix \eqn{r x d} containing the \eqn{r} points where the function is to be computed.
 #' @param kmModel the \link[DiceKriging]{km} model of the Gaussian process \eqn{Z}.
-#' @param simupoints the matrix \eqn{l x d} containing the simulation points \eqn{E}.
+#' @param simupoints the matrix \eqn{l x d} containing the pilot points \eqn{G}.
 #' @param T.mat the upper triangular factor of the Choleski decomposition of the covariance matrix of \code{rbind(kmModel@X,simupoints)}
 #' @param F.mat the evaluation of the trend function at \code{rbind(kmModel@X,simupoints)}, see \link[stats]{model.matrix}.
 #' @return the value of the gradient for the variance function at \code{x} for the difference process \eqn{Z^\Delta = Z_x - \widetilde{Z}_x}.
@@ -100,7 +100,7 @@ grad_var_Delta_T<-function(x,kmModel,simupoints,T.mat,F.mat){
 #' @title Profile extrema for the mean and variance functions of difference process
 #' @description The function prof_mean_var_Delta computes the profile extrema functions for the mean and variance functions of the difference process \eqn{Z_x - \widetilde{Z}_x} at \code{x}.
 #' @param kmModel the \link[DiceKriging]{km} model of the Gaussian process \eqn{Z}.
-#' @param simupoints the matrix \eqn{l x d} containing the simulation points \eqn{E}.
+#' @param simupoints the matrix \eqn{l x d} containing the pilot points \eqn{G}.
 #' @param allPsi optional list of matrices (dim \eqn{pxd}) for which to compute the profile extrema. If NULL coordinate profiles are computed.
 #' @param options_approx an optional list of options for \link{approxMaxMin} (or \link{approxProfileExtrema} if \code{allPsi} not NULL).
 #' @param options_full_sims an optional list of options for \link{getAllMaxMin}(or \link{approxProfileExtrema} if \code{allPsi} not NULL). If NULL the full computations are not excuted. NOTE: this computations might be very expensive!

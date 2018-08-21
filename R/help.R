@@ -21,7 +21,7 @@
 #' @details Package: profExtrema \cr
 #' Type: Package \cr
 #' Version: 0.2.0 \cr
-#' Date: 2018-08-17
+#' Date: 2018-08-21
 #'
 #' @author Dario Azzimonti (dario.azzimonti@@gmail.com) .
 #' @docType package

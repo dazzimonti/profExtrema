@@ -65,7 +65,7 @@ fprime <- function(x){
 all_Psi <- list(Psi1=vv1,Psi2=vv2)
 
 
-\dontrun{
+\donttest{
 # Evaluate profile extrema along directions of all_Psi
 allOblique<-getProfileExtrema(f=f,fprime = fprime,d = 2,allPsi = all_Psi,
                               opts = list(plts=FALSE,discretization=100,multistart=8))
@@ -87,26 +87,14 @@ outs<-apply(X = inputs,MARGIN = 1,function(x){return(testF(x,pparams,v1=vv1,v2=v
 cccObl<-getChangePoints(threshold = threshold,allRes = allOblique,Design = allOblique$Design)
 
 # visualize the functions and the regions excluded
-plotOblique<-function(cc,vv,col){
- av<- cc/vv[2]
- bv<- -vv[1]/vv[2]*(cc!=0)
- for(i in seq(length(av))){
-   if(av[i]==0){
-       next
-    }else{
-        abline(a=av[i],b=bv[i],col=col,lwd=1.5)
-    }
-  }
-}
-
 
 image(inDes,inDes,matrix(outs,ncol=100),col=grey.colors(20),main="Example and oblique profiles")
 contour(inDes,inDes,matrix(outs,ncol=100),add=T,nlevels = 20)
 contour(inDes,inDes,matrix(outs,ncol=100),add=T,levels = c(threshold),col=4,lwd=1.5)
-plotOblique(cccObl$alwaysEx$`0`[[1]],all_Psi[[1]],3)
-plotOblique(cccObl$alwaysEx$`0`[[2]],all_Psi[[2]],3)
-plotOblique(cccObl$neverEx$`0`[[1]],all_Psi[[1]],2)
-plotOblique(cccObl$neverEx$`0`[[2]],all_Psi[[2]],2)
+plotOblique(cccObl$alwaysEx$`0`[[1]],all_Psi[[1]],col=3)
+plotOblique(cccObl$alwaysEx$`0`[[2]],all_Psi[[2]],col=3)
+plotOblique(cccObl$neverEx$`0`[[1]],all_Psi[[1]],col=2)
+plotOblique(cccObl$neverEx$`0`[[2]],all_Psi[[2]],col=2)
 
 }
 }

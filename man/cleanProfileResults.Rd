@@ -15,7 +15,7 @@ cleanProfileResults(object, level = 1)
 returns \code{object} with the deleted parts as selected by \code{level}. In particular \itemize{
 \item{\code{1:}}{keep only \code{profMean_full}.}
 \item{\code{2:}}{keep \code{profMean_full} and \code{profMean_approx}. Remove all UQ results.}
-\item{\code{3:}}{keep \code{profMean_full} and \code{profMean_approx} and the simulation points. Remove all UQ simulations.}
+\item{\code{3:}}{keep \code{profMean_full} and \code{profMean_approx} and the pilot points. Remove all UQ simulations.}
 \item{\code{4:}}{Remove only the bound computations.}
 }
 }
@@ -49,7 +49,7 @@ cProfilesMean<-coordinateProfiles(object=kmModel,threshold=threshold,options_ful
 # If we want to run again the computation of approximate coordinate profiles
 # we delete that result and run again the coordinate profiles function
 cProfiles_full <- cleanProfileResults(cProfilesMean,level=1)
-\dontrun{
+\donttest{
 # Coordinate profiles with UQ with approximate profiles
 plot_options<-list(save=FALSE, titleProf = "Coordinate profiles",
                    title2d = "Posterior mean",qq_fill=TRUE)
@@ -59,10 +59,10 @@ cProfilesUQ<-coordinateProfiles(object=cProfilesMean,threshold=threshold,options
 # If we would like to remove all UQ results
 cProf_noUQ <- cleanProfileResults(cProfilesUQ,level=2)
 
-# If we would like to remove the simulations but keep the simulation points
+# If we would like to remove the simulations but keep the pilot points
 cProf_noSims <- cleanProfileResults(cProfilesUQ,level=3)
 # the line above is useful, for example, if we need a more accurate UQ. In that case
-# we obtain more simulations with the same simulation points and then combine the results.
+# we obtain more simulations with the same pilot points and then combine the results.
 
 }
 }

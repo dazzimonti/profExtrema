@@ -11,7 +11,7 @@ prof_mean_var_Delta(kmModel, simupoints, allPsi = NULL,
 \arguments{
 \item{kmModel}{the \link[DiceKriging]{km} model of the Gaussian process \eqn{Z}.}
 
-\item{simupoints}{the matrix \eqn{l x d} containing the simulation points \eqn{E}.}
+\item{simupoints}{the matrix \eqn{l x d} containing the pilot points \eqn{G}.}
 
 \item{allPsi}{optional list of matrices (dim \eqn{pxd}) for which to compute the profile extrema. If NULL coordinate profiles are computed.}
 

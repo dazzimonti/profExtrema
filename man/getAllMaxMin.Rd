@@ -54,7 +54,7 @@ gprime = function(x){
 # set up dimension
 coordProf<-getAllMaxMin(f = g,fprime = gprime,d=2,options = list(multistart=4,heavyReturn=TRUE))
 
-\dontrun{
+\donttest{
 # Consider threshold=-10
 threshold<- -10
 # obtain the points where the profiles take the threshold value

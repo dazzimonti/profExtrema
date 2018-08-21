@@ -11,7 +11,7 @@ mean_Delta_T(x, kmModel, simupoints, T.mat, F.mat)
 
 \item{kmModel}{the \link[DiceKriging]{km} model of the Gaussian process \eqn{Z}.}
 
-\item{simupoints}{the matrix \eqn{l x d} containing the simulation points \eqn{E}.}
+\item{simupoints}{the matrix \eqn{l x d} containing the pilot points \eqn{G}.}
 
 \item{T.mat}{the upper triangular factor of the Choleski decomposition of the covariance matrix of \code{rbind(kmModel@X,simupoints)}}
 

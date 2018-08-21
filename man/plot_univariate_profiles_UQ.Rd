@@ -5,8 +5,8 @@
 \title{Univariate profile extrema with UQ}
 \usage{
 plot_univariate_profiles_UQ(objectUQ, plot_options, nsims, threshold,
-  nameFile = "prof_UQ", quantiles_uq = c(0.05, 0.95), profMean = NULL,
-  typeProf = "approx")
+  nameFile = "prof_UQ", quantiles_uq = c(0.05, 0.95),
+  profMean = NULL, typeProf = "approx")
 }
 \arguments{
 \item{objectUQ}{an object returned by \link{coordProf_UQ} or the object saved in \code{obj$res_UQ}, if \code{obj} is the object returned by \link{coordinateProfiles}.}

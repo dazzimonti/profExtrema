@@ -37,9 +37,9 @@ colnames(inputs)[4:5]<-c("tPlus","tMinus")
 # put response in areaFlooded variable
 areaFlooded<-data.frame(coastal_flooding[,6])
 colnames(areaFlooded)<-colnames(coastal_flooding)[6]
-response = sqrt(areaFlooded*625)
+response = sqrt(areaFlooded)
 
-\dontrun{
+\donttest{
 model <- km(formula=~Tide+Surge+I(phi^2)+tMinus+tPlus,
             design = inputs,response = response,covtype="matern3_2")
 # Fix threshold
