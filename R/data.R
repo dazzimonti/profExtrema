@@ -1,4 +1,4 @@
-#' Coastal flooding as function of offshore conditions.
+#' Coastal flooding as function of offshore forcing conditions.
 #'
 #' A dataset containing the results of a numerical simulation conducted with
 #' the MARS model (Lazure and Dumas, 2008) for coastal flooding.
@@ -14,10 +14,10 @@
 #' @format A data frame with 200 rows and 6 variables:
 #' \describe{
 #'   \item{Tide}{High tide level in meters;}
-#'   \item{Surge}{Surge height in meters;}
-#'   \item{phi}{Phase difference between tide and surge;}
-#'   \item{t-}{Duration of the increasing part of surge;}
-#'   \item{t+}{Duration of the decreasing part of surge;}
+#'   \item{Surge}{Surge peak amplitude in meters;}
+#'   \item{phi}{Phase difference between high tide and surge peak;}
+#'   \item{t-}{Duration of the increasing part of the surge temporal signal (assumed to be triangular);}
+#'   \item{t+}{Duration of the decreasing part of the surge temporal signal (assumed to be triangular);}
 #'   \item{Area}{Flooded area in m^2.}
 #' }
 #'
@@ -38,7 +38,7 @@
 #' # Fix threshold
 #' threshold<-sqrt(c(1.2e6,1.9e6,3.1e6,6.5e6))
 #'
-#' #' # use the coordinateProfile function
+#' # use the coordinateProfile function
 #' ## set up plot options
 #' options_plots <- list(save=FALSE, folderPlots = "./" ,
 #'                       titleProf = "Coordinate profiles",
@@ -82,8 +82,6 @@
 #' Azzimonti, D., Ginsbourger, D., Rohmer, J. and Idier, D. (2017+). \emph{Profile extrema for visualizing and quantifying uncertainties on excursion regions. Application to coastal flooding.} arXiv:1710.00688.
 #'
 #' Rohmer, J., Idier, D., Paris, F., Pedreros, R., and Louisor, J. (2018). \emph{Casting light on forcing and breaching scenarios that lead to marine inundation: Combining numerical simulations with a random-forest classification approach.} Environmental Modelling & Software, 104:64-80.
-#'
-#' Rohmer, J. and Idier, D. (2012). \emph{A meta-modelling strategy to identify the critical offshore conditions for coastal flooding.} Natural Hazards and Earth System Sciences, 12(9):2943-2955.
 #'
 #' Lazure, P. and Dumas, F. (2008). \emph{An external-internal mode coupling for a 3D hydrodynamical model for applications at regional scale (MARS)}. Advances in Water Resources, 31:233-250.
 #'
