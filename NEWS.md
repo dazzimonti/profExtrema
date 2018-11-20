@@ -1,4 +1,8 @@
-# profExtrema 0.2.0
+# profExtrema 0.2.1
+
+## Changes with respect to profExtrema 0.2.0
+
+* Fixed a bug in plots of coordinate and oblique profiles that was removing the possibility to change coordinate names in plots. 
 
 ## Changes with respect to profExtrema 0.1.0
 
