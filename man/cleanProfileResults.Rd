@@ -49,7 +49,7 @@ cProfilesMean<-coordinateProfiles(object=kmModel,threshold=threshold,options_ful
 # If we want to run again the computation of approximate coordinate profiles
 # we delete that result and run again the coordinate profiles function
 cProfiles_full <- cleanProfileResults(cProfilesMean,level=1)
-\donttest{
+\dontrun{
 # Coordinate profiles with UQ with approximate profiles
 plot_options<-list(save=FALSE, titleProf = "Coordinate profiles",
                    title2d = "Posterior mean",qq_fill=TRUE)

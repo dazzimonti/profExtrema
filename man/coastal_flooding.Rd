@@ -57,6 +57,15 @@ d <- model@d
 init_des<-lhs::maximinLHS(5*d , d )
 options_approx<- list(multistart=2,heavyReturn=TRUE, initDesign=init_des,
                       fullDesignSize=100, smoother="quantSpline")
+
+# run the coordinate profile extrema on the mean
+CF_CoordProf_mean<- coordinateProfiles(object = model, threshold = threshold,
+                                       uq_computations = FALSE, options_approx = options_approx,
+                                       plot_level=3, plot_options= options_plots, return_level=3,
+                                       options_full=options_full)
+}
+\dontrun{
+## UQ computations might require a long time
 # set up simulation options
 ## reduce nsims and batchsize for faster/less accurate UQ
 nsims=200
@@ -70,11 +79,6 @@ opts_sims$integration.param <- integration_design(opts_sims$integcontrol,
                                                   opts_sims$upper,
                                                   model,threshold)
 opts_sims$integration.param$alpha <- 0.5
-# run the coordinate profile extrema on the mean
-CF_CoordProf_mean<- coordinateProfiles(object = model, threshold = threshold,
-                                       uq_computations = FALSE, options_approx = options_approx,
-                                       plot_level=3, plot_options= options_plots, return_level=3,
-                                       options_full=options_full)
 
 # run UQ computations
 CF_CoordProf_UQ<- coordinateProfiles(object = CF_CoordProf_mean, threshold = threshold,

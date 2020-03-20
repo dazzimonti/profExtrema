@@ -89,8 +89,8 @@ cccObl<-getChangePoints(threshold = threshold,allRes = allOblique,Design = allOb
 # visualize the functions and the regions excluded
 
 image(inDes,inDes,matrix(outs,ncol=100),col=grey.colors(20),main="Example and oblique profiles")
-contour(inDes,inDes,matrix(outs,ncol=100),add=T,nlevels = 20)
-contour(inDes,inDes,matrix(outs,ncol=100),add=T,levels = c(threshold),col=4,lwd=1.5)
+contour(inDes,inDes,matrix(outs,ncol=100),add=TRUE,nlevels = 20)
+contour(inDes,inDes,matrix(outs,ncol=100),add=TRUE,levels = c(threshold),col=4,lwd=1.5)
 plotOblique(cccObl$alwaysEx$`0`[[1]],all_Psi[[1]],col=3)
 plotOblique(cccObl$alwaysEx$`0`[[2]],all_Psi[[2]],col=3)
 plotOblique(cccObl$neverEx$`0`[[1]],all_Psi[[1]],col=2)
