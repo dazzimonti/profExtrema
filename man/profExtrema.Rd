@@ -30,7 +30,7 @@ Computation and plots of profile extrema functions. The package main functions a
 Package: profExtrema \cr
 Type: Package \cr
 Version: 0.2.1 \cr
-Date: 2018-11-20
+Date: 2020-03-20
 }
 \note{
 This work was supported in part the Hasler Foundation, grant number 16065 and by the Swiss National Science Foundation, grant number 167199. The author warmly thanks David Ginsbourger, Jérémy Rohmer and Déborah Idier for fruitful discussions and accurate, thought provoking suggestions.
