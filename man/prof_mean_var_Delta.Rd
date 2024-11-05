@@ -4,9 +4,15 @@
 \alias{prof_mean_var_Delta}
 \title{Profile extrema for the mean and variance functions of difference process}
 \usage{
-prof_mean_var_Delta(kmModel, simupoints, allPsi = NULL,
-  options_full_sims = NULL, options_approx = NULL, F.mat = NULL,
-  T.mat = NULL)
+prof_mean_var_Delta(
+  kmModel,
+  simupoints,
+  allPsi = NULL,
+  options_full_sims = NULL,
+  options_approx = NULL,
+  F.mat = NULL,
+  T.mat = NULL
+)
 }
 \arguments{
 \item{kmModel}{the \link[DiceKriging]{km} model of the Gaussian process \eqn{Z}.}

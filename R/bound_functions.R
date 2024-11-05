@@ -204,8 +204,8 @@ prof_mean_var_Delta<-function(kmModel,simupoints,allPsi=NULL,options_full_sims=N
 #' @param options_approx an optional list of options for \link{approxMaxMin} (or \link{approxProfileExtrema} if \code{allPsi} not NULL).
 #' @param options_full_sims an optional list of options for \link{getAllMaxMin} (or \link{getProfileExtrema} if \code{allPsi} not NULL). If NULL the full computations are not excuted. NOTE: this computations might be very expensive!
 #' @return a list containing \itemize{
-#' \item{\code{bound: }}{a list containing the upper/lower bound for profile sup and inf}
-#' \item{\code{approx: }}{a list containing the upper/lower approximate quantiles for profile sup and inf}
+#' \item \code{bound: } a list containing the upper/lower bound for profile sup and inf
+#' \item \code{approx: } a list containing the upper/lower approximate quantiles for profile sup and inf
 #' }
 #' @export
 bound_profiles<-function(objectUQ,mean_var_delta=NULL,beta=0.0124,alpha=0.025,allPsi=NULL,options_approx=NULL,options_full_sims=NULL){

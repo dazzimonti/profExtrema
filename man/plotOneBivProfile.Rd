@@ -4,8 +4,15 @@
 \alias{plotOneBivProfile}
 \title{Plot bivariate profiles}
 \usage{
-plotOneBivProfile(allRes, allPsi, Design = NULL, threshold = NULL,
-  trueEvals = NULL, main_addendum = "", ...)
+plotOneBivProfile(
+  allRes,
+  allPsi,
+  Design = NULL,
+  threshold = NULL,
+  trueEvals = NULL,
+  main_addendum = "",
+  ...
+)
 }
 \arguments{
 \item{allRes}{list containing the list \code{res} which contains the computed minima and maxima. The object returned by the function \code{getProfileExtrema}.}

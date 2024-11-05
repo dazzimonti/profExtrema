@@ -8,11 +8,11 @@
 #' @param allPsi a list containing the matrices Psi (dim \eqn{pxd}) for which to compute the profile extrema
 #' @param opts a list containing the options for this function and the subfunctions \link{getProfileSup_optim}, \link{getProfileInf_optim}. The options only for getProfileExtrema are
 #' \itemize{
-#' \item{\code{limits:}}{an optional list containing \code{lower} and \code{upper}, two vectors with the limits of the input space. If NULL then \code{limits=list(upper=rep(1,d),lower=rep(0,d))}}
-#' \item{\code{discretization:}}{an optional integer representing the discretization size for the profile computation for each dimension of eta. Pay attention that this leads to a grid of size \code{discretization^p}.}
-#' \item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
-#' \item{\code{plts:}}{If TRUE and p==1 for all Psi in allPsi, plots the profile functions at each Psi, default is FALSE.}
-#' \item{\code{verb:}}{If TRUE, outputs intermediate results, default is FALSE.}
+#' \item \code{limits:} an optional list containing \code{lower} and \code{upper}, two vectors with the limits of the input space. If NULL then \code{limits=list(upper=rep(1,d),lower=rep(0,d))}
+#' \item \code{discretization:} an optional integer representing the discretization size for the profile computation for each dimension of eta. Pay attention that this leads to a grid of size \code{discretization^p}.
+#' \item \code{heavyReturn:} If TRUE returns also all minimizers, default is FALSE.
+#' \item \code{plts:} If TRUE and p==1 for all Psi in allPsi, plots the profile functions at each Psi, default is FALSE.
+#' \item \code{verb:} If TRUE, outputs intermediate results, default is FALSE.
 #' }
 #' @return a list of two data frames (min, max) of the evaluations of \eqn{P^sup_Psi f(eta) = sup_{Psi x = \eta} f(x) } and \eqn{P^inf_Psi f(eta) = inf_{Psi x = \eta} f(x) }
 #' discretized over 50 equally spaced points for each dimension for each Psi in \code{allPsi}. This number can be changed by defining it in options$discretization.
@@ -209,19 +209,19 @@ getProfileExtrema<-function(f,fprime=NULL,d,allPsi,opts=NULL){
 #' @param allPsi a list containing the matrices Psi (dim \eqn{pxd}) for which to compute the profile extrema
 #' @param opts a list containing the options for this function and the subfunctions \link{getProfileSup_optim}, \link{getProfileInf_optim} or \link{getProfileExtrema}. The options only for approxProfileExtrema are
 #' \itemize{
-#' \item{\code{limits:}}{an optional list with the upper and lower limits of input space dimension, if NULL then \code{limits=list(upper=rep(1,d),lower=rep(0,d))}}
-#' \item{\code{smoother:}}{Select which smoother to use:a string that selects which smoother to use: \itemize{
-#'       \item{\code{"1order"}}: first order interpolation with gradient
-#'       \item{\code{"splineSmooth"}}: smoothing spline with default degrees of freedom (DEFAULT OPTION)
-#'       \item{\code{"quantSpline"}}: profile inf and profile sup approximated with quantile spline regression at levels 0.1 and 0.9 respectively
-#' }}
-#' \item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
-#' \item{\code{initDesign:}}{A list of the same length as allPsi containing the designs of few points where the expensive sup is evaluated. If Null it is automatically initialized}
-#' \item{\code{fullDesignSize:}}{The full design where the function is approximated.}
-#' \item{\code{multistart:}}{number of multistarts for optim procedure.}
-#' \item{\code{numMCsamples:}}{number of MC samples for the sup.}
-#' \item{\code{plts:}}{If TRUE, plots the max/min functions at each coordinate, default is FALSE.}
-#' \item{\code{verb:}}{If TRUE, outputs intermediate results, default is FALSE.}
+#' \item \code{limits:} an optional list with the upper and lower limits of input space dimension, if NULL then \code{limits=list(upper=rep(1,d),lower=rep(0,d))}
+#' \item \code{smoother:} Select which smoother to use:a string that selects which smoother to use: \itemize{
+#'       \item \code{"1order"}: first order interpolation with gradient
+#'       \item \code{"splineSmooth"}: smoothing spline with default degrees of freedom (DEFAULT OPTION)
+#'       \item \code{"quantSpline"}: profile inf and profile sup approximated with quantile spline regression at levels 0.1 and 0.9 respectively
+#' }
+#' \item \code{heavyReturn:} If TRUE returns also all minimizers, default is FALSE.
+#' \item \code{initDesign:} A list of the same length as allPsi containing the designs of few points where the expensive sup is evaluated. If Null it is automatically initialized
+#' \item \code{fullDesignSize:} The full design where the function is approximated.
+#' \item \code{multistart:} number of multistarts for optim procedure.
+#' \item \code{numMCsamples:} number of MC samples for the sup.
+#' \item \code{plts:} If TRUE, plots the max/min functions at each coordinate, default is FALSE.
+#' \item \code{verb:} If TRUE, outputs intermediate results, default is FALSE.
 #' }
 #' @return a list of two data frames (min, max) of the evaluations of \eqn{f_sup(x_i) = sup_{x_j \neq i} f(x_1,\dots,x_d) } and \eqn{f_inf(x_i) = inf_{x_j \neq i} f(x_1,\dots,x_d) }
 #' for each i at the design Design. By default Design is a 100 equally spaced points for each dimension. It can be changed by defining it in options$Design

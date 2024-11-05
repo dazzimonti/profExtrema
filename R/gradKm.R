@@ -9,9 +9,9 @@
 #' @param bias.correct an optional boolean to correct bias in the UK variance. Default is FALSE.
 #' @param light.return an optional boolean indicating whether to return additional variables. Default is FALSE.
 #' @return Returns a list containing \itemize{
-#' \item{\code{mean:}}{ the gradient of the posterior mean at \code{newdata}.}
-#' \item{\code{trend:}}{ the gradient of the trend at \code{newdata}.}
-#' \item{\code{s2:}}{ the gradient of the posterior variance at \code{newdata}.}
+#' \item \code{mean:} the gradient of the posterior mean at \code{newdata}.
+#' \item \code{trend:} the gradient of the trend at \code{newdata}.
+#' \item \code{s2:} the gradient of the posterior variance at \code{newdata}.
 #' }
 #' @export
 gradKm_dnewdata<-function (object, newdata, type, se.compute = TRUE, light.return = FALSE, bias.correct = FALSE)

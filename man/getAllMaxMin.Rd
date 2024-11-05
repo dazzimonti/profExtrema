@@ -16,11 +16,11 @@ getAllMaxMin(f, fprime = NULL, d, options = NULL)
 \item{options}{a list containing the options for this function and the subfunctions getMax, getMin
 see documentation of getMax, getMin for details. The options only for getAllMaxMin are
 \itemize{
-\item{\code{Design:}}{an optional design matrix with the discretization of each dimension, if NULL then for each dimension Design[,coord] = seq(0,1,length.out=100)}
-\item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
-\item{\code{plts:}}{If TRUE, plots the max/min functions at each coordinate, default is FALSE.}
-\item{\code{verb:}}{If TRUE, outputs intermediate results, default is FALSE.}
-\item{\code{MonteCarlo:}}{If TRUE, use the MC optimizer otherwise use standard optim.}
+\item \code{Design:} an optional design matrix with the discretization of each dimension, if NULL then for each dimension Design[,coord] = seq(0,1,length.out=100)
+\item \code{heavyReturn:} If TRUE returns also all minimizers, default is FALSE.
+\item \code{plts:} If TRUE, plots the max/min functions at each coordinate, default is FALSE.
+\item \code{verb:} If TRUE, outputs intermediate results, default is FALSE.
+\item \code{MonteCarlo:} If TRUE, use the MC optimizer otherwise use standard optim.
 }}
 }
 \value{

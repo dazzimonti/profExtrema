@@ -10,10 +10,10 @@
 #' @param d dimension of the input for f
 #' @param options a list containing the options to be passed to optim:
 #' \itemize{
-#' \item{\code{par:}}{contains the starting point (a point in dimension d-1)}
-#' \item{\code{method:}}{ is the string denoting the chosen method for the optimization (see optim for details)}
-#' \item{\code{lower:} }{the lower bounds for the optimization domain (see optim for details)}
-#' \item{\code{upper:}}{the upper bounds for the optimization domain (see optim for details)}
+#' \item \code{par:} contains the starting point (a point in dimension d-1)
+#' \item \code{method:} is the string denoting the chosen method for the optimization (see optim for details)
+#' \item \code{lower:} the lower bounds for the optimization domain (see optim for details)
+#' \item \code{upper:} the upper bounds for the optimization domain (see optim for details)
 #' }
 #' @return a real value corresponding to \eqn{max_{x_1,\dots, x_{coord-1},x_{coord+1}, \dots, x_d} f(x_1,\dots,x_d)}
 getMax = function(x,f,fprime,coord,d,options=NULL){
@@ -104,10 +104,10 @@ getMax = function(x,f,fprime,coord,d,options=NULL){
 #' @param d dimension of the input for f
 #' @param options a list containing the options to be passed to optim:
 #' \itemize{
-#' \item{\code{par:}}{contains the starting point (a point in dimension d-1)}
-#' \item{\code{method:}}{is the string denoting the chosen method for the optimization (see optim for details)}
-#' \item{\code{lower:}}{the lower bounds for the optimization domain (see optim for details)}
-#' \item{\code{upper:}}{the upper bounds for the optimization domain (see optim for details)}
+#' \item \code{par:} contains the starting point (a point in dimension d-1)
+#' \item \code{method:} is the string denoting the chosen method for the optimization (see optim for details)
+#' \item \code{lower:} the lower bounds for the optimization domain (see optim for details)
+#' \item \code{upper:} the upper bounds for the optimization domain (see optim for details)
 #' }
 #' @return a real value corresponding to \eqn{min_{x_1,\dots, x_{coord-1},x_{coord+1}, \dots, x_d} f(x_1,\dots,x_d)}
 getMin = function(x,f,fprime,coord,d,options=NULL){
@@ -196,11 +196,11 @@ getMin = function(x,f,fprime,coord,d,options=NULL){
 #' @param d dimension of the input for f
 #' @param options a list containing the options to be passed to the MC optimizer:
 #' \itemize{
-#' \item{\code{par:}}{contains the starting point (a point in dimension d-1)}
-#' \item{\code{numMCsamples:}}{ number of MC samples}
-#' \item{\code{rand}}{string that chooses the type of randomness in MC: "unif" (uniform in [lower,upper]), "norm" (independent normal with mean 0 and variance 1)}
-#' \item{\code{lower:} }{the lower bounds for the optimization domain (see optim for details)}
-#' \item{\code{upper:}}{the upper bounds for the optimization domain (see optim for details)}
+#' \item \code{par:} contains the starting point (a point in dimension d-1)
+#' \item \code{numMCsamples:} number of MC samples
+#' \item \code{rand} string that chooses the type of randomness in MC: "unif" (uniform in [lower,upper]), "norm" (independent normal with mean 0 and variance 1)
+#' \item \code{lower:} the lower bounds for the optimization domain (see optim for details)
+#' \item \code{upper:} the upper bounds for the optimization domain (see optim for details)
 #' }
 #' @return a real value corresponding to \eqn{max_{x_1,\dots, x_{coord-1},x_{coord+1}, \dots, x_d} f(x_1,\dots,x_d)}
 getMaxMinMC = function(x,f,fprime,coord,d,options=NULL){
@@ -284,11 +284,11 @@ getMaxMinMC = function(x,f,fprime,coord,d,options=NULL){
 #' @param options a list containing the options for this function and the subfunctions getMax, getMin
 #' see documentation of getMax, getMin for details. The options only for getAllMaxMin are
 #' \itemize{
-#' \item{\code{Design:}}{an optional design matrix with the discretization of each dimension, if NULL then for each dimension Design[,coord] = seq(0,1,length.out=100)}
-#' \item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
-#' \item{\code{plts:}}{If TRUE, plots the max/min functions at each coordinate, default is FALSE.}
-#' \item{\code{verb:}}{If TRUE, outputs intermediate results, default is FALSE.}
-#' \item{\code{MonteCarlo:}}{If TRUE, use the MC optimizer otherwise use standard optim.}
+#' \item \code{Design:} an optional design matrix with the discretization of each dimension, if NULL then for each dimension Design[,coord] = seq(0,1,length.out=100)
+#' \item \code{heavyReturn:} If TRUE returns also all minimizers, default is FALSE.
+#' \item \code{plts:} If TRUE, plots the max/min functions at each coordinate, default is FALSE.
+#' \item \code{verb:} If TRUE, outputs intermediate results, default is FALSE.
+#' \item \code{MonteCarlo:} If TRUE, use the MC optimizer otherwise use standard optim.
 #' }
 #' @return a list of two data frames (min, max) of the evaluations of \eqn{f_sup(x_i) = sup_{x_j \neq i} f(x_1,\dots,x_d) } and \eqn{f_inf(x_i) = inf_{x_j \neq i} f(x_1,\dots,x_d) }
 #' for each i at the design Design. By default Design is a 100 equally spaced points for each dimension. It can be changed by defining it in options$Design
@@ -449,20 +449,20 @@ getAllMaxMin<-function(f,fprime=NULL,d,options=NULL){
 #' @param d dimension of the input domain
 #' @param opts a list containing the options for this function and the subfunctions getMax, getMin or getMaxMinMC, see documentation of getMax, getMin, getMaxMinMC for details. The options only for approxMaxMin are
 #' \itemize{
-#' \item{\code{limits:}}{an optional list with the upper and lower limits of each dimension, if NULL then for each dimension limits are 0,1}
-#' \item{\code{smoother:}}{Select which smoother to use:a string that selects which smoother to use: \itemize{
-#'       \item{\code{"1order"}}: first order interpolation with gradient
-#'       \item{\code{"splineSmooth"}}: smoothing spline with default degrees of freedom (DEFAULT OPTION)
-#'       \item{\code{"quantSpline"}}: profile inf and profile sup approximated with quantile spline regression at levels 0.1 and 0.9 respectively
-#' }}
-#' \item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
-#' \item{\code{initDesign:}}{The design of few points where the expensive sup is evaluated.}
-#' \item{\code{fullDesignSize:}}{The full design where the function is approximated.}
-#' \item{\code{multistart:}}{number of multistarts for optim procedure.}
-#' \item{\code{MonteCarlo:}}{if TRUE, computes sup with Monte Carlo procedure.}
-#' \item{\code{numMCsamples:}}{number of MC samples for the sup.}
-#' \item{\code{plts:}}{If TRUE, plots the max/min functions at each coordinate, default is FALSE.}
-#' \item{\code{verb:}}{If TRUE, outputs intermediate results, default is FALSE.}
+#' \item \code{limits:} an optional list with the upper and lower limits of each dimension, if NULL then for each dimension limits are 0,1
+#' \item \code{smoother:} Select which smoother to use:a string that selects which smoother to use: \itemize{
+#'       \item \code{"1order"}: first order interpolation with gradient
+#'       \item \code{"splineSmooth"}: smoothing spline with default degrees of freedom (DEFAULT OPTION)
+#'       \item \code{"quantSpline"}: profile inf and profile sup approximated with quantile spline regression at levels 0.1 and 0.9 respectively
+#' }
+#' \item \code{heavyReturn:} If TRUE returns also all minimizers, default is FALSE.
+#' \item \code{initDesign:} The design of few points where the expensive sup is evaluated.
+#' \item \code{fullDesignSize:} The full design where the function is approximated.
+#' \item \code{multistart:} number of multistarts for optim procedure.
+#' \item \code{MonteCarlo:} if TRUE, computes sup with Monte Carlo procedure.
+#' \item \code{numMCsamples:} number of MC samples for the sup.
+#' \item \code{plts:} If TRUE, plots the max/min functions at each coordinate, default is FALSE.
+#' \item \code{verb:} If TRUE, outputs intermediate results, default is FALSE.
 #' }
 #' @return a list of two data frames (min, max) of the evaluations of \eqn{f_sup(x_i) = sup_{x_j \neq i} f(x_1,\dots,x_d) } and \eqn{f_inf(x_i) = inf_{x_j \neq i} f(x_1,\dots,x_d) }
 #' for each i at the design Design. By default Design is a 100 equally spaced points for each dimension. It can be changed by defining it in options$Design

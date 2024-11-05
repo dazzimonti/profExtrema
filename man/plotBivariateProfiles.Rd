@@ -4,8 +4,15 @@
 \alias{plotBivariateProfiles}
 \title{Plot bivariate profiles}
 \usage{
-plotBivariateProfiles(bivProf, allPsi, Design = NULL, threshold = NULL,
-  whichIQR = NULL, plot_options = NULL, ...)
+plotBivariateProfiles(
+  bivProf,
+  allPsi,
+  Design = NULL,
+  threshold = NULL,
+  whichIQR = NULL,
+  plot_options = NULL,
+  ...
+)
 }
 \arguments{
 \item{bivProf}{list returned by \code{obliqueProfiles}.}

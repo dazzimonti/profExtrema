@@ -13,10 +13,10 @@ cleanProfileResults(object, level = 1)
 }
 \value{
 returns \code{object} with the deleted parts as selected by \code{level}. In particular \itemize{
-\item{\code{1:}}{keep only \code{profMean_full}.}
-\item{\code{2:}}{keep \code{profMean_full} and \code{profMean_approx}. Remove all UQ results.}
-\item{\code{3:}}{keep \code{profMean_full} and \code{profMean_approx} and the pilot points. Remove all UQ simulations.}
-\item{\code{4:}}{Remove only the bound computations.}
+\item \code{1:} keep only \code{profMean_full}.
+\item \code{2:} keep \code{profMean_full} and \code{profMean_approx}. Remove all UQ results.
+\item \code{3:} keep \code{profMean_full} and \code{profMean_approx} and the pilot points. Remove all UQ simulations.
+\item \code{4:} Remove only the bound computations.
 }
 }
 \description{

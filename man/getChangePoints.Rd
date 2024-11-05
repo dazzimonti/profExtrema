@@ -16,8 +16,8 @@ getChangePoints(threshold, Design = NULL, allRes)
 \value{
 returns a list containing two lists with d components where
 \itemize{
-\item{alwaysEx:} each component is a numerical vector indicating the points \eqn{x_i} where \eqn{inf_{x^{-i}}f(x) >} \code{threshold};
-\item{neverEx:} each component is a numerical vector indicating the points \eqn{x_i} where \eqn{sup_{x^{-i}}f(x) <} \code{threshold}.
+\item alwaysEx: each component is a numerical vector indicating the points \eqn{x_i} where \eqn{inf_{x^{-i}}f(x) >} \code{threshold};
+\item neverEx: each component is a numerical vector indicating the points \eqn{x_i} where \eqn{sup_{x^{-i}}f(x) <} \code{threshold}.
 }
 }
 \description{

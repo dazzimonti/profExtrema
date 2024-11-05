@@ -11,31 +11,31 @@
 #' @param options_full_sims an optional list of options for getAllMaxMin, see \link{getAllMaxMin} for details. If NULL the full computations are not excuted. NOTE: this computations might be very expensive!
 #' @param options_sims an optional list of options for the posterior simulations.
 #' \itemize{
-#' \item{\code{algorithm:}} string choice of the algorithm to select the pilot points ("A" or "B", default "B");
-#' \item{\code{lower:}} \eqn{d} dimensional vector with lower bounds for pilot points, default \code{rep(0,d)};
-#' \item{\code{upper:}} \eqn{d} dimensional vector with upper bounds for pilot points, default \code{rep(1,d)};
-#' \item{\code{batchsize:}} number of pilot points, default \code{120};
-#' \item{\code{optimcontrol:}} list containing the options for optimization, see \link[pGPx]{optim_dist_measure};
-#' \item{\code{integcontrol:}} list containing the options for numerical integration of the criterion, see \link[pGPx]{optim_dist_measure};
-#' \item{\code{integration.param:}} list containing the integration design, obtained with the function \link[KrigInv]{integration_design};
-#' \item{\code{nsim:}} number of approximate GP simulations, default \code{300}.
+#' \item \code{algorithm:} string choice of the algorithm to select the pilot points ("A" or "B", default "B");
+#' \item \code{lower:} \eqn{d} dimensional vector with lower bounds for pilot points, default \code{rep(0,d)};
+#' \item \code{upper:} \eqn{d} dimensional vector with upper bounds for pilot points, default \code{rep(1,d)};
+#' \item \code{batchsize:} number of pilot points, default \code{120};
+#' \item \code{optimcontrol:} list containing the options for optimization, see \link[pGPx]{optim_dist_measure};
+#' \item \code{integcontrol:} list containing the options for numerical integration of the criterion, see \link[pGPx]{optim_dist_measure};
+#' \item \code{integration.param:} list containing the integration design, obtained with the function \link[KrigInv]{integration_design};
+#' \item \code{nsim:} number of approximate GP simulations, default \code{300}.
 #' }
 #' @param options_bound an optional list containing \code{beta} the confidence level for the approximation and \code{alpha} the confidence level for the bound. Note that \code{alpha > 2*beta}. If \code{NULL}, the bound is not computed.
 #' @param plot_level an integer to select the plots to return (0=no plots, 1=basic plots, 2= all plots)
 #' @param plot_options an optional list of parameters for plots. See \link{setPlotOptions} for currently available options.
 #' @param return_level an integer to select the amount of details returned
 #' @return If return_level=1 a list containing \itemize{
-#' \item{\code{profSups:}}{an array \code{dxfullDesignSizexnsims} containing the profile sup for each coordinate for each realization.}
-#' \item{\code{profInfs:}}{an array \code{dxfullDesignSizexnsims} containing the profile inf for each coordinate for each realization.}
-#' \item{\code{prof_quantiles_approx:}}{a list containing the quantiles (levels set by \code{quantiles_uq}) of the profile extrema functions.}
+#' \item \code{profSups:} an array \code{dxfullDesignSizexnsims} containing the profile sup for each coordinate for each realization.
+#' \item \code{profInfs:} an array \code{dxfullDesignSizexnsims} containing the profile inf for each coordinate for each realization.
+#' \item \code{prof_quantiles_approx:} a list containing the quantiles (levels set by \code{quantiles_uq}) of the profile extrema functions.
 #' } if return_level=2 the same list as above but also including \code{more:} a list containing \itemize{
-#' \item{\code{times:}}{a list containing
+#' \item \code{times:} a list containing
 #' 	\itemize{
-#' 	\item{\code{tSpts:} }{computational time for selecting pilot points.}
-#' 	\item{\code{tApprox1ord:}}{vector containing the computational time required for profile extrema computation for each realization}
-#' 	}}
-#' \item{\code{simuls:}}{ a matrix containing the value of the field simulated at the pilot points}
-#' \item{\code{sPts:}}{the pilot points}
+#' 	\item \code{tSpts:} computational time for selecting pilot points.
+#' 	\item \code{tApprox1ord:} vector containing the computational time required for profile extrema computation for each realization
+#' 	}
+#' \item \code{simuls:} a matrix containing the value of the field simulated at the pilot points
+#' \item \code{sPts:} the pilot points
 #' }
 #' @examples
 #' if (!requireNamespace("DiceKriging", quietly = TRUE)) {

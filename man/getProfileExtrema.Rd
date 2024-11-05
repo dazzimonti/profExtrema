@@ -17,11 +17,11 @@ getProfileExtrema(f, fprime = NULL, d, allPsi, opts = NULL)
 
 \item{opts}{a list containing the options for this function and the subfunctions \link{getProfileSup_optim}, \link{getProfileInf_optim}. The options only for getProfileExtrema are
 \itemize{
-\item{\code{limits:}}{an optional list containing \code{lower} and \code{upper}, two vectors with the limits of the input space. If NULL then \code{limits=list(upper=rep(1,d),lower=rep(0,d))}}
-\item{\code{discretization:}}{an optional integer representing the discretization size for the profile computation for each dimension of eta. Pay attention that this leads to a grid of size \code{discretization^p}.}
-\item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
-\item{\code{plts:}}{If TRUE and p==1 for all Psi in allPsi, plots the profile functions at each Psi, default is FALSE.}
-\item{\code{verb:}}{If TRUE, outputs intermediate results, default is FALSE.}
+\item \code{limits:} an optional list containing \code{lower} and \code{upper}, two vectors with the limits of the input space. If NULL then \code{limits=list(upper=rep(1,d),lower=rep(0,d))}
+\item \code{discretization:} an optional integer representing the discretization size for the profile computation for each dimension of eta. Pay attention that this leads to a grid of size \code{discretization^p}.
+\item \code{heavyReturn:} If TRUE returns also all minimizers, default is FALSE.
+\item \code{plts:} If TRUE and p==1 for all Psi in allPsi, plots the profile functions at each Psi, default is FALSE.
+\item \code{verb:} If TRUE, outputs intermediate results, default is FALSE.
 }}
 }
 \value{

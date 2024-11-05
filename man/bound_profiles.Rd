@@ -4,9 +4,15 @@
 \alias{bound_profiles}
 \title{Bound for profile extrema quantiles}
 \usage{
-bound_profiles(objectUQ, mean_var_delta = NULL, beta = 0.0124,
-  alpha = 0.025, allPsi = NULL, options_approx = NULL,
-  options_full_sims = NULL)
+bound_profiles(
+  objectUQ,
+  mean_var_delta = NULL,
+  beta = 0.0124,
+  alpha = 0.025,
+  allPsi = NULL,
+  options_approx = NULL,
+  options_full_sims = NULL
+)
 }
 \arguments{
 \item{objectUQ}{an object returned by \link{coordProf_UQ} or the object saved in \code{obj$res_UQ}, if \code{obj} is the object returned by \link{coordinateProfiles}}
@@ -25,8 +31,8 @@ bound_profiles(objectUQ, mean_var_delta = NULL, beta = 0.0124,
 }
 \value{
 a list containing \itemize{
-\item{\code{bound: }}{a list containing the upper/lower bound for profile sup and inf}
-\item{\code{approx: }}{a list containing the upper/lower approximate quantiles for profile sup and inf}
+\item \code{bound: } a list containing the upper/lower bound for profile sup and inf
+\item \code{approx: } a list containing the upper/lower approximate quantiles for profile sup and inf
 }
 }
 \description{

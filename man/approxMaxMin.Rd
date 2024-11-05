@@ -15,20 +15,20 @@ approxMaxMin(f, fprime = NULL, d, opts = NULL)
 
 \item{opts}{a list containing the options for this function and the subfunctions getMax, getMin or getMaxMinMC, see documentation of getMax, getMin, getMaxMinMC for details. The options only for approxMaxMin are
 \itemize{
-\item{\code{limits:}}{an optional list with the upper and lower limits of each dimension, if NULL then for each dimension limits are 0,1}
-\item{\code{smoother:}}{Select which smoother to use:a string that selects which smoother to use: \itemize{
-      \item{\code{"1order"}}: first order interpolation with gradient
-      \item{\code{"splineSmooth"}}: smoothing spline with default degrees of freedom (DEFAULT OPTION)
-      \item{\code{"quantSpline"}}: profile inf and profile sup approximated with quantile spline regression at levels 0.1 and 0.9 respectively
-}}
-\item{\code{heavyReturn:}}{If TRUE returns also all minimizers, default is FALSE.}
-\item{\code{initDesign:}}{The design of few points where the expensive sup is evaluated.}
-\item{\code{fullDesignSize:}}{The full design where the function is approximated.}
-\item{\code{multistart:}}{number of multistarts for optim procedure.}
-\item{\code{MonteCarlo:}}{if TRUE, computes sup with Monte Carlo procedure.}
-\item{\code{numMCsamples:}}{number of MC samples for the sup.}
-\item{\code{plts:}}{If TRUE, plots the max/min functions at each coordinate, default is FALSE.}
-\item{\code{verb:}}{If TRUE, outputs intermediate results, default is FALSE.}
+\item \code{limits:} an optional list with the upper and lower limits of each dimension, if NULL then for each dimension limits are 0,1
+\item \code{smoother:} Select which smoother to use:a string that selects which smoother to use: \itemize{
+      \item \code{"1order"}: first order interpolation with gradient
+      \item \code{"splineSmooth"}: smoothing spline with default degrees of freedom (DEFAULT OPTION)
+      \item \code{"quantSpline"}: profile inf and profile sup approximated with quantile spline regression at levels 0.1 and 0.9 respectively
+}
+\item \code{heavyReturn:} If TRUE returns also all minimizers, default is FALSE.
+\item \code{initDesign:} The design of few points where the expensive sup is evaluated.
+\item \code{fullDesignSize:} The full design where the function is approximated.
+\item \code{multistart:} number of multistarts for optim procedure.
+\item \code{MonteCarlo:} if TRUE, computes sup with Monte Carlo procedure.
+\item \code{numMCsamples:} number of MC samples for the sup.
+\item \code{plts:} If TRUE, plots the max/min functions at each coordinate, default is FALSE.
+\item \code{verb:} If TRUE, outputs intermediate results, default is FALSE.
 }}
 }
 \value{

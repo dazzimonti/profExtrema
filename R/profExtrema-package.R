@@ -1,3 +1,9 @@
+#' @keywords internal
+"_PACKAGE"
+
+## usethis namespace: start
+## usethis namespace: end
+
 #' @title profExtrema package
 #' @description Computation and plots of profile extrema functions. The package main functions are: \describe{
 #'    \item{\strong{Computation:}}{ \itemize{
@@ -24,7 +30,6 @@
 #' Date: 2020-03-20
 #'
 #' @author Dario Azzimonti (dario.azzimonti@@gmail.com) .
-#' @docType package
 #' @name profExtrema
 #' @import microbenchmark
 #' @importFrom DiceKriging predict.km covMat1Mat2 covVector.dx covMatrix simulate km

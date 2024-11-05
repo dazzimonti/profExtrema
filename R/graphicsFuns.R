@@ -71,8 +71,8 @@ plotMaxMin<-function(allRes,Design=NULL,threshold=NULL,changes=FALSE,trueEvals=N
 #' @param threshold if not null plots the level
 #' @return returns a list containing two lists with d components where
 #' \itemize{
-#' \item{alwaysEx:} each component is a numerical vector indicating the points \eqn{x_i} where \eqn{inf_{x^{-i}}f(x) >} \code{threshold};
-#' \item{neverEx:} each component is a numerical vector indicating the points \eqn{x_i} where \eqn{sup_{x^{-i}}f(x) <} \code{threshold}.
+#' \item alwaysEx: each component is a numerical vector indicating the points \eqn{x_i} where \eqn{inf_{x^{-i}}f(x) >} \code{threshold};
+#' \item neverEx: each component is a numerical vector indicating the points \eqn{x_i} where \eqn{sup_{x^{-i}}f(x) <} \code{threshold}.
 #' }
 #' @export
 getChangePoints <- function(threshold,Design=NULL,allRes){

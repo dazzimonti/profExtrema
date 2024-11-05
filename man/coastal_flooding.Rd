@@ -4,7 +4,8 @@
 \name{coastal_flooding}
 \alias{coastal_flooding}
 \title{Coastal flooding as function of offshore forcing conditions.}
-\format{A data frame with 200 rows and 6 variables:
+\format{
+A data frame with 200 rows and 6 variables:
 \describe{
   \item{Tide}{High tide level in meters;}
   \item{Surge}{Surge peak amplitude in meters;}
@@ -12,7 +13,8 @@
   \item{t-}{Duration of the increasing part of the surge temporal signal (assumed to be triangular);}
   \item{t+}{Duration of the decreasing part of the surge temporal signal (assumed to be triangular);}
   \item{Area}{Flooded area in m^2.}
-}}
+}
+}
 \usage{
 coastal_flooding
 }

@@ -19,9 +19,9 @@ getProfileSup_optim(eta, Psi, f, fprime, d, options = NULL)
 
 \item{options}{a list containing the options to be passed to optim:
 \itemize{
-\item{\code{par:}}{contains the starting point (a point in dimension d-1)}
-\item{\code{lower:} }{the lower bounds for the optimization domain (see optim for details)}
-\item{\code{upper:}}{the upper bounds for the optimization domain (see optim for details)}
+\item \code{par:} contains the starting point (a point in dimension d-1)
+\item \code{lower:} the lower bounds for the optimization domain (see optim for details)
+\item \code{upper:} the upper bounds for the optimization domain (see optim for details)
 }}
 }
 \value{

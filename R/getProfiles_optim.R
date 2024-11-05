@@ -10,9 +10,9 @@
 #' @param d dimension of the input for f
 #' @param options a list containing the options to be passed to optim:
 #' \itemize{
-#' \item{\code{par:}}{contains the starting point (a point in dimension d-1)}
-#' \item{\code{lower:} }{the lower bounds for the optimization domain (see optim for details)}
-#' \item{\code{upper:}}{the upper bounds for the optimization domain (see optim for details)}
+#' \item \code{par:} contains the starting point (a point in dimension d-1)
+#' \item \code{lower:} the lower bounds for the optimization domain (see optim for details)
+#' \item \code{upper:} the upper bounds for the optimization domain (see optim for details)
 #' }
 #' @return a real value corresponding to \eqn{max_{x \in D_Psi} f(x)}
 #' @seealso \link{getProfileInf_optim}, \link{plotMaxMin}
@@ -166,9 +166,9 @@ getProfileSup_optim = function(eta,Psi,f,fprime,d,options=NULL){
 #' @param d dimension of the input for f
 #' @param options a list containing the options to be passed to optim:
 #' \itemize{
-#' \item{\code{par:}}{contains the starting point (a point in dimension d)}
-#' \item{\code{lower:} }{the lower bounds for the optimization domain (see optim for details)}
-#' \item{\code{upper:}}{the upper bounds for the optimization domain (see optim for details)}
+#' \item \code{par:} contains the starting point (a point in dimension d)
+#' \item \code{lower:} the lower bounds for the optimization domain (see optim for details)
+#' \item \code{upper:} the upper bounds for the optimization domain (see optim for details)
 #' }
 #' @return a real value corresponding to \eqn{min_{x \in D_Psi} f(x)}
 #' @seealso \link{getProfileSup_optim}, \link{plotMaxMin}

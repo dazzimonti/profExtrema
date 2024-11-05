@@ -4,9 +4,16 @@
 \alias{plot_univariate_profiles_UQ}
 \title{Univariate profile extrema with UQ}
 \usage{
-plot_univariate_profiles_UQ(objectUQ, plot_options, nsims, threshold,
-  nameFile = "prof_UQ", quantiles_uq = c(0.05, 0.95),
-  profMean = NULL, typeProf = "approx")
+plot_univariate_profiles_UQ(
+  objectUQ,
+  plot_options,
+  nsims,
+  threshold,
+  nameFile = "prof_UQ",
+  quantiles_uq = c(0.05, 0.95),
+  profMean = NULL,
+  typeProf = "approx"
+)
 }
 \arguments{
 \item{objectUQ}{an object returned by \link{coordProf_UQ} or the object saved in \code{obj$res_UQ}, if \code{obj} is the object returned by \link{coordinateProfiles}.}
@@ -24,9 +31,9 @@ plot_univariate_profiles_UQ(objectUQ, plot_options, nsims, threshold,
 \item{profMean}{the profile coordinate extrema functions for the mean. It is saved in \code{obj$profMean_full} or \code{obj$profMean_approx} if \code{obj} is an object returned by \link{coordinateProfiles}.}
 
 \item{typeProf}{a string to choose with type of profile extrema for simulations to plot \itemize{
-\item{"approx"}{plots only the approximate profile extrema for simulations}
-\item{"full"}{plots only the full profile extrema for simulations}
-\item{"both"}{plots both the approximate and full profile extrema for simulations}
+\item "approx": plots only the approximate profile extrema for simulations
+\item "full": plots only the full profile extrema for simulations
+\item "both": plots both the approximate and full profile extrema for simulations
 }}
 }
 \value{

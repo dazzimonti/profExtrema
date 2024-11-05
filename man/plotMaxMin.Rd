@@ -4,8 +4,14 @@
 \alias{plotMaxMin}
 \title{Plot coordinate profiles}
 \usage{
-plotMaxMin(allRes, Design = NULL, threshold = NULL, changes = FALSE,
-  trueEvals = NULL, ...)
+plotMaxMin(
+  allRes,
+  Design = NULL,
+  threshold = NULL,
+  changes = FALSE,
+  trueEvals = NULL,
+  ...
+)
 }
 \arguments{
 \item{allRes}{list containing the list \code{res} which contains the computed minima and maxima. The object returned by the function \code{getAllMaxMin}.}

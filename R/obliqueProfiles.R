@@ -16,18 +16,18 @@
 #' @param ... additional parameters to be passed to \link{obliqueProf_UQ}.
 #' @return If return_level=1 a list containing
 #' \itemize{
-#' \item{\code{profMean_full:}}{the results of \code{getProfileExtrema} for the posterior mean}
-#' \item{\code{profMean_approx:}}{the results of \code{approxProfileExtrema} for the posterior mean}
-#' \item{\code{res_UQ:}}{the results of \code{obliqueProf_UQ} for the posterior mean}
+#' \item \code{profMean_full:} the results of \code{getProfileExtrema} for the posterior mean
+#' \item \code{profMean_approx:} the results of \code{approxProfileExtrema} for the posterior mean
+#' \item \code{res_UQ:} the results of \code{obliqueProf_UQ} for the posterior mean
 #' }
 #' if return_level=2 the same list as above but also including
 #' \itemize{
-#' \item{\code{abs_err:}}{the vector of maximum absolute approximation errors for the profile inf /sup on posterior mean for the chosen approximation}
-#' \item{\code{times:} }{ a list containing
+#' \item \code{abs_err:} the vector of maximum absolute approximation errors for the profile inf /sup on posterior mean for the chosen approximation
+#' \item \code{times:}  a list containing
 #' 	\itemize{
-#' 	\item{\code{full:}}{computational time for the full computation of profile extrema}
-#' 	\item{\code{approx:}}{computational time for the approximate computation of profile extrema}
-#' 	}}
+#' 	\item \code{full:} computational time for the full computation of profile extrema
+#' 	\item \code{approx:} computational time for the approximate computation of profile extrema
+#' 	}
 #' }
 #' @examples
 #' if (!requireNamespace("DiceKriging", quietly = TRUE)) {
