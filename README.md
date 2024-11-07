@@ -1,11 +1,16 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# profExtrema
+
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/dazzimonti/profExtrema/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dazzimonti/profExtrema/actions/workflows/R-CMD-check.yaml)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/profExtrema)](https://CRAN.R-project.org/package=profExtrema)
+[![Lifecycle:
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
-
-# profExtrema
 
 Computation and plots of profile extrema functions. The package main
 functions are:
