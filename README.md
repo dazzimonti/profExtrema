@@ -82,7 +82,7 @@ based on kriging. Computational Statistics & Data Analysis, 71:
 1021-1034.
 
 Johnson, S. G. The NLopt nonlinear-optimization package,
-<http://ab-initio.mit.edu/nlopt>
+<https://nlopt.readthedocs.io/en/latest/>
 
 Koenker, R. (2017). quantreg: Quantile Regression. R package version
 5.33.

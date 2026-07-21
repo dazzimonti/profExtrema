@@ -3,7 +3,7 @@
 \docType{data}
 \name{coastal_flooding}
 \alias{coastal_flooding}
-\title{Coastal flooding as function of offshore forcing conditions.}
+\title{Coastal flooding as function of offshore forcing conditions}
 \format{
 A data frame with 200 rows and 6 variables:
 \describe{

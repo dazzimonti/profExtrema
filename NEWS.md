@@ -1,3 +1,9 @@
+# profExtrema 0.2.2
+
+* Fixed bug in man files that caused a NOTE on CRAN.
+
+* Updated format of the whole documentation.
+
 # profExtrema 0.2.1
 
 ## Changes with respect to profExtrema 0.2.0

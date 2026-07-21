@@ -7,8 +7,21 @@
 \description{
 Computes profile extrema functions for arbitrary functions. If the function is expensive-to-evaluate it computes profile extrema by emulating the function with a Gaussian process (using package 'DiceKriging'). In this case uncertainty quantification on the profile extrema can also be computed. The different plotting functions for profile extrema give the user a tool to better locate excursion sets.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/dazzimonti/profExtrema}
+  \item Report bugs at \url{https://github.com/dazzimonti/profExtrema/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Dario Azzimonti \email{dario.azzimonti@gmail.com} (\href{https://orcid.org/0000-0001-5080-3061}{ORCID}) [copyright holder]
+
+Authors:
+\itemize{
+  \item Dario Azzimonti \email{dario.azzimonti@gmail.com} (\href{https://orcid.org/0000-0001-5080-3061}{ORCID}) [copyright holder]
+}
 
 }
 \keyword{internal}

@@ -1,4 +1,4 @@
-#' Coastal flooding as function of offshore forcing conditions.
+#' Coastal flooding as function of offshore forcing conditions
 #'
 #' A dataset containing the results of a numerical simulation conducted with
 #' the MARS model (Lazure and Dumas, 2008) for coastal flooding.

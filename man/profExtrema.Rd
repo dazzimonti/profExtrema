@@ -34,7 +34,7 @@ Date: 2020-03-20
 This work was supported in part the Hasler Foundation, grant number 16065 and by the Swiss National Science Foundation, grant number 167199. The author warmly thanks David Ginsbourger, Jérémy Rohmer and Déborah Idier for fruitful discussions and accurate, thought provoking suggestions.
 }
 \references{
-Azzimonti, D., Bect, J., Chevalier, C., and Ginsbourger, D. (2016). Quantifying uncertainties on excursion sets under a Gaussian random field prior. SIAM/ASA Journal on Uncertainty Quantification, 4(1):850–874.
+Azzimonti, D., Bect, J., Chevalier, C., and Ginsbourger, D. (2016). Quantifying uncertainties on excursion sets under a Gaussian random field prior. SIAM/ASA Journal on Uncertainty Quantification, 4(1):850-874.
 
 Azzimonti, D., Ginsbourger, D., Rohmer, J. and Idier, D. (2017+). Profile extrema for visualizing and quantifying uncertainties on excursion regions. Application to coastal flooding. arXiv:1710.00688.
 
