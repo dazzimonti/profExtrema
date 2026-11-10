@@ -6,3 +6,5 @@ README.Rmd
 ^\.github$
 ^\.positai$
 ^\.claude$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
